@@ -13,7 +13,6 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-
 </head>
 
 <body>
@@ -84,106 +83,20 @@
 
     <!-- Report Details Modal -->
     <div id="detailsModal" class="modal">
-        <!DOCTYPE html>
-        <html lang="ar" dir="rtl">
+        <div class="modal-content">
+            <span class="close-details">&times;</span>
+            <div id="reportDetails"></div>
+        </div>
+    </div>
 
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>نظام الإبلاغ عن الخروقات في لبنان</title>
-            <link rel="stylesheet" href="css/style.css">
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/reports.js"></script>
 
-            <!-- Leaflet CSS -->
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-                integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/map.js"></script>
+</body>
 
-        </head>
-
-        <body>
-            <!-- Header -->
-            <header class="header">
-                <div class="container">
-                    <div class="header-content">
-                        <h1 class="logo">🇱🇧 نظام الإبلاغ عن الخروقات</h1>
-                        <nav class="nav">
-                            <div id="userInfo" class="user-info" style="display: none;">
-                                <span id="userName"></span>
-                                <button id="logoutBtn" class="btn btn-secondary">تسجيل الخروج</button>
-                            </div>
-                            <div id="authButtons" class="auth-buttons">
-                                <a href="login.html" class="btn btn-primary">تسجيل الدخول</a>
-                                <a href="register.html" class="btn btn-secondary">إنشاء حساب</a>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <div class="container">
-                    <div class="filter-content">
-                        <label for="categoryFilter">تصفية حسب الفئة:</label>
-                        <select id="categoryFilter" class="filter-select">
-                            <option value="">جميع الفئات</option>
-                        </select>
-                        <button id="refreshBtn" class="btn btn-icon">🔄 تحديث</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Map Container -->
-            <div id="map" class="map-container"></div>
-
-            <!-- Report Modal -->
-            <div id="reportModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2 id="modalTitle">إنشاء تقرير جديد</h2>
-                    <form id="reportForm">
-                        <div class="form-group">
-                            <label>الموقع:</label>
-                            <input type="text" id="reportAddress" readonly>
-                            <input type="hidden" id="reportLat">
-                            <input type="hidden" id="reportLng">
-                        </div>
-                        <div class="form-group">
-                            <label>الفئة:</label>
-                            <select id="reportCategory" required>
-                                <option value="">اختر الفئة</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>الوصف:</label>
-                            <textarea id="reportDescription" rows="4" placeholder="أضف تفاصيل التقرير..."></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">إرسال التقرير</button>
-                            <button type="button" class="btn btn-secondary" id="cancelBtn">إلغاء</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Report Details Modal -->
-            <div id="detailsModal" class="modal">
-                <div class="modal-content">
-                    <span class="close-details">&times;</span>
-                    <div id="reportDetails"></div>
-                </div>
-            </div>
-
-            <!-- Scripts -->
-            <script src="js/auth.js"></script>
-            <script src="js/reports.js"></script>
-
-            <!-- Leaflet JS -->
-            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-            <script src="js/map.js"></script>
-        </body>
-
-        </html>
+</html>

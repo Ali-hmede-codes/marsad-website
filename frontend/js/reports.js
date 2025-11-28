@@ -2,6 +2,18 @@
 let allReports = [];
 let categories = [];
 
+// Category emoji icons mapping
+const CATEGORY_ICONS = {
+    'طائرات مسيرة': '🛸',
+    'طائرات حربية': '✈️',
+    'صواريخ': '🚀',
+    'انفجارات': '💥',
+    'اشتباكات مسلحة': '⚔️',
+    'قصف مدفعي': '💣',
+    'حركة عسكرية': '🎖️',
+    'أخرى': '📍'
+};
+
 // Load categories
 async function loadCategories() {
     try {
@@ -18,7 +30,11 @@ async function loadCategories() {
             data.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat.catg_id;
-                option.textContent = cat.catg_name;
+                const emoji = CATEGORY_ICONS[cat.catg_name] || '📍';
+                const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                option.textContent = `${emoji} ${cat.catg_name}`;
+                option.style.color = color;
+                option.style.fontWeight = 'bold';
                 filterSelect.appendChild(option);
             });
         }
@@ -28,7 +44,11 @@ async function loadCategories() {
             data.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat.catg_id;
-                option.textContent = cat.catg_name;
+                const emoji = CATEGORY_ICONS[cat.catg_name] || '📍';
+                const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                option.textContent = `${emoji} ${cat.catg_name}`;
+                option.style.color = color;
+                option.style.fontWeight = 'bold';
                 reportCategorySelect.appendChild(option);
             });
         }
@@ -103,9 +123,30 @@ function showReportDetails(report) {
         minute: '2-digit'
     });
 
+    const categoryName = report.category_name || getCategoryName(report.categorie);
+    const emoji = CATEGORY_ICONS[categoryName] || '📍';
+    const colorR = report.category_color_r || 100;
+    const colorG = report.category_color_g || 100;
+    const colorB = report.category_color_b || 100;
+    const color = `rgb(${colorR}, ${colorG}, ${colorB})`;
+
     detailsDiv.innerHTML = `
         <div class="report-detail">
-            <h3>${report.category_name || getCategoryName(report.categorie)}</h3>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <div style="
+                    background-color: ${color};
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 28px;
+                    border: 3px solid white;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                ">${emoji}</div>
+                <h3 style="margin: 0; color: ${color};">${categoryName}</h3>
+            </div>
             <p><strong>الموقع:</strong> ${report.report_address}</p>
             <p><strong>التاريخ والوقت:</strong> ${formattedDate}</p>
             <p><strong>الإحداثيات:</strong> ${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}</p>
