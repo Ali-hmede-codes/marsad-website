@@ -30,16 +30,34 @@ function initMap() {
         minZoom: 7
     }).addTo(map);
 
-    // Add click listener for creating new reports (publishers only)
+    // Add click listener for creating new reports (logged in users only)
     map.on('click', (e) => {
+        // Check if user is logged in
+        if (!isLoggedIn()) {
+            showLoginPrompt();
+            return;
+        }
+
+        // Check if user is publisher
         if (isPublisher()) {
             openReportModal(e.latlng);
+        } else {
+            alert('يجب أن تكون ناشراً لإنشاء التقارير');
         }
     });
 
     // Load initial reports
     if (window.loadReports) {
         window.loadReports();
+    }
+}
+
+// Show login prompt for non-authenticated users
+function showLoginPrompt() {
+    const message = 'يجب تسجيل الدخول أولاً لإنشاء تقرير';
+
+    if (confirm(message + '\n\nهل تريد الانتقال إلى صفحة تسجيل الدخول؟')) {
+        window.location.href = 'login.html';
     }
 }
 
