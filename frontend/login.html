@@ -4,57 +4,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="تسجيل الدخول إلى نظام الإبلاغ عن الخروقات">
     <title>تسجيل الدخول - نظام الإبلاغ</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="auth-page">
     <div class="auth-container">
         <div class="auth-card">
-            <h1 class="auth-title">🇱🇧 تسجيل الدخول</h1>
-            <p class="auth-subtitle">نظام الإبلاغ عن الخروقات في لبنان</p>
+            <div class="auth-header">
+                <h1 class="auth-title">🇱🇧 تسجيل الدخول</h1>
+                <p class="auth-subtitle">مرحباً بك في نظام الإبلاغ عن الخروقات</p>
+            </div>
 
-            <form id="loginForm" class="auth-form">
+            <div id="errorMessage" class="message message-error hidden"></div>
+
+            <form id="loginForm">
                 <div class="form-group">
-                    <label for="email">البريد الإلكتروني</label>
-                    <input type="email" id="email" required placeholder="example@email.com">
+                    <label for="email" class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="email" class="form-input" required placeholder="example@email.com">
                 </div>
 
                 <div class="form-group">
-                    <label for="password">كلمة المرور</label>
-                    <input type="password" id="password" required placeholder="••••••••">
+                    <label for="password" class="form-label">كلمة المرور</label>
+                    <input type="password" id="password" class="form-input" required placeholder="••••••••">
                 </div>
 
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
-
-                <button type="submit" class="btn btn-primary btn-block">تسجيل الدخول</button>
+                <button type="submit" class="btn btn-primary btn-full btn-lg">تسجيل الدخول</button>
             </form>
 
-            <p class="auth-footer">
-                ليس لديك حساب؟ <a href="register.html">إنشاء حساب جديد</a>
-            </p>
+            <div class="auth-footer">
+                <p>ليس لديك حساب؟ <a href="register.html" class="auth-link">إنشاء حساب جديد</a></p>
+            </div>
 
-            <a href="index.html" class="back-link">← العودة إلى الخريطة</a>
+            <div class="text-center">
+                <a href="index.html" class="back-link">← العودة إلى الصفحة الرئيسية</a>
+            </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
     <script>
-        const API_URL = 'http://localhost:3000/api';
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('errorMessage');
 
             try {
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
 
@@ -65,12 +78,12 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'index.html';
                 } else {
-                    errorDiv.textContent = data.error || 'حدث خطأ في تسجيل الدخول';
-                    errorDiv.style.display = 'block';
+                    errorMessage.textContent = data.error || 'فشل تسجيل الدخول';
+                    errorMessage.classList.remove('hidden');
                 }
             } catch (error) {
-                errorDiv.textContent = 'خطأ في الاتصال بالخادم';
-                errorDiv.style.display = 'block';
+                errorMessage.textContent = 'حدث خطأ في الاتصال بالخادم';
+                errorMessage.classList.remove('hidden');
             }
         });
     </script>

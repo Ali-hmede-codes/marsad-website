@@ -4,98 +4,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="إنشاء حساب جديد في نظام الإبلاغ عن الخروقات">
     <title>إنشاء حساب - نظام الإبلاغ</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body class="auth-page">
     <div class="auth-container">
         <div class="auth-card">
-            <h1 class="auth-title">🇱🇧 إنشاء حساب جديد</h1>
-            <p class="auth-subtitle">انضم إلى نظام الإبلاغ عن الخروقات</p>
+            <div class="auth-header">
+                <h1 class="auth-title">🇱🇧 إنشاء حساب</h1>
+                <p class="auth-subtitle">انضم إلى نظام الإبلاغ عن الخروقات</p>
+            </div>
 
-            <form id="registerForm" class="auth-form">
+            <div id="errorMessage" class="message message-error hidden"></div>
+            <div id="successMessage" class="message message-success hidden"></div>
+
+            <form id="registerForm">
                 <div class="form-group">
-                    <label for="name">الاسم الكامل</label>
-                    <input type="text" id="name" required placeholder="أدخل اسمك الكامل">
+                    <label for="name" class="form-label">الاسم الكامل</label>
+                    <input type="text" id="name" class="form-input" required placeholder="أدخل اسمك الكامل">
                 </div>
 
                 <div class="form-group">
-                    <label for="email">البريد الإلكتروني</label>
-                    <input type="email" id="email" required placeholder="example@email.com">
+                    <label for="email" class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="email" class="form-input" required placeholder="example@email.com">
                 </div>
 
                 <div class="form-group">
-                    <label for="password">كلمة المرور</label>
-                    <input type="password" id="password" required placeholder="6 أحرف على الأقل">
+                    <label for="password" class="form-label">كلمة المرور</label>
+                    <input type="password" id="password" class="form-input" required placeholder="••••••••"
+                        minlength="6">
+                    <small class="text-muted"
+                        style="font-size: var(--font-size-xs); display: block; margin-top: var(--space-2);">
+                        يجب أن تحتوي على 6 أحرف على الأقل
+                    </small>
                 </div>
 
                 <div class="form-group">
-                    <label for="confirmPassword">تأكيد كلمة المرور</label>
-                    <input type="password" id="confirmPassword" required placeholder="أعد إدخال كلمة المرور">
+                    <label for="confirmPassword" class="form-label">تأكيد كلمة المرور</label>
+                    <input type="password" id="confirmPassword" class="form-input" required placeholder="••••••••">
                 </div>
 
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
-                <div id="successMessage" class="success-message" style="display: none;"></div>
-
-                <button type="submit" class="btn btn-primary btn-block">إنشاء الحساب</button>
+                <button type="submit" class="btn btn-primary btn-full btn-lg">إنشاء الحساب</button>
             </form>
 
-            <p class="auth-footer">
-                لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول</a>
-            </p>
+            <div class="auth-footer">
+                <p>لديك حساب بالفعل؟ <a href="login.html" class="auth-link">تسجيل الدخول</a></p>
+            </div>
 
-            <a href="index.html" class="back-link">← العودة إلى الخريطة</a>
+            <div class="text-center">
+                <a href="index.html" class="back-link">← العودة إلى الصفحة الرئيسية</a>
+            </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
     <script>
-        const API_URL = 'http://localhost:3000/api';
+        const registerForm = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const errorDiv = document.getElementById('errorMessage');
-            const successDiv = document.getElementById('successMessage');
 
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
-
+            // Validate passwords match
             if (password !== confirmPassword) {
-                errorDiv.textContent = 'كلمات المرور غير متطابقة';
-                errorDiv.style.display = 'block';
+                errorMessage.textContent = 'كلمات المرور غير متطابقة';
+                errorMessage.classList.remove('hidden');
+                successMessage.classList.add('hidden');
                 return;
             }
 
             try {
                 const response = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    successDiv.textContent = 'تم إنشاء الحساب بنجاح! جاري التحويل...';
-                    successDiv.style.display = 'block';
+                    successMessage.textContent = 'تم إنشاء الحساب بنجاح! جاري التحويل...';
+                    successMessage.classList.remove('hidden');
+                    errorMessage.classList.add('hidden');
+
                     setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        window.location.href = 'index.html';
+                    }, 1500);
                 } else {
-                    errorDiv.textContent = data.error || 'حدث خطأ في إنشاء الحساب';
-                    errorDiv.style.display = 'block';
+                    errorMessage.textContent = data.error || 'فشل إنشاء الحساب';
+                    errorMessage.classList.remove('hidden');
+                    successMessage.classList.add('hidden');
                 }
             } catch (error) {
-                errorDiv.textContent = 'خطأ في الاتصال بالخادم';
-                errorDiv.style.display = 'block';
+                errorMessage.textContent = 'حدث خطأ في الاتصال بالخادم';
+                errorMessage.classList.remove('hidden');
+                successMessage.classList.add('hidden');
             }
         });
     </script>
