@@ -26,6 +26,10 @@ CREATE TABLE categories (
     catg_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     catg_name VARCHAR(255) NOT NULL,
     categorie_desc TEXT,
+    catg_color_r TINYINT UNSIGNED DEFAULT 100,
+    catg_color_g TINYINT UNSIGNED DEFAULT 100,
+    catg_color_b TINYINT UNSIGNED DEFAULT 100,
+    catg_picture VARCHAR(255),
     INDEX idx_catg_name (catg_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -73,6 +77,10 @@ SELECT
     r.is_active,
     c.catg_name AS category_name,
     c.categorie_desc AS category_description,
+    c.catg_color_r AS category_color_r,
+    c.catg_color_g AS category_color_g,
+    c.catg_color_b AS category_color_b,
+    c.catg_picture AS category_picture,
     u.name AS reporter_name,
     u.user_pic AS reporter_pic
 FROM reports r
