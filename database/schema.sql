@@ -33,13 +33,16 @@ CREATE TABLE categories (
     INDEX idx_catg_name (catg_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Location Table
-CREATE TABLE location (
-    locationid BIGINT AUTO_INCREMENT PRIMARY KEY,
-    location_name VARCHAR(255) NOT NULL,
-    reports_categorie VARCHAR(255),
-    report_count BIGINT DEFAULT 0,
-    INDEX idx_location_name (location_name)
+-- Locations Table (Lebanon governorates, districts, villages)
+CREATE TABLE locations (
+    loc_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    loc_name VARCHAR(255) NOT NULL,
+    loc_type ENUM('governorate', 'district', 'village') NOT NULL,
+    parent_id BIGINT DEFAULT NULL,
+    INDEX idx_loc_name (loc_name),
+    INDEX idx_loc_type (loc_type),
+    INDEX idx_parent_id (parent_id),
+    FOREIGN KEY (parent_id) REFERENCES locations(loc_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Reports Table
@@ -75,6 +78,7 @@ SELECT
     r.description,
     r.image_url,
     r.is_active,
+    r.categorie,
     c.catg_name AS category_name,
     c.categorie_desc AS category_description,
     c.catg_color_r AS category_color_r,
