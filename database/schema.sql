@@ -1,8 +1,8 @@
 -- Lebanon Breach Reporting System Database Schema
 -- Drop database if exists and create new
-DROP DATABASE IF EXISTS lebanon_reports;
-CREATE DATABASE lebanon_reports CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE lebanon_reports;
+-- DROP DATABASE IF EXISTS marsad;  -- Disabled in phpMyAdmin/web interfaces
+CREATE DATABASE IF NOT EXISTS marsad CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE marsad;
 
 -- Users Table
 CREATE TABLE users (
