@@ -1,5 +1,5 @@
-// API Configuration
-const API_URL = 'http://localhost:3000/api';
+// Authentication utilities
+
 
 // Get token from localStorage
 function getToken() {

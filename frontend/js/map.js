@@ -6,17 +6,6 @@ let selectedLocation = null;
 // Lebanon center coordinates
 const LEBANON_CENTER = [33.8547, 35.8623];
 
-// Category emoji icons mapping
-const CATEGORY_ICONS = {
-    'طائرات مسيرة': '🛸',
-    'طائرات حربية': '✈️',
-    'صواريخ': '🚀',
-    'انفجارات': '💥',
-    'اشتباكات مسلحة': '⚔️',
-    'قصف مدفعي': '💣',
-    'حركة عسكرية': '🎖️',
-    'أخرى': '📍'
-};
 
 // Initialize Leaflet Map
 function initMap() {
