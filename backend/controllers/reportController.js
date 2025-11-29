@@ -46,7 +46,7 @@ exports.getReport = async (req, res) => {
     }
 };
 
-// Create new report (publisher only)
+// Create new report
 exports.createReport = async (req, res) => {
     try {
         const { latitude, longitude, category, description, report_address } = req.body;
@@ -61,11 +61,50 @@ exports.createReport = async (req, res) => {
             return res.status(400).json({ error: 'الموقع يجب أن يكون داخل لبنان' });
         }
 
+        // Check category permissions
+        const [catData] = await db.query('SELECT required_role FROM categories WHERE catg_id = ?', [category]);
+        if (catData.length === 0) {
+            return res.status(400).json({ error: 'الفئة غير موجودة' });
+        }
+
+        const requiredRole = catData[0].required_role;
+        if (requiredRole === 'admin' && !req.user.is_admin) {
+            return res.status(403).json({ error: 'غير مصرح لك بالنشر في هذه الفئة' });
+        }
+        if (requiredRole === 'publisher' && !req.user.is_publisher && !req.user.is_admin) {
+            return res.status(403).json({ error: 'غير مصرح لك بالنشر في هذه الفئة' });
+        }
+
+        // Check for duplicates (Clustering) - within 1km and 1 hour
+        const [duplicates] = await db.query(`
+            SELECT rep_id FROM reports 
+            WHERE categorie = ? 
+            AND ST_Distance_Sphere(geolocation, POINT(?, ?)) < 1000 
+            AND date_and_time > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            AND is_active = TRUE
+            ORDER BY date_and_time DESC
+            LIMIT 1
+        `, [category, parseFloat(longitude), parseFloat(latitude)]);
+
+        if (duplicates.length > 0) {
+            // Increment count on existing report
+            await db.query(
+                'UPDATE reports SET confirmation_count = confirmation_count + 1, last_confirmed_at = NOW() WHERE rep_id = ?',
+                [duplicates[0].rep_id]
+            );
+
+            return res.status(200).json({
+                message: 'تم دمج التقرير مع تقرير موجود مسبقاً في نفس المنطقة',
+                report_id: duplicates[0].rep_id,
+                is_duplicate: true
+            });
+        }
+
         // Create POINT geometry
         const [result] = await db.query(
             `INSERT INTO reports 
-            (latitude, longitude, geolocation, categorie, user_reported, description, report_address) 
-            VALUES (?, ?, POINT(?, ?), ?, ?, ?, ?)`,
+            (latitude, longitude, geolocation, categorie, user_reported, description, report_address, confirmation_count) 
+            VALUES (?, ?, POINT(?, ?), ?, ?, ?, ?, 1)`,
             [
                 parseFloat(latitude),
                 parseFloat(longitude),

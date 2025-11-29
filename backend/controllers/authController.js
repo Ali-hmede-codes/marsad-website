@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const db = require('../config/database');
 const { isValidEmail, sanitizeInput } = require('../utils/validation');
+const { sendVerificationEmail } = require('../utils/email');
 
 // Register new user
 exports.register = async (req, res) => {
@@ -30,18 +32,62 @@ exports.register = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         // Insert user
         const [result] = await db.query(
-            'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-            [sanitizeInput(name), email, hashedPassword]
+            'INSERT INTO users (name, email, password, verification_token, token_expires, is_verified) VALUES (?, ?, ?, ?, ?, FALSE)',
+            [sanitizeInput(name), email, hashedPassword, verificationToken, tokenExpires]
         );
 
+        // Send verification email
+        try {
+            await sendVerificationEmail(email, verificationToken);
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+            // Don't fail registration, but warn user
+        }
+
         res.status(201).json({
-            message: 'تم التسجيل بنجاح',
+            message: 'تم التسجيل بنجاح. الرجاء التحقق من بريدك الإلكتروني لتفعيل الحساب.',
             user_id: result.insertId
         });
     } catch (error) {
         console.error('Registration error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+// Verify email
+exports.verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ error: 'رمز التحقق مطلوب' });
+        }
+
+        // Find user with token and valid expiry
+        const [users] = await db.query(
+            'SELECT user_id FROM users WHERE verification_token = ? AND token_expires > NOW()',
+            [token]
+        );
+
+        if (users.length === 0) {
+            return res.status(400).json({ error: 'رمز التحقق غير صالح أو منتهي الصلاحية' });
+        }
+
+        // Update user
+        await db.query(
+            'UPDATE users SET is_verified = TRUE, verification_token = NULL, token_expires = NULL WHERE user_id = ?',
+            [users[0].user_id]
+        );
+
+        res.json({ message: 'تم تفعيل الحساب بنجاح' });
+    } catch (error) {
+        console.error('Verification error:', error);
         res.status(500).json({ error: 'خطأ في الخادم' });
     }
 };
@@ -71,6 +117,11 @@ exports.login = async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return res.status(401).json({ error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' });
+        }
+
+        // Check verification
+        if (!user.is_verified) {
+            return res.status(403).json({ error: 'الرجاء تفعيل حسابك عبر البريد الإلكتروني أولاً' });
         }
 
         // Generate JWT token
@@ -121,3 +172,4 @@ exports.getCurrentUser = async (req, res) => {
         res.status(500).json({ error: 'خطأ في الخادم' });
     }
 };
+
