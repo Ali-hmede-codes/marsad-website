@@ -21,6 +21,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/reports', require('./routes/reports'));
@@ -39,9 +42,14 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'حدث خطأ في الخادم' });
 });
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ error: 'المسار غير موجود' });
+// Serve index.html for all non-API routes (SPA support)
+app.get('*', (req, res) => {
+    // Only serve index.html for non-API routes
+    if (!req.path.startsWith('/api/')) {
+        res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    } else {
+        res.status(404).json({ error: 'المسار غير موجود' });
+    }
 });
 
 // Start server
