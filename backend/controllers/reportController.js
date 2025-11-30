@@ -26,10 +26,15 @@ exports.createReport = async (req, res) => {
             finalAddress = autoAddress || 'موقع غير معروف';
         }
 
-        // Check category permissions
-        const [catData] = await db.query('SELECT required_role FROM categories WHERE catg_id = ?', [category]);
+        // Check category exists and is a child category (not parent)
+        const [catData] = await db.query('SELECT required_role, parent_id FROM categories WHERE catg_id = ?', [category]);
         if (catData.length === 0) {
             return res.status(400).json({ error: 'الفئة غير موجودة' });
+        }
+
+        // Ensure only child categories are used for reports
+        if (catData[0].parent_id === null) {
+            return res.status(400).json({ error: 'يجب اختيار فئة فرعية وليس فئة رئيسية' });
         }
 
         const requiredRole = catData[0].required_role;

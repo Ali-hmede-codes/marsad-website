@@ -33,6 +33,34 @@ exports.getAllCategories = async (req, res) => {
     }
 };
 
+// Get only child categories (for report creation)
+exports.getChildCategories = async (req, res) => {
+    try {
+        const [categories] = await db.query(
+            'SELECT catg_id, catg_name, categorie_desc, catg_color, catg_picture, parent_id, required_role FROM categories WHERE parent_id IS NOT NULL ORDER BY catg_name ASC'
+        );
+
+        res.json(categories);
+    } catch (error) {
+        console.error('Get child categories error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+// Get only parent categories (for admin management)
+exports.getParentCategories = async (req, res) => {
+    try {
+        const [categories] = await db.query(
+            'SELECT catg_id, catg_name, categorie_desc, catg_color, catg_picture, required_role FROM categories WHERE parent_id IS NULL ORDER BY catg_name ASC'
+        );
+
+        res.json(categories);
+    } catch (error) {
+        console.error('Get parent categories error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
 // Create category (admin only)
 exports.createCategory = async (req, res) => {
     try {

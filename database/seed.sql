@@ -26,6 +26,20 @@ INSERT INTO categories (catg_name, categorie_desc, catg_color, parent_id, requir
 ('صواريخ', 'إطلاق صواريخ', '#C62828', @shelling_id, 'publisher'),
 ('غارات جوية', 'قصف من الطائرات', '#B71C1C', @shelling_id, 'publisher');
 
+-- Clashes
+SET @clashes_id = (SELECT catg_id FROM categories WHERE catg_name = 'اشتباكات' AND parent_id IS NULL LIMIT 1);
+
+INSERT INTO categories (catg_name, categorie_desc, catg_color, parent_id, required_role) VALUES
+('اشتباكات خفيفة', 'تبادل إطلاق نار', '#FB8C00', @clashes_id, 'publisher'),
+('اشتباكات عنيفة', 'معارك شديدة', '#E65100', @clashes_id, 'publisher');
+
+-- Military Movements
+SET @military_id = (SELECT catg_id FROM categories WHERE catg_name = 'تحركات عسكرية' AND parent_id IS NULL LIMIT 1);
+
+INSERT INTO categories (catg_name, categorie_desc, catg_color, parent_id, required_role) VALUES
+('آليات عسكرية', 'دبابات ومدرعات', '#6D4C41', @military_id, 'admin'),
+('جنود', 'تحركات قوات برية', '#5D4037', @military_id, 'admin');
+
 -- Insert Default Admin User
 -- Email: admin@marsad.com
 -- Password: admin123

@@ -6,6 +6,8 @@ const upload = require('../middleware/uploadMiddleware');
 
 // Public routes
 router.get('/', categoryController.getAllCategories);
+router.get('/children', categoryController.getChildCategories);
+router.get('/parents', categoryController.getParentCategories);
 
 // Protected routes (admin only)
 router.post('/', verifyToken, isAdmin, upload.single('catg_picture'), categoryController.createCategory);
