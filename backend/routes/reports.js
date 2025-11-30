@@ -6,7 +6,6 @@ const { verifyToken, isPublisher } = require('../middleware/auth');
 // Public routes
 router.get('/', reportController.getAllReports);
 router.get('/:id', reportController.getReport);
-router.get('/location/:locationId', reportController.getReportsByLocation);
 
 // Protected routes (publisher only)
 router.post('/', verifyToken, isPublisher, reportController.createReport);

@@ -4,27 +4,27 @@ USE marsad;
 
 -- Insert Main Categories (Parents)
 INSERT INTO categories (catg_name, categorie_desc, catg_color, required_role) VALUES
-('طائرات', 'تقارير عن نشاط جوي', '#90acc4ff', 'user'),
-('قصف', 'تقارير عن قصف مدفعي أو صاروخي', '#F44336', 'user'),
-('اشتباكات', 'تقارير عن اشتباكات برية', '#FF9800', 'user'),
-('تحركات عسكرية', 'تقارير عن تحركات آليات وجنود', '#795548', 'publisher');
+('طائرات', 'تقارير عن نشاط جوي', '#90acc4ff', 'publisher'),
+('قصف', 'تقارير عن قصف مدفعي أو صاروخي', '#F44336', 'publisher'),
+('اشتباكات', 'تقارير عن اشتباكات برية', '#FF9800', 'publisher'),
+('تحركات عسكرية', 'تقارير عن تحركات آليات وجنود', '#795548', 'admin');
 
 -- Insert Subcategories (Children)
 -- Planes
 SET @planes_id = (SELECT catg_id FROM categories WHERE catg_name = 'طائرات' AND parent_id IS NULL LIMIT 1);
 
 INSERT INTO categories (catg_name, categorie_desc, catg_color, parent_id, required_role) VALUES
-('طائرات حربية', 'طائرات مقاتلة نفاثة', '#1976D2', @planes_id, 'user'),
-('طائرات مسيرة', 'طائرات بدون طيار (درون)', '#0D47A1', @planes_id, 'user'),
-('طائرات استطلاع', 'طائرات مراقبة', '#64B5F6', @planes_id, 'user');
+('طائرات حربية', 'طائرات مقاتلة نفاثة', '#1976D2', @planes_id, 'publisher'),
+('طائرات مسيرة', 'طائرات بدون طيار (درون)', '#0D47A1', @planes_id, 'publisher'),
+('طائرات استطلاع', 'طائرات مراقبة', '#64B5F6', @planes_id, 'publisher');
 
 -- Shelling
 SET @shelling_id = (SELECT catg_id FROM categories WHERE catg_name = 'قصف' AND parent_id IS NULL LIMIT 1);
 
 INSERT INTO categories (catg_name, categorie_desc, catg_color, parent_id, required_role) VALUES
-('قصف مدفعي', 'قذائف مدفعية', '#D32F2F', @shelling_id, 'user'),
-('صواريخ', 'إطلاق صواريخ', '#C62828', @shelling_id, 'user'),
-('غارات جوية', 'قصف من الطائرات', '#B71C1C', @shelling_id, 'user');
+('قصف مدفعي', 'قذائف مدفعية', '#D32F2F', @shelling_id, 'publisher'),
+('صواريخ', 'إطلاق صواريخ', '#C62828', @shelling_id, 'publisher'),
+('غارات جوية', 'قصف من الطائرات', '#B71C1C', @shelling_id, 'publisher');
 
 -- Insert Default Admin User
 -- Email: admin@marsad.com

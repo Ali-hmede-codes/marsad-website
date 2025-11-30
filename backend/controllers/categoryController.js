@@ -59,7 +59,7 @@ exports.createCategory = async (req, res) => {
                 color,
                 picturePath,
                 parent_id || null,
-                required_role || 'user'
+                required_role || 'publisher'
             ]
         );
 

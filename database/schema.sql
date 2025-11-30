@@ -32,21 +32,9 @@ CREATE TABLE categories (
     catg_color VARCHAR(9) DEFAULT '#000000',
     catg_picture VARCHAR(255),
     parent_id BIGINT DEFAULT NULL,
-    required_role ENUM('user', 'publisher', 'admin') DEFAULT 'user',
+    required_role ENUM('publisher', 'admin') DEFAULT 'publisher',
     INDEX idx_catg_name (catg_name),
     FOREIGN KEY (parent_id) REFERENCES categories(catg_id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Locations Table (Lebanon governorates, districts, villages)
-CREATE TABLE locations (
-    loc_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    loc_name VARCHAR(255) NOT NULL,
-    loc_type ENUM('governorate', 'district', 'village') NOT NULL,
-    parent_id BIGINT DEFAULT NULL,
-    INDEX idx_loc_name (loc_name),
-    INDEX idx_loc_type (loc_type),
-    INDEX idx_parent_id (parent_id),
-    FOREIGN KEY (parent_id) REFERENCES locations(loc_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Reports Table
@@ -60,8 +48,6 @@ CREATE TABLE reports (
     is_active BOOLEAN DEFAULT TRUE,
     categorie BIGINT NOT NULL,
     user_reported BIGINT NOT NULL,
-    description TEXT,
-    image_url VARCHAR(255),
     confirmation_count INT DEFAULT 1,
     last_confirmed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categorie) REFERENCES categories(catg_id) ON DELETE CASCADE,
@@ -81,8 +67,6 @@ SELECT
     r.date_and_time,
     r.latitude,
     r.longitude,
-    r.description,
-    r.image_url,
     r.is_active,
     r.categorie,
     r.confirmation_count,

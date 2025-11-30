@@ -7,7 +7,7 @@ const { getAddressFromCoordinates } = require('../utils/geocoding');
 // Create new report
 exports.createReport = async (req, res) => {
     try {
-        const { latitude, longitude, category, description, report_address } = req.body;
+        const { latitude, longitude, category, report_address } = req.body;
 
         // Validate required fields
         if (!latitude || !longitude || !category) {
@@ -68,8 +68,8 @@ exports.createReport = async (req, res) => {
         // Create POINT geometry
         const [result] = await db.query(
             `INSERT INTO reports 
-            (latitude, longitude, geolocation, categorie, user_reported, description, report_address, confirmation_count) 
-            VALUES (?, ?, POINT(?, ?), ?, ?, ?, ?, 1)`,
+            (latitude, longitude, geolocation, categorie, user_reported, report_address, confirmation_count) 
+            VALUES (?, ?, POINT(?, ?), ?, ?, ?, 1)`,
             [
                 parseFloat(latitude),
                 parseFloat(longitude),
@@ -77,7 +77,6 @@ exports.createReport = async (req, res) => {
                 parseFloat(latitude),
                 category,
                 req.user.user_id,
-                sanitizeInput(description) || null,
                 sanitizeInput(finalAddress)
             ]
         );
@@ -103,7 +102,7 @@ exports.createReport = async (req, res) => {
 exports.updateReport = async (req, res) => {
     try {
         const { id } = req.params;
-        const { description, is_active } = req.body;
+        const { is_active } = req.body;
 
         // Check if report exists and user owns it (or is admin)
         const [reports] = await db.query(
@@ -122,11 +121,6 @@ exports.updateReport = async (req, res) => {
         // Update report
         const updates = [];
         const params = [];
-
-        if (description !== undefined) {
-            updates.push('description = ?');
-            params.push(sanitizeInput(description));
-        }
 
         if (is_active !== undefined && req.user.is_admin) {
             updates.push('is_active = ?');
@@ -180,19 +174,37 @@ exports.deleteReport = async (req, res) => {
     }
 };
 
-// Get reports by location
-exports.getReportsByLocation = async (req, res) => {
+// Get all reports
+exports.getAllReports = async (req, res) => {
     try {
-        const { locationId } = req.params;
-
         const [reports] = await db.query(
-            'SELECT * FROM report_details WHERE is_active = TRUE ORDER BY date_and_time DESC',
-            []
+            'SELECT * FROM report_details WHERE is_active = TRUE ORDER BY date_and_time DESC'
         );
 
         res.json(reports);
     } catch (error) {
-        console.error('Get reports by location error:', error);
+        console.error('Get all reports error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+// Get single report by ID
+exports.getReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [reports] = await db.query(
+            'SELECT * FROM report_details WHERE rep_id = ? AND is_active = TRUE',
+            [id]
+        );
+
+        if (reports.length === 0) {
+            return res.status(404).json({ error: 'التقرير غير موجود' });
+        }
+
+        res.json(reports[0]);
+    } catch (error) {
+        console.error('Get report error:', error);
         res.status(500).json({ error: 'خطأ في الخادم' });
     }
 };
