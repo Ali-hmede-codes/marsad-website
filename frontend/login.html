@@ -53,6 +53,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/auth.js"></script>
     <script>
         const loginForm = document.getElementById('loginForm');
@@ -76,14 +78,19 @@
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    window.location.href = 'index.html';
+                    showNotification('تم تسجيل الدخول بنجاح', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
                 } else {
                     errorMessage.textContent = data.error || 'فشل تسجيل الدخول';
                     errorMessage.classList.remove('hidden');
+                    showNotification(data.error || 'فشل تسجيل الدخول', 'error');
                 }
             } catch (error) {
                 errorMessage.textContent = 'حدث خطأ في الاتصال بالخادم';
                 errorMessage.classList.remove('hidden');
+                showNotification('حدث خطأ في الاتصال بالخادم', 'error');
             }
         });
     </script>

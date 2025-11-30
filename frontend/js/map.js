@@ -31,7 +31,7 @@ function initMap() {
         if (isPublisher()) {
             openReportModal(e.latlng);
         } else {
-            alert('يجب أن تكون ناشراً لإنشاء التقارير');
+            showNotification('يجب أن تكون ناشراً لإنشاء التقارير', 'error');
         }
     });
 

@@ -84,10 +84,10 @@
     </main>
 
     <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/auth.js"></script>
     <script>
-        const API_URL = 'http://localhost:3000/api';
-
         // Check authentication
         if (!isLoggedIn() || !isPublisher()) {
             window.location.href = 'login.html';
@@ -95,8 +95,10 @@
 
         // Load user info
         const user = getCurrentUser();
-        document.getElementById('userName').textContent = user.name;
-        document.getElementById('userRole').textContent = user.is_admin ? 'مدير النظام' : 'ناشر';
+        if (user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userRole').textContent = user.is_admin ? 'مدير النظام' : 'ناشر';
+        }
 
         // Load dashboard data
         async function loadDashboard() {
@@ -142,7 +144,7 @@
         }
 
         function editReport(id) {
-            alert('ميزة التعديل قيد التطوير');
+            showNotification('ميزة التعديل قيد التطوير', 'info');
         }
 
         async function deleteReport(id) {
@@ -154,13 +156,13 @@
                 });
 
                 if (response.ok) {
-                    alert('تم حذف التقرير بنجاح');
+                    showNotification('تم حذف التقرير بنجاح', 'success');
                     loadDashboard();
                 } else {
-                    alert('حدث خطأ في حذف التقرير');
+                    showNotification('حدث خطأ في حذف التقرير', 'error');
                 }
             } catch (error) {
-                alert('خطأ في الاتصال بالخادم');
+                showNotification('خطأ في الاتصال بالخادم', 'error');
             }
         }
 

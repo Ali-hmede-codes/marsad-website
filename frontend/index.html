@@ -81,121 +81,39 @@
                         <option value="">اختر الفئة</option>
                     </select>
                 </div>
-                <!DOCTYPE html>
-                <html lang="ar" dir="rtl">
 
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <meta name="description" content="نظام الإبلاغ عن الخروقات الأمنية في لبنان">
-                    <title>نظام الإبلاغ عن الخروقات - لبنان</title>
+                <div class="form-group">
+                    <label for="reportAddress">العنوان *</label>
+                    <input type="text" id="reportAddress" class="form-control" required>
+                </div>
 
-                    <!-- Fonts -->
-                    <link rel="preconnect" href="https://fonts.googleapis.com">
-                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                    <link
-                        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
-                        rel="stylesheet">
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">إنشاء التقرير</button>
+                    <button type="button" id="cancelBtn" class="btn btn-secondary">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                    <!-- Leaflet CSS -->
-                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-                        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">تفاصيل التقرير</h2>
+                <button class="close-details">&times;</button>
+            </div>
+            <div id="reportDetails"></div>
+        </div>
+    </div>
 
-                    <!-- Styles -->
-                    <link rel="stylesheet" href="css/style.css">
-                </head>
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/map.js"></script>
+</body>
 
-                <body>
-                    <!-- Header -->
-                    <header class="header">
-                        <div class="container">
-                            <div class="header-content">
-                                <a href="index.html" class="logo">
-                                    <span class="logo-icon">🇱🇧</span>
-                                    <span>نظام الإبلاغ عن الخروقات</span>
-                                </a>
-
-                                <nav class="nav">
-                                    <div id="userInfo" class="hidden">
-                                        <span id="userName"></span>
-                                        <button id="logoutBtn" class="btn btn-secondary btn-sm">تسجيل الخروج</button>
-                                    </div>
-                                    <div id="authButtons">
-                                        <a href="login.html" class="btn btn-secondary btn-sm">تسجيل الدخول</a>
-                                        <a href="register.html" class="btn btn-primary btn-sm">إنشاء حساب</a>
-                                    </div>
-                                </nav>
-                            </div>
-                        </div>
-                    </header>
-
-                    <!-- Filter Section -->
-                    <section class="filter-section">
-                        <div class="container">
-                            <div class="filter-content">
-                                <label for="categoryFilter" class="filter-label">تصفية حسب الفئة:</label>
-                                <select id="categoryFilter" class="form-select" style="max-width: 250px;">
-                                    <option value="">جميع الفئات</option>
-                                </select>
-                                <button id="refreshBtn" class="btn btn-primary btn-sm">تحديث</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Map Container -->
-                    <main class="container" style="padding-top: var(--space-4); padding-bottom: var(--space-4);">
-                        <div id="map" class="map-container"></div>
-                    </main>
-
-                    <!-- Report Modal -->
-                    <div id="reportModal" class="modal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h2 class="modal-title">إنشاء تقرير جديد</h2>
-                                <button class="close">&times;</button>
-                            </div>
-                            <form id="reportForm">
-                                <input type="hidden" id="reportLat">
-                                <input type="hidden" id="reportLng">
-
-                                <div class="form-group">
-                                    <label for="reportCategory">الفئة *</label>
-                                    <select id="reportCategory" class="form-control" required>
-                                        <option value="">اختر الفئة</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="reportAddress">العنوان *</label>
-                                    <input type="text" id="reportAddress" class="form-control" required>
-                                </div>
-
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary">إنشاء التقرير</button>
-                                    <button type="button" id="cancelBtn" class="btn btn-secondary">إلغاء</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Details Modal -->
-                    <div id="detailsModal" class="modal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h2 class="modal-title">تفاصيل التقرير</h2>
-                                <button class="close-details">&times;</button>
-                            </div>
-                            <div id="reportDetails"></div>
-                        </div>
-                    </div>
-
-                    <!-- Scripts -->
-                    <script src="js/config.js"></script>
-                    <script src="js/auth.js"></script>
-                    <script src="js/reports.js"></script>
-                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-                    <script src="js/map.js"></script>
-                </body>
-
-                </html>
+</html>

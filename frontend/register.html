@@ -69,6 +69,8 @@
     </div>
 
     <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/auth.js"></script>
     <script>
         const registerForm = document.getElementById('registerForm');
@@ -88,6 +90,7 @@
                 errorMessage.textContent = 'كلمات المرور غير متطابقة';
                 errorMessage.classList.remove('hidden');
                 successMessage.classList.add('hidden');
+                showNotification('كلمات المرور غير متطابقة', 'error');
                 return;
             }
 
@@ -104,6 +107,7 @@
                     successMessage.textContent = 'تم إنشاء الحساب بنجاح! جاري التحويل...';
                     successMessage.classList.remove('hidden');
                     errorMessage.classList.add('hidden');
+                    showNotification('تم إنشاء الحساب بنجاح!', 'success');
 
                     setTimeout(() => {
                         localStorage.setItem('token', data.token);
@@ -114,11 +118,13 @@
                     errorMessage.textContent = data.error || 'فشل إنشاء الحساب';
                     errorMessage.classList.remove('hidden');
                     successMessage.classList.add('hidden');
+                    showNotification(data.error || 'فشل إنشاء الحساب', 'error');
                 }
             } catch (error) {
                 errorMessage.textContent = 'حدث خطأ في الاتصال بالخادم';
                 errorMessage.classList.remove('hidden');
                 successMessage.classList.add('hidden');
+                showNotification('حدث خطأ في الاتصال بالخادم', 'error');
             }
         });
     </script>

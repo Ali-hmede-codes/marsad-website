@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             if (!isPublisher()) {
-                alert('يجب أن تكون ناشراً لإنشاء تقرير');
+                showNotification('يجب أن تكون ناشراً لإنشاء تقرير', 'error');
                 return;
             }
 
@@ -199,12 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await createReport(reportData);
 
             if (result.success) {
-                alert('تم إنشاء التقرير بنجاح');
+                showNotification('تم إنشاء التقرير بنجاح', 'success');
                 document.getElementById('reportModal').style.display = 'none';
                 reportForm.reset();
                 loadReports();
             } else {
-                alert(result.error || 'حدث خطأ في إنشاء التقرير');
+                showNotification(result.error || 'حدث خطأ في إنشاء التقرير', 'error');
             }
         });
     }
