@@ -152,7 +152,7 @@ function showReportDetails(report) {
         </div>
     `;
 
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
 }
 
 // Initialize reports functionality
