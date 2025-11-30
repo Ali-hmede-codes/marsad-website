@@ -51,7 +51,7 @@ function showLoginPrompt() {
 
     if (!modal) return;
 
-    modal.style.display = 'flex';
+    modal.style.display = 'block';
 
     // Handle confirm
     const handleConfirm = () => {
@@ -116,7 +116,7 @@ async function openReportModal(latlng) {
         addressInput.value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
     }
 
-    modal.style.display = 'flex';
+    modal.style.display = 'block';
 }
 
 // Create custom marker icon with category color and picture
