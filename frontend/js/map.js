@@ -148,7 +148,6 @@ function updateMapMarkers(reports) {
                 </h3>
                 <p style="margin: 5px 0;"><strong>الموقع:</strong> ${report.report_address || 'غير محدد'}</p>
                 <p style="margin: 5px 0;"><strong>التاريخ:</strong> ${new Date(report.date_and_time).toLocaleString('ar-LB')}</p>
-                ${report.description ? `<p style="margin: 5px 0;"><strong>الوصف:</strong> ${report.description}</p>` : ''}
                 <button onclick="showReportDetails(${report.rep_id})" style="
                     margin-top: 10px;
                     padding: 5px 15px;

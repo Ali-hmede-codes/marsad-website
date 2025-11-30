@@ -29,17 +29,25 @@ async function loadCategories() {
         }
 
         if (reportCategorySelect) {
-            reportCategorySelect.innerHTML = '<option value="">اختر الفئة</option>';
-            data.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.catg_id;
-                const emoji = CATEGORY_ICONS[cat.catg_name] || '📍';
-                const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
-                option.textContent = `${emoji} ${cat.catg_name}`;
-                option.style.color = color;
-                option.style.fontWeight = 'bold';
-                reportCategorySelect.appendChild(option);
-            });
+            // Fetch child categories for report form
+            try {
+                const childResponse = await fetch(`${API_URL}/categories/children`);
+                const childData = await childResponse.json();
+
+                reportCategorySelect.innerHTML = '<option value="">اختر الفئة</option>';
+                childData.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.catg_id;
+                    const emoji = CATEGORY_ICONS[cat.catg_name] || '📍';
+                    const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                    option.textContent = `${emoji} ${cat.catg_name}`;
+                    option.style.color = color;
+                    option.style.fontWeight = 'bold';
+                    reportCategorySelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error loading child categories:', err);
+            }
         }
     } catch (error) {
         console.error('Error loading categories:', error);
@@ -83,6 +91,7 @@ async function createReport(reportData) {
         if (response.ok) {
             return { success: true, data };
         } else {
+            // Return the specific error message from backend
             return { success: false, error: data.error };
         }
     } catch (error) {
@@ -139,7 +148,6 @@ function showReportDetails(report) {
             <p><strong>الموقع:</strong> ${report.report_address}</p>
             <p><strong>التاريخ والوقت:</strong> ${formattedDate}</p>
             <p><strong>الإحداثيات:</strong> ${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}</p>
-            ${report.description ? `<p><strong>الوصف:</strong> ${report.description}</p>` : ''}
             ${report.reporter_name ? `<p><strong>المبلغ:</strong> ${report.reporter_name}</p>` : ''}
         </div>
     `;
@@ -185,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 latitude: document.getElementById('reportLat').value,
                 longitude: document.getElementById('reportLng').value,
                 category: document.getElementById('reportCategory').value,
-                description: document.getElementById('reportDescription').value,
                 report_address: document.getElementById('reportAddress').value
             };
 
