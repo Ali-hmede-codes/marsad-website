@@ -1079,6 +1079,201 @@ body {
     border: none;
     font-size: 1.2rem;
     color: #999;
+}
+
+.category-desc {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.category-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.category-role-badge,
+.category-type-badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+}
+
+.category-role-badge {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: var(--color-accent);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.category-type-badge {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.category-type-badge.subcategory {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--color-warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.category-picture {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.category-card:hover .category-picture {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+/* Form Control Styles */
+.form-control {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-base);
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.form-control:hover {
+    border-color: var(--color-border-light);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+}
+
+/* Responsive Category Management */
+@media (max-width: 768px) {
+    .category-card {
+        margin-right: 0 !important;
+    }
+
+    .category-header {
+        flex-direction: column;
+    }
+
+    .category-picture {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+    }
+
+    .category-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .category-actions .btn {
+        flex: 1;
+    }
+}
+
+/* Notification System */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+    width: 90%;
+    max-width: 400px;
+}
+
+.notification {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    border-right: 4px solid #ccc;
+    direction: rtl;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification-success {
+    border-right-color: var(--color-success);
+}
+
+.notification-error {
+    border-right-color: var(--color-error);
+}
+
+.notification-info {
+    border-right-color: var(--color-primary);
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+}
+
+.notification-message {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #999;
     cursor: pointer;
     padding: 0 4px;
     line-height: 1;
@@ -1086,4 +1281,34 @@ body {
 
 .notification-close:hover {
     color: #333;
+}
+
+/* Login Prompt Modal Styles */
+.login-prompt-content {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-accent);
+    box-shadow: var(--shadow-xl), var(--shadow-glow);
+    color: var(--color-text);
+    max-width: 400px;
+}
+
+.login-prompt-content .modal-header {
+    border-bottom-color: var(--color-border);
+}
+
+.login-prompt-content .modal-footer {
+    border-top-color: var(--color-border);
+}
+
+.login-prompt-content .close-login-prompt {
+    color: var(--color-text-secondary);
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.login-prompt-content .close-login-prompt:hover {
+    color: var(--color-error);
 }

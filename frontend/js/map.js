@@ -42,12 +42,47 @@ function initMap() {
 }
 
 // Show login prompt for non-authenticated users
+// Show login prompt for non-authenticated users
 function showLoginPrompt() {
-    const message = 'يجب تسجيل الدخول أولاً لإنشاء تقرير';
+    const modal = document.getElementById('loginPromptModal');
+    const confirmBtn = document.getElementById('confirmLoginBtn');
+    const cancelBtn = document.getElementById('cancelLoginBtn');
+    const closeBtn = modal.querySelector('.close-login-prompt');
 
-    if (confirm(message + '\n\nهل تريد الانتقال إلى صفحة تسجيل الدخول؟')) {
+    if (!modal) return;
+
+    modal.style.display = 'block';
+
+    // Handle confirm
+    const handleConfirm = () => {
         window.location.href = 'login.html';
-    }
+    };
+
+    // Handle close/cancel
+    const handleClose = () => {
+        modal.style.display = 'none';
+        cleanup();
+    };
+
+    // Cleanup event listeners to avoid duplicates
+    const cleanup = () => {
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleClose);
+        closeBtn.removeEventListener('click', handleClose);
+        window.removeEventListener('click', outsideClick);
+    };
+
+    // Close on outside click
+    const outsideClick = (e) => {
+        if (e.target === modal) {
+            handleClose();
+        }
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleClose);
+    closeBtn.addEventListener('click', handleClose);
+    window.addEventListener('click', outsideClick);
 }
 
 // Open report modal with location
