@@ -42,10 +42,10 @@ exports.createCategory = async (req, res) => {
             return res.status(400).json({ error: 'اسم الفئة مطلوب' });
         }
 
-        // Validate Hex Color
+        // Validate Hex Color (6 or 8 digits)
         const color = catg_color || '#000000';
-        if (!/^#[0-9A-F]{6}$/i.test(color)) {
-            return res.status(400).json({ error: 'اللون يجب أن يكون بصيغة Hex (مثال: #FF0000)' });
+        if (!/^#([0-9A-F]{6}|[0-9A-F]{8})$/i.test(color)) {
+            return res.status(400).json({ error: 'اللون يجب أن يكون بصيغة Hex (مثال: #FF0000 أو #FF0000FF)' });
         }
 
         // Get uploaded file path if exists
@@ -94,8 +94,8 @@ exports.updateCategory = async (req, res) => {
 
         // Update color if provided
         if (catg_color !== undefined) {
-            if (!/^#[0-9A-F]{6}$/i.test(catg_color)) {
-                return res.status(400).json({ error: 'اللون يجب أن يكون بصيغة Hex (مثال: #FF0000)' });
+            if (!/^#([0-9A-F]{6}|[0-9A-F]{8})$/i.test(catg_color)) {
+                return res.status(400).json({ error: 'اللون يجب أن يكون بصيغة Hex (مثال: #FF0000 أو #FF0000FF)' });
             }
             updates.push('catg_color = ?');
             params.push(catg_color);

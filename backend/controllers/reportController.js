@@ -1,50 +1,8 @@
 const db = require('../config/database');
 const { isInLebanon, sanitizeInput } = require('../utils/validation');
+const { getAddressFromCoordinates } = require('../utils/geocoding');
 
-// Get all active reports
-exports.getAllReports = async (req, res) => {
-    try {
-        const { category, limit = 100 } = req.query;
-
-        let query = 'SELECT * FROM report_details WHERE is_active = TRUE';
-        const params = [];
-
-        if (category) {
-            query += ' AND categorie = ?';
-            params.push(category);
-        }
-
-        query += ' ORDER BY date_and_time DESC LIMIT ?';
-        params.push(parseInt(limit));
-
-        const [reports] = await db.query(query, params);
-        res.json(reports);
-    } catch (error) {
-        console.error('Get reports error:', error);
-        res.status(500).json({ error: 'خطأ في الخادم' });
-    }
-};
-
-// Get single report
-exports.getReport = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        const [reports] = await db.query(
-            'SELECT * FROM report_details WHERE rep_id = ?',
-            [id]
-        );
-
-        if (reports.length === 0) {
-            return res.status(404).json({ error: 'التقرير غير موجود' });
-        }
-
-        res.json(reports[0]);
-    } catch (error) {
-        console.error('Get report error:', error);
-        res.status(500).json({ error: 'خطأ في الخادم' });
-    }
-};
+// ... (existing code)
 
 // Create new report
 exports.createReport = async (req, res) => {
@@ -59,6 +17,13 @@ exports.createReport = async (req, res) => {
         // Validate coordinates are in Lebanon
         if (!isInLebanon(parseFloat(latitude), parseFloat(longitude))) {
             return res.status(400).json({ error: 'الموقع يجب أن يكون داخل لبنان' });
+        }
+
+        // Auto-detect address if not provided
+        let finalAddress = report_address;
+        if (!finalAddress) {
+            const autoAddress = await getAddressFromCoordinates(latitude, longitude);
+            finalAddress = autoAddress || 'موقع غير معروف';
         }
 
         // Check category permissions
@@ -113,7 +78,7 @@ exports.createReport = async (req, res) => {
                 category,
                 req.user.user_id,
                 sanitizeInput(description) || null,
-                sanitizeInput(report_address) || 'موقع في لبنان'
+                sanitizeInput(finalAddress)
             ]
         );
 
@@ -125,7 +90,8 @@ exports.createReport = async (req, res) => {
 
         res.status(201).json({
             message: 'تم إنشاء التقرير بنجاح',
-            report_id: result.insertId
+            report_id: result.insertId,
+            address: finalAddress
         });
     } catch (error) {
         console.error('Create report error:', error);

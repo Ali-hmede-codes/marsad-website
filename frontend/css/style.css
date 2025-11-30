@@ -827,3 +827,189 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-accent);
 }
+/* ===== Category Management ===== */
+.categories-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.category-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    transition: var(--transition);
+    animation: slideUp 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateX(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-light);
+}
+
+.category-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.category-info {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    flex: 1;
+}
+
+.category-color-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.category-card:hover .category-color-badge {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.category-name {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-1);
+}
+
+.category-desc {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+}
+
+.category-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.category-role-badge,
+.category-type-badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border-radius: var(--radius-full);
+    transition: var(--transition);
+}
+
+.category-role-badge {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: var(--color-accent);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.category-type-badge {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.category-type-badge.subcategory {
+    background-color: rgba(245, 158, 11, 0.15);
+    color: var(--color-warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.category-picture {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.category-card:hover .category-picture {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+/* Form Control Styles */
+.form-control {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-base);
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.form-control:hover {
+    border-color: var(--color-border-light);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+}
+
+/* Responsive Category Management */
+@media (max-width: 768px) {
+    .category-card {
+        margin-right: 0 !important;
+    }
+
+    .category-header {
+        flex-direction: column;
+    }
+
+    .category-picture {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+    }
+
+    .category-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .category-actions .btn {
+        flex: 1;
+    }
+}

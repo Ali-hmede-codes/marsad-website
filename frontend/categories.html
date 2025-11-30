@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="إدارة الفئات - نظام الإبلاغ عن الخروقات">
+    <title>إدارة الفئات - نظام الإبلاغ</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="dashboard.html" class="logo">
+                    <span class="logo-icon">📂</span>
+                    <span>إدارة الفئات</span>
+                </a>
+
+                <nav class="nav">
+                    <a href="index.html" class="btn btn-secondary btn-sm">الخريطة</a>
+                    <a href="dashboard.html" class="btn btn-secondary btn-sm">لوحة التحكم</a>
+                    <button id="logoutBtn" class="btn btn-primary btn-sm">تسجيل الخروج</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">إدارة الفئات</h1>
+                <p class="dashboard-subtitle">إدارة الفئات الرئيسية والفرعية</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button id="addMainCategoryBtn" class="btn btn-primary">
+                    ➕ إضافة فئة رئيسية
+                </button>
+            </div>
+
+            <!-- Categories Display -->
+            <div id="categoriesContainer" class="categories-container">
+                <div class="text-center text-muted" style="padding: 2rem;">
+                    جاري التحميل...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Create/Edit Category -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">إضافة فئة</h2>
+                <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <form id="categoryForm" enctype="multipart/form-data">
+                <input type="hidden" id="categoryId" name="categoryId">
+                <input type="hidden" id="parentId" name="parentId">
+
+                <div class="form-group">
+                    <label for="catg_name">اسم الفئة *</label>
+                    <input type="text" id="catg_name" name="catg_name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="categorie_desc">الوصف</label>
+                    <textarea id="categorie_desc" name="categorie_desc" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="catg_color">اللون *</label>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="color" id="catg_color" name="catg_color" value="#000000"
+                            style="width: 60px; height: 40px; border: 1px solid var(--color-border); border-radius: 8px; cursor: pointer;">
+                        <input type="text" id="catg_color_text" class="form-control" value="#000000"
+                            pattern="^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" style="flex: 1;">
+                    </div>
+                    <small class="text-muted">اختر اللون أو أدخل كود Hex (مثال: #FF0000)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="catg_picture">صورة الفئة</label>
+                    <input type="file" id="catg_picture" name="catg_picture" class="form-control" accept="image/*">
+                    <div id="currentPicture" style="margin-top: 0.5rem;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="required_role">الصلاحية المطلوبة *</label>
+                    <select id="required_role" name="required_role" class="form-control" required>
+                        <option value="user">مستخدم عادي</option>
+                        <option value="publisher">ناشر</option>
+                        <option value="admin">مدير</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/categories.js"></script>
+</body>
+
+</html>

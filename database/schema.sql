@@ -29,7 +29,7 @@ CREATE TABLE categories (
     catg_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     catg_name VARCHAR(255) NOT NULL,
     categorie_desc TEXT,
-    catg_color VARCHAR(7) DEFAULT '#000000',
+    catg_color VARCHAR(9) DEFAULT '#000000',
     catg_picture VARCHAR(255),
     parent_id BIGINT DEFAULT NULL,
     required_role ENUM('user', 'publisher', 'admin') DEFAULT 'user',
