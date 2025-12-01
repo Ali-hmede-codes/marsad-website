@@ -106,6 +106,18 @@ async function openReportModal(latlng) {
         );
         const data = await response.json();
 
+        // Check if location is in Lebanon
+        if (data && data.address) {
+            const country = data.address.country;
+            const countryCode = data.address.country_code;
+
+            // Check if country is Lebanon (country name or country code)
+            if (country !== 'لبنان' && country !== 'Lebanon' && countryCode !== 'lb') {
+                showNotification('يمكن إنشاء التقارير في لبنان فقط', 'error');
+                return;
+            }
+        }
+
         if (data && data.display_name) {
             addressInput.value = data.display_name;
         } else {
