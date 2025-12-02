@@ -15,7 +15,7 @@
 
 ## 📋 Prerequisites
 
-- Node.js (v14 or higher)
+ - Node.js (v20.x or higher)
 - MySQL or MariaDB
 - Google Maps API Key
 - VPS with SSH access (for deployment)
