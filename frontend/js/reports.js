@@ -169,7 +169,7 @@ function showReportDetails(report) {
         </div>
     `;
 
-    modal.style.display = 'block';
+    modal.classList.add('active');
 }
 window.showReportDetails = showReportDetails;
 
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 showNotification('تم إنشاء التقرير بنجاح', 'success');
-                document.getElementById('reportModal').style.display = 'none';
+                document.getElementById('reportModal').classList.remove('active');
                 reportForm.reset();
                 loadReports();
             } else {
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancelBtn');
     if (cancelBtn) {
         cancelBtn.addEventListener('click', () => {
-            document.getElementById('reportModal').style.display = 'none';
+            document.getElementById('reportModal').classList.remove('active');
         });
     }
 
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButtons = document.querySelectorAll('.close, .close-details');
     closeButtons.forEach(btn => {
         btn.addEventListener('click', function () {
-            this.closest('.modal').style.display = 'none';
+            this.closest('.modal').classList.remove('active');
         });
     });
 
@@ -290,10 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const detailsModal = document.getElementById('detailsModal');
 
         if (e.target === reportModal) {
-            reportModal.style.display = 'none';
+            reportModal.classList.remove('active');
         }
         if (e.target === detailsModal) {
-            detailsModal.style.display = 'none';
+            detailsModal.classList.remove('active');
         }
-    });
+});
 });

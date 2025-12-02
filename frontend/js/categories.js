@@ -161,12 +161,12 @@ function openCategoryModal(categoryId = null, parentId = null) {
         document.getElementById('catg_color_text').value = '#000000';
     }
 
-    modal.style.display = 'flex';
+    modal.classList.add('active');
 }
 
 // Close modal
 function closeCategoryModal() {
-    document.getElementById('categoryModal').style.display = 'none';
+    document.getElementById('categoryModal').classList.remove('active');
     editingCategoryId = null;
 }
 

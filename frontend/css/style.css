@@ -431,12 +431,12 @@ body {
     padding: var(--space-4);
     overflow-y: auto;
     animation: fadeIn 0.2s ease;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal.active {
     display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .modal-content {

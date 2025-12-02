@@ -76,7 +76,7 @@ function showLoginPrompt() {
 
     if (!modal) return;
 
-    modal.style.display = 'block';
+    modal.classList.add('active');
 
     // Handle confirm
     const handleConfirm = () => {
@@ -85,7 +85,7 @@ function showLoginPrompt() {
 
     // Handle close/cancel
     const handleClose = () => {
-        modal.style.display = 'none';
+        modal.classList.remove('active');
         cleanup();
     };
 
@@ -153,7 +153,7 @@ async function openReportModal(latlng) {
         addressInput.value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
     }
 
-    modal.style.display = 'block';
+    modal.classList.add('active');
 }
 
 // Setup address search in report modal
