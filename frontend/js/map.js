@@ -67,6 +67,37 @@ function initMap() {
     }
     // Setup address search in report modal
     setupAddressSearch();
+
+    const reportBtn = document.getElementById('mapReportBtn');
+    if (reportBtn) {
+        reportBtn.addEventListener('click', () => {
+            if (!window.isLoggedIn || !window.isLoggedIn()) {
+                showLoginPrompt();
+                return;
+            }
+            if (window.isPublisher && window.isPublisher()) {
+                const center = map.getCenter();
+                openReportModal(center);
+            } else {
+                if (window.showNotification) window.showNotification('يجب أن تكون ناشراً لإنشاء التقارير', 'error');
+            }
+        });
+    }
+
+    const overlay = document.getElementById('mapActivateOverlay');
+    if (overlay && window.innerWidth <= 768) {
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.doubleClickZoom.disable();
+        overlay.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            map.dragging.enable();
+            map.touchZoom.enable();
+            map.scrollWheelZoom.enable();
+            map.doubleClickZoom.enable();
+        });
+    }
 }
 
 // Show login prompt for non-authenticated users
