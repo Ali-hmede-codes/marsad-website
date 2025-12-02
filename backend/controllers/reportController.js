@@ -176,11 +176,13 @@ exports.deleteReport = async (req, res) => {
 // Get all reports
 exports.getAllReports = async (req, res) => {
     try {
-        const { category, limit, today } = req.query;
+        const { category, limit, today, tzOffset } = req.query;
+        const offset = tzOffset || '+02:00';
         let sql = 'SELECT * FROM report_details WHERE is_active = TRUE';
         const params = [];
         if (today === 'true') {
-            sql += ' AND DATE(date_and_time) = CURDATE()';
+            sql += ' AND DATE(CONVERT_TZ(date_and_time, "+00:00", ?)) = DATE(CONVERT_TZ(UTC_TIMESTAMP(), "+00:00", ?))';
+            params.push(offset, offset);
         }
         if (category) {
             sql += ' AND categorie = ?';
@@ -223,9 +225,10 @@ exports.getReport = async (req, res) => {
 
 exports.getTodayReports = async (req, res) => {
     try {
-        const { category } = req.query;
-        let sql = 'SELECT * FROM report_details WHERE is_active = TRUE AND DATE(date_and_time) = CURDATE()';
-        const params = [];
+        const { category, tzOffset } = req.query;
+        const offset = tzOffset || '+02:00';
+        let sql = 'SELECT * FROM report_details WHERE is_active = TRUE AND DATE(CONVERT_TZ(date_and_time, "+00:00", ?)) = DATE(CONVERT_TZ(UTC_TIMESTAMP(), "+00:00", ?))';
+        const params = [offset, offset];
         if (category) {
             sql += ' AND categorie = ?';
             params.push(parseInt(category));
@@ -241,12 +244,15 @@ exports.getTodayReports = async (req, res) => {
 
 exports.getTodayReportsByType = async (req, res) => {
     try {
+        const { tzOffset } = req.query;
+        const offset = tzOffset || '+02:00';
         const [rows] = await db.query(
             `SELECT categorie AS category_id, category_name, COUNT(*) AS count
              FROM report_details
-             WHERE is_active = TRUE AND DATE(date_and_time) = CURDATE()
+             WHERE is_active = TRUE AND DATE(CONVERT_TZ(date_and_time, "+00:00", ?)) = DATE(CONVERT_TZ(UTC_TIMESTAMP(), "+00:00", ?))
              GROUP BY categorie, category_name
-             ORDER BY count DESC`
+             ORDER BY count DESC`,
+            [offset, offset]
         );
         res.json(rows);
     } catch (error) {
@@ -257,12 +263,15 @@ exports.getTodayReportsByType = async (req, res) => {
 
 exports.getTodayReportsByCity = async (req, res) => {
     try {
+        const { tzOffset } = req.query;
+        const offset = tzOffset || '+02:00';
         const [rows] = await db.query(
             `SELECT TRIM(SUBSTRING_INDEX(report_address, ',', 1)) AS city, COUNT(*) AS count
              FROM report_details
-             WHERE is_active = TRUE AND DATE(date_and_time) = CURDATE()
+             WHERE is_active = TRUE AND DATE(CONVERT_TZ(date_and_time, "+00:00", ?)) = DATE(CONVERT_TZ(UTC_TIMESTAMP(), "+00:00", ?))
              GROUP BY city
-             ORDER BY count DESC`
+             ORDER BY count DESC`,
+            [offset, offset]
         );
         res.json(rows);
     } catch (error) {

@@ -22,7 +22,7 @@ const BACKEND_API = process.env.API_URL || 'http://localhost:3000/api';
 
 async function warmTodayReports() {
   try {
-    const res = await axios.get(`${BACKEND_API}/reports/today`, { timeout: 5000 });
+    const res = await axios.get(`${BACKEND_API}/reports/today?tzOffset=%2B02:00`, { timeout: 5000 });
     const count = Array.isArray(res.data) ? res.data.length : 0;
     console.log(`Fetched today's reports from backend: ${count}`);
     return { ok: true, count };
@@ -74,4 +74,3 @@ main().catch((e) => {
   console.error('Failed to start refresh-map-now:', e);
   process.exit(1);
 });
-
