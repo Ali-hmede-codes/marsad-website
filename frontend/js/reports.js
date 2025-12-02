@@ -86,6 +86,10 @@ async function loadReports(categoryFilter = '') {
             window.updateMapMarkers(allReports);
         }
 
+        const dailyInputEl = document.getElementById('dailyDate');
+        const dateStr = dailyInputEl ? dailyInputEl.value : formatDateISO(new Date());
+        renderDailyReportsForDate(dateStr);
+
         return allReports;
     } catch (error) {
         console.error('Error loading reports:', error);
@@ -216,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const today = formatDateISO(new Date());
         dailyInput.value = today;
         dailyInput.addEventListener('change', () => renderDailyReportsForDate(dailyInput.value));
+        renderDailyReportsForDate(today);
     }
 });
 
@@ -237,6 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
+            const filter = categoryFilter ? categoryFilter.value : '';
+            loadReports(filter);
+        });
+    }
+
+    const refreshDailyBtn = document.getElementById('refreshDailyBtn');
+    if (refreshDailyBtn) {
+        refreshDailyBtn.addEventListener('click', () => {
             const filter = categoryFilter ? categoryFilter.value : '';
             loadReports(filter);
         });
