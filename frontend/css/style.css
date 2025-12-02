@@ -386,6 +386,61 @@ body {
     color: var(--color-text);
 }
 
+/* Filter Card Layout */
+.filters-card .card-header {
+    padding: 0;
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.filters-card .card-title {
+    margin: 0;
+    padding: var(--space-4) var(--space-6);
+}
+
+.filters-card .card-body {
+    padding: 0;
+}
+
+.filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: flex-end;
+}
+
+.filters-row .form-group {
+    margin-bottom: 0;
+    min-width: 220px;
+}
+
+.filters-row .button-group {
+    flex: 0 0 auto;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.input-group .form-control {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filters-row .form-group {
+        min-width: 100%;
+    }
+    .filters-row .button-group .btn {
+        width: 100%;
+    }
+}
+
 /* ===== Map Container ===== */
 .map-container {
     height: calc(100vh - 140px);

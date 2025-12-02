@@ -57,32 +57,34 @@
     <main class="container" style="padding-top: var(--space-4); padding-bottom: var(--space-4);">
         <div id="map" class="map-container"></div>
 
-        <div class="card" style="margin-top: var(--space-4);">
-            <div class="daily-header" style="padding: 16px 24px;">
-                <h2 class="section-title" style="margin: 0;">بحث وتصفية</h2>
+        <div class="card filters-card" style="margin-top: var(--space-4);">
+            <div class="card-header">
+                <h2 class="card-title">بحث وتصفية</h2>
             </div>
-            <div class="card-body" style="padding: 16px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: end;">
-                <div class="form-group">
-                    <label for="mainCategoryFilter">الفئة الرئيسية</label>
-                    <select id="mainCategoryFilter" class="form-control">
-                        <option value="">جميع الفئات الرئيسية</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="categoryFilter">الفئة الفرعية</label>
-                    <select id="categoryFilter" class="form-control">
-                        <option value="">جميع الفئات</option>
-                    </select>
-                </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="locationSearch">بحث عن موقع</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input id="locationSearch" type="text" class="form-control" placeholder="ابحث عن مدينة أو موقع في لبنان" />
-                        <button id="searchBtn" class="btn btn-secondary btn-sm">بحث</button>
+            <div class="card-body">
+                <div class="filters-row">
+                    <div class="form-group button-group" style="margin-bottom: 0;">
+                        <button id="refreshBtn" class="btn btn-primary btn-sm">تحديث</button>
                     </div>
-                </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <button id="refreshBtn" class="btn btn-primary btn-sm btn-full">تحديث</button>
+                    <div class="form-group">
+                        <label for="mainCategoryFilter">الفئة الرئيسية</label>
+                        <select id="mainCategoryFilter" class="form-control">
+                            <option value="">جميع الفئات الرئيسية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryFilter">الفئة الفرعية</label>
+                        <select id="categoryFilter" class="form-control">
+                            <option value="">جميع الفئات</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="locationSearch">بحث عن موقع</label>
+                        <div class="input-group">
+                            <input id="locationSearch" type="text" class="form-control" placeholder="ابحث عن مدينة أو موقع في لبنان" />
+                            <button id="searchBtn" class="btn btn-secondary btn-sm">بحث</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
