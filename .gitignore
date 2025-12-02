@@ -30,3 +30,6 @@ pids/
 
 # Uploads (optional - uncomment if you don't want to track uploaded files)
 # backend/uploads/
+
+# Build output
+frontend/js/dist/

@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
+    "build": "webpack --config webpack.config.js",
+    "build:watch": "webpack --config webpack.config.js --watch",
     "pm2:start": "npx pm2 start ecosystem.config.js",
     "pm2:start:prod": "npx pm2 start ecosystem.config.js --env production",
     "pm2:stop": "npx pm2 stop lebanon-breach-reporting",
@@ -15,7 +17,8 @@
     "pm2:monit": "npx pm2 monit",
     "pm2:list": "npx pm2 list",
     "pm2:save": "npx pm2 save",
-    "pm2:startup": "npx pm2 startup"
+    "pm2:startup": "npx pm2 startup",
+    "deploy": "npm run build && node update-html-scripts.js"
   },
   "keywords": [
     "lebanon",
@@ -38,7 +41,12 @@
     "nodemailer": "^7.0.11"
   },
   "devDependencies": {
+    "javascript-obfuscator": "^4.2.0",
     "nodemon": "^3.0.2",
-    "pm2": "^6.0.14"
+    "pm2": "^6.0.14",
+    "terser": "^5.44.1",
+    "webpack": "^5.103.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-obfuscator": "^3.5.1"
   }
 }
