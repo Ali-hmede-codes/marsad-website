@@ -32,4 +32,4 @@ pids/
 # backend/uploads/
 
 # Build output
-frontend/js/dist/
+#frontend/js/dist/
