@@ -283,16 +283,16 @@ function addSearchMarker(latlng, address) {
     const iconHtml = `
         <div style="
             background-color: #ef4444;
-            width: 36px;
-            height: 36px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
         ">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>
                 <circle cx="12" cy="9" r="2" fill="white"></circle>
             </svg>
@@ -302,9 +302,9 @@ function addSearchMarker(latlng, address) {
     const icon = L.divIcon({
         html: iconHtml,
         className: 'custom-search-marker',
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-        popupAnchor: [0, -18]
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -12]
     });
 
     // Create marker
@@ -338,16 +338,16 @@ function createCategoryIcon(category) {
     const iconHtml = `
         <div style="
             background-color: ${color};
-            width: 36px;
-            height: 36px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
         ">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                 <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>
                 <circle cx="12" cy="9" r="2" fill="white"></circle>
             </svg>
@@ -357,9 +357,9 @@ function createCategoryIcon(category) {
     return L.divIcon({
         html: iconHtml,
         className: 'custom-marker',
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-        popupAnchor: [0, -18]
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -12]
     });
 }
 
