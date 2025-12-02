@@ -21,17 +21,72 @@ async function loadCategories() {
                 if (hasChildren) {
                     const optgroup = document.createElement('optgroup');
                     optgroup.label = parent.catg_name;
-                parent.children.forEach(cat => {
+                    parent.children.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.catg_id;
+                        const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                        option.textContent = cat.catg_name;
+                        option.style.color = color;
+                        option.style.fontWeight = 'bold';
+                        optgroup.appendChild(option);
+                    });
+                    filterSelect.appendChild(optgroup);
+                }
+            });
+        }
+
+        const mainFilterSelect = document.getElementById('mainCategoryFilter');
+        if (mainFilterSelect) {
+            mainFilterSelect.innerHTML = '<option value="">جميع الفئات الرئيسية</option>';
+            data.forEach(parent => {
+                const option = document.createElement('option');
+                option.value = parent.catg_id;
+                option.textContent = parent.catg_name;
+                mainFilterSelect.appendChild(option);
+            });
+
+            const populateFilterChildren = (parentId) => {
+                if (!filterSelect) return;
+                if (!parentId) {
+                    filterSelect.innerHTML = '<option value="">جميع الفئات</option>';
+                    data.forEach(parent => {
+                        const hasChildren = parent.children && parent.children.length > 0;
+                        if (hasChildren) {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = parent.catg_name;
+                            parent.children.forEach(cat => {
+                                const option = document.createElement('option');
+                                option.value = cat.catg_id;
+                                const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                                option.textContent = cat.catg_name;
+                                option.style.color = color;
+                                option.style.fontWeight = 'bold';
+                                optgroup.appendChild(option);
+                            });
+                            filterSelect.appendChild(optgroup);
+                        }
+                    });
+                    return;
+                }
+
+                filterSelect.innerHTML = '<option value="">جميع الفئات</option>';
+                const parent = data.find(p => String(p.catg_id) === String(parentId));
+                const children = parent && parent.children ? parent.children : [];
+                children.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.catg_id;
                     const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
                     option.textContent = cat.catg_name;
                     option.style.color = color;
                     option.style.fontWeight = 'bold';
-                    optgroup.appendChild(option);
+                    filterSelect.appendChild(option);
                 });
-                    filterSelect.appendChild(optgroup);
-                }
+            };
+
+            mainFilterSelect.addEventListener('change', (e) => {
+                populateFilterChildren(e.target.value);
+                if (filterSelect) filterSelect.value = '';
+                loadReports('');
             });
         }
 
