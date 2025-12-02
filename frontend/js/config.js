@@ -1,10 +1,9 @@
-// Configuration and Constants
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+var API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000/api'
     : '/api';
+window.API_URL = API_URL;
 
-// Category emoji icons mapping
-const CATEGORY_ICONS = {
+var CATEGORY_ICONS = {
     'طائرات مسيرة': '🛸',
     'طائرات حربية': '✈️',
     'صواريخ': '🚀',
@@ -14,3 +13,4 @@ const CATEGORY_ICONS = {
     'حركة عسكرية': '🎖️',
     'أخرى': '📍'
 };
+window.CATEGORY_ICONS = CATEGORY_ICONS;

@@ -6,7 +6,7 @@ let categories = [];
 // Load categories
 async function loadCategories() {
     try {
-        const response = await fetch(`${API_URL}/categories`);
+        const response = await fetch(`${window.API_URL}/categories`);
         const data = await response.json();
         categories = data;
 
@@ -19,7 +19,7 @@ async function loadCategories() {
             data.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat.catg_id;
-                const emoji = CATEGORY_ICONS[cat.catg_name] || '📍';
+                const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
                 const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
                 option.textContent = `${emoji} ${cat.catg_name}`;
                 option.style.color = color;
@@ -31,14 +31,14 @@ async function loadCategories() {
         if (reportCategorySelect) {
             // Fetch child categories for report form
             try {
-                const childResponse = await fetch(`${API_URL}/categories/children`);
+                const childResponse = await fetch(`${window.API_URL}/categories/children`);
                 const childData = await childResponse.json();
 
                 reportCategorySelect.innerHTML = '<option value="">اختر الفئة</option>';
                 childData.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.catg_id;
-                    const emoji = CATEGORY_ICONS[cat.catg_name] || '📍';
+                    const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
                     const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
                     option.textContent = `${emoji} ${cat.catg_name}`;
                     option.style.color = color;
@@ -57,7 +57,7 @@ async function loadCategories() {
 // Load reports
 async function loadReports(categoryFilter = '') {
     try {
-        let url = `${API_URL}/reports?limit=500`;
+        let url = `${window.API_URL}/reports?limit=500`;
         if (categoryFilter) {
             url += `&category=${categoryFilter}`;
         }
@@ -81,7 +81,7 @@ async function loadReports(categoryFilter = '') {
 // Create new report
 async function createReport(reportData) {
     try {
-        const response = await fetchWithAuth(`${API_URL}/reports`, {
+        const response = await fetchWithAuth(`${window.API_URL}/reports`, {
             method: 'POST',
             body: JSON.stringify(reportData)
         });
@@ -122,7 +122,7 @@ function showReportDetails(report) {
     });
 
     const categoryName = report.category_name || getCategoryName(report.categorie);
-    const emoji = CATEGORY_ICONS[categoryName] || '📍';
+    const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[categoryName]) || '📍';
     const colorR = report.category_color_r || 100;
     const colorG = report.category_color_g || 100;
     const colorB = report.category_color_b || 100;
