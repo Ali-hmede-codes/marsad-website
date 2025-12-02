@@ -24,10 +24,30 @@ function showNotification(message, type = 'info', duration = 4000) {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
 
-    // Icon based on type
-    let icon = 'ℹ️';
-    if (type === 'success') icon = '✅';
-    if (type === 'error') icon = '❌';
+    let icon = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="8"></line>
+            <line x1="12" y1="12" x2="12" y2="16"></line>
+        </svg>
+    `;
+    if (type === 'success') {
+        icon = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9 12l2 2 4-4"></path>
+            </svg>
+        `;
+    }
+    if (type === 'error') {
+        icon = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        `;
+    }
 
     notification.innerHTML = `
         <span class="notification-icon">${icon}</span>

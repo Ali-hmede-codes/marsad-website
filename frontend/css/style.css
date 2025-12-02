@@ -1070,7 +1070,6 @@ body {
     }
 }
 
-/* Notification System */
 #notification-container {
     position: fixed;
     top: 20px;
@@ -1079,25 +1078,26 @@ body {
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-3);
     pointer-events: none;
     width: 90%;
-    max-width: 400px;
+    max-width: 420px;
 }
 
 .notification {
-    background: white;
-    border-radius: 8px;
-    padding: 12px 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-accent);
+    border-right: 4px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-xl), var(--shadow-glow);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-3);
     pointer-events: auto;
     opacity: 0;
     transform: translateY(-20px);
-    transition: all 0.3s ease;
-    border-right: 4px solid #ccc;
+    transition: var(--transition);
     direction: rtl;
 }
 
@@ -1115,16 +1115,33 @@ body {
 }
 
 .notification-info {
-    border-right-color: var(--color-primary);
+    border-right-color: var(--color-info);
 }
 
 .notification-icon {
-    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.notification-success .notification-icon {
+    color: var(--color-success);
+}
+
+.notification-error .notification-icon {
+    color: var(--color-error);
+}
+
+.notification-info .notification-icon {
+    color: var(--color-info);
 }
 
 .notification-message {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
     color: var(--color-text);
     font-weight: 500;
 }
@@ -1133,7 +1150,14 @@ body {
     background: none;
     border: none;
     font-size: 1.2rem;
-    color: #999;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+
+.notification-close:hover {
+    color: var(--color-text);
 }
 
 .category-desc {
@@ -1265,7 +1289,6 @@ body {
     }
 }
 
-/* Notification System */
 #notification-container {
     position: fixed;
     top: 20px;
@@ -1274,25 +1297,26 @@ body {
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-3);
     pointer-events: none;
     width: 90%;
-    max-width: 400px;
+    max-width: 420px;
 }
 
 .notification {
-    background: white;
-    border-radius: 8px;
-    padding: 12px 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-accent);
+    border-right: 4px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-xl), var(--shadow-glow);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-3);
     pointer-events: auto;
     opacity: 0;
     transform: translateY(-20px);
-    transition: all 0.3s ease;
-    border-right: 4px solid #ccc;
+    transition: var(--transition);
     direction: rtl;
 }
 
@@ -1310,16 +1334,33 @@ body {
 }
 
 .notification-info {
-    border-right-color: var(--color-primary);
+    border-right-color: var(--color-info);
 }
 
 .notification-icon {
-    font-size: 1.2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.notification-success .notification-icon {
+    color: var(--color-success);
+}
+
+.notification-error .notification-icon {
+    color: var(--color-error);
+}
+
+.notification-info .notification-icon {
+    color: var(--color-info);
 }
 
 .notification-message {
     flex: 1;
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
     color: var(--color-text);
     font-weight: 500;
 }
@@ -1328,14 +1369,14 @@ body {
     background: none;
     border: none;
     font-size: 1.2rem;
-    color: #999;
+    color: var(--color-text-secondary);
     cursor: pointer;
     padding: 0 4px;
     line-height: 1;
 }
 
 .notification-close:hover {
-    color: #333;
+    color: var(--color-text);
 }
 
 /* Login Prompt Modal Styles */
