@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.API_URL || 'http://localhost:3000/api';
 
 // Check authentication - admin only
 if (!isLoggedIn() || !isAdmin()) {
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup event listeners
 function setupEventListeners() {
-    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('logoutBtn').addEventListener('click', window.logout || logout);
     document.getElementById('addMainCategoryBtn').addEventListener('click', () => openCategoryModal());
     document.getElementById('categoryForm').addEventListener('submit', handleCategorySubmit);
 

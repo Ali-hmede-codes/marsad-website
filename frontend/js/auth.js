@@ -92,3 +92,12 @@ if (document.readyState === 'loading') {
 } else {
     updateAuthUI();
 }
+
+window.getToken = getToken;
+window.getCurrentUser = getCurrentUser;
+window.isLoggedIn = isLoggedIn;
+window.isPublisher = isPublisher;
+window.isAdmin = isAdmin;
+window.logout = logout;
+window.updateAuthUI = updateAuthUI;
+window.fetchWithAuth = fetchWithAuth;

@@ -155,6 +155,8 @@ function showReportDetails(report) {
     modal.style.display = 'block';
 }
 
+window.showReportDetails = showReportDetails;
+
 // Initialize reports functionality
 document.addEventListener('DOMContentLoaded', () => {
     // Load categories and reports

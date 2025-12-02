@@ -23,17 +23,15 @@ function initMap() {
 
     // Add click listener for creating new reports (logged in users only)
     map.on('click', (e) => {
-        // Check if user is logged in
-        if (!isLoggedIn()) {
+        if (!window.isLoggedIn || !window.isLoggedIn()) {
             showLoginPrompt();
             return;
         }
 
-        // Check if user is publisher
-        if (isPublisher()) {
+        if (window.isPublisher && window.isPublisher()) {
             openReportModal(e.latlng);
         } else {
-            showNotification('يجب أن تكون ناشراً لإنشاء التقارير', 'error');
+            if (window.showNotification) window.showNotification('يجب أن تكون ناشراً لإنشاء التقارير', 'error');
         }
     });
 
@@ -177,7 +175,7 @@ function setupAddressSearch() {
         searchBtn.disabled = true;
 
         try {
-            if (window.showNotification) showNotification('جاري البحث عن الموقع...', 'info');
+            if (window.showNotification) window.showNotification('جاري البحث عن الموقع...', 'info');
 
             const response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1&countrycodes=lb`
@@ -205,13 +203,13 @@ function setupAddressSearch() {
                     map.setView([lat, lng], 16);
                 }
 
-                if (window.showNotification) showNotification(`تم تحديد الموقع: ${result.display_name}`, 'success');
+                if (window.showNotification) window.showNotification(`تم تحديد الموقع: ${result.display_name}`, 'success');
             } else {
-                if (window.showNotification) showNotification('لم يتم العثور على الموقع', 'error');
+                if (window.showNotification) window.showNotification('لم يتم العثور على الموقع', 'error');
             }
         } catch (error) {
             console.error('Search error:', error);
-            if (window.showNotification) showNotification('حدث خطأ أثناء البحث', 'error');
+            if (window.showNotification) window.showNotification('حدث خطأ أثناء البحث', 'error');
         } finally {
             searchBtn.innerHTML = originalBtnText;
             searchBtn.disabled = false;
@@ -328,7 +326,7 @@ function createCategoryIcon(category) {
     const color = `rgb(${colorR}, ${colorG}, ${colorB})`;
 
     const categoryName = category.catg_name || category.category_name || '';
-    const emoji = CATEGORY_ICONS[categoryName] || '📍';
+    const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[categoryName]) || '📍';
 
     // Create custom HTML icon
     const iconHtml = `
