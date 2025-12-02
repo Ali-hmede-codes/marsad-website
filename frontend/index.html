@@ -46,15 +46,22 @@
         </div>
     </header>
 
-    <!-- Filter Section -->
-    <section class="filter-section">
+    <section class="hero">
         <div class="container">
-            <div class="filter-content">
-                <label for="categoryFilter" class="filter-label">تصفية حسب الفئة:</label>
-                <select id="categoryFilter" class="form-select" style="max-width: 250px;">
-                    <option value="">جميع الفئات</option>
-                </select>
-                <button id="refreshBtn" class="btn btn-primary btn-sm">تحديث</button>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">مرصد الخروقات الأمنية في لبنان</h1>
+                    <p class="hero-subtitle">استكشف التقارير على الخريطة وقم بالتصفية حسب الفئات</p>
+                </div>
+                <div class="hero-actions">
+                    <div class="filters-inline">
+                        <label for="categoryFilter" class="filter-label">تصفية الفئة</label>
+                        <select id="categoryFilter" class="form-select">
+                            <option value="">جميع الفئات</option>
+                        </select>
+                        <button id="refreshBtn" class="btn btn-primary btn-sm">تحديث</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -74,6 +81,13 @@
             <form id="reportForm">
                 <input type="hidden" id="reportLat">
                 <input type="hidden" id="reportLng">
+
+                <div class="form-group">
+                    <label for="reportMainCategory">الفئة الرئيسية</label>
+                    <select id="reportMainCategory" class="form-control">
+                        <option value="">اختر الفئة الرئيسية</option>
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label for="reportCategory">الفئة *</label>
@@ -101,6 +115,29 @@
             </form>
         </div>
     </div>
+
+    <section class="daily-reports">
+        <div class="container">
+            <div class="daily-header">
+                <h2 class="section-title">تقارير اليوم</h2>
+                <div class="daily-controls">
+                    <input type="date" id="dailyDate" class="form-control" />
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="table table-modern" id="dailyReportsTable">
+                    <thead>
+                        <tr>
+                            <th>الوقت</th>
+                            <th>النوع</th>
+                            <th>المدينة</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 
     <!-- Details Modal -->
     <div id="detailsModal" class="modal">

@@ -16,26 +16,41 @@ async function loadCategories() {
 
         if (filterSelect) {
             filterSelect.innerHTML = '<option value="">جميع الفئات</option>';
-            data.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.catg_id;
-                const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
-                const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
-                option.textContent = `${emoji} ${cat.catg_name}`;
-                option.style.color = color;
-                option.style.fontWeight = 'bold';
-                filterSelect.appendChild(option);
+            data.forEach(parent => {
+                const hasChildren = parent.children && parent.children.length > 0;
+                if (hasChildren) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = parent.catg_name;
+                    parent.children.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.catg_id;
+                        const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
+                        const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                        option.textContent = `${emoji} ${cat.catg_name}`;
+                        option.style.color = color;
+                        option.style.fontWeight = 'bold';
+                        optgroup.appendChild(option);
+                    });
+                    filterSelect.appendChild(optgroup);
+                }
             });
         }
 
-        if (reportCategorySelect) {
-            // Fetch child categories for report form
-            try {
-                const childResponse = await fetch(`${window.API_URL}/categories/children`);
-                const childData = await childResponse.json();
+        const reportMainCategorySelect = document.getElementById('reportMainCategory');
+        if (reportMainCategorySelect && reportCategorySelect) {
+            reportMainCategorySelect.innerHTML = '<option value="">اختر الفئة الرئيسية</option>';
+            data.forEach(parent => {
+                const option = document.createElement('option');
+                option.value = parent.catg_id;
+                option.textContent = parent.catg_name;
+                reportMainCategorySelect.appendChild(option);
+            });
 
+            const populateChildren = (parentId) => {
                 reportCategorySelect.innerHTML = '<option value="">اختر الفئة</option>';
-                childData.forEach(cat => {
+                const parent = data.find(p => String(p.catg_id) === String(parentId));
+                const children = parent && parent.children ? parent.children : [];
+                children.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.catg_id;
                     const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
@@ -45,9 +60,11 @@ async function loadCategories() {
                     option.style.fontWeight = 'bold';
                     reportCategorySelect.appendChild(option);
                 });
-            } catch (err) {
-                console.error('Error loading child categories:', err);
-            }
+            };
+
+            reportMainCategorySelect.addEventListener('change', (e) => {
+                populateChildren(e.target.value);
+            });
         }
     } catch (error) {
         console.error('Error loading categories:', error);
@@ -154,8 +171,48 @@ function showReportDetails(report) {
 
     modal.style.display = 'block';
 }
-
 window.showReportDetails = showReportDetails;
+
+function extractCity(address) {
+    if (!address) return '';
+    const parts = address.split(',');
+    return parts[0] ? parts[0].trim() : address;
+}
+
+function formatDateISO(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function renderDailyReportsForDate(dateStr) {
+    const tbody = document.querySelector('#dailyReportsTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    const filtered = allReports.filter(r => {
+        const d = new Date(r.date_and_time);
+        return formatDateISO(d) === dateStr;
+    });
+    filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        const time = new Date(r.date_and_time).toLocaleTimeString('ar-LB', { hour: '2-digit', minute: '2-digit' });
+        const typeName = r.category_name || getCategoryName(r.categorie);
+        const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[typeName]) || '📍';
+        const city = extractCity(r.report_address);
+        tr.innerHTML = `<td>${time}</td><td>${emoji} ${typeName}</td><td>${city}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const dailyInput = document.getElementById('dailyDate');
+    if (dailyInput) {
+        const today = formatDateISO(new Date());
+        dailyInput.value = today;
+        dailyInput.addEventListener('change', () => renderDailyReportsForDate(dailyInput.value));
+    }
+});
 
 // Initialize reports functionality
 document.addEventListener('DOMContentLoaded', () => {

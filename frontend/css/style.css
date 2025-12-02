@@ -1312,3 +1312,59 @@ body {
 .login-prompt-content .close-login-prompt:hover {
     color: var(--color-error);
 }
+.hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
+    color: #fff;
+    padding: var(--space-10) 0;
+}
+.hero-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+}
+.hero-title {
+    font-size: 2rem;
+    margin: 0 0 var(--space-2) 0;
+}
+.hero-subtitle {
+    color: #cbd5e1;
+    margin: 0;
+}
+.filters-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+.daily-reports {
+    padding: var(--space-8) 0;
+}
+.daily-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+.table-wrapper {
+    overflow: auto;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+.table-modern {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table-modern thead th {
+    background-color: var(--color-primary);
+    color: #fff;
+    text-align: right;
+    padding: var(--space-4);
+}
+.table-modern tbody td {
+    padding: var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+.table-modern tbody tr:hover td {
+    background-color: var(--color-surface-hover);
+}
