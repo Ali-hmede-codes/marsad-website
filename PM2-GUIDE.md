@@ -143,6 +143,30 @@ pm2 plus
 
 ## Troubleshooting
 
+### "pm2: not found" Error on Production Server
+
+If you get `sh: 1: pm2: not found` when running `npm run pm2:start`, it means PM2 is not globally installed on your server.
+
+**Solution 1: Use the updated npm scripts (Recommended)**
+The scripts have been updated to use `npx pm2` which will work with locally installed PM2:
+```bash
+npm run pm2:start
+```
+
+**Solution 2: Install PM2 globally on your server**
+```bash
+# On your production server
+sudo npm install -g pm2
+
+# Then you can use PM2 directly
+pm2 start ecosystem.config.js
+```
+
+**Solution 3: Use npx directly**
+```bash
+npx pm2 start ecosystem.config.js
+```
+
 ### App won't start
 ```bash
 # Check PM2 logs

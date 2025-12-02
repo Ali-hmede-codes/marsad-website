@@ -6,13 +6,16 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:start:prod": "pm2 start ecosystem.config.js --env production",
-    "pm2:stop": "pm2 stop lebanon-breach-reporting",
-    "pm2:restart": "pm2 restart lebanon-breach-reporting",
-    "pm2:delete": "pm2 delete lebanon-breach-reporting",
-    "pm2:logs": "pm2 logs lebanon-breach-reporting",
-    "pm2:monit": "pm2 monit"
+    "pm2:start": "npx pm2 start ecosystem.config.js",
+    "pm2:start:prod": "npx pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "npx pm2 stop lebanon-breach-reporting",
+    "pm2:restart": "npx pm2 restart lebanon-breach-reporting",
+    "pm2:delete": "npx pm2 delete lebanon-breach-reporting",
+    "pm2:logs": "npx pm2 logs lebanon-breach-reporting",
+    "pm2:monit": "npx pm2 monit",
+    "pm2:list": "npx pm2 list",
+    "pm2:save": "npx pm2 save",
+    "pm2:startup": "npx pm2 startup"
   },
   "keywords": [
     "lebanon",
