@@ -180,7 +180,7 @@ function setupAddressSearch() {
             if (window.showNotification) showNotification('جاري البحث عن الموقع...', 'info');
 
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1`
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1&countrycodes=lb`
             );
             const data = await response.json();
 
@@ -193,6 +193,9 @@ function setupAddressSearch() {
                 // Update hidden inputs
                 if (latInput) latInput.value = lat;
                 if (lngInput) lngInput.value = lng;
+
+                // Update address input with the full found name
+                addressInput.value = result.display_name;
 
                 // Update global selectedLocation
                 selectedLocation = { lat, lng };
@@ -235,7 +238,7 @@ async function searchLocation(query) {
 
         // Use Nominatim geocoding API
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1`
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1&countrycodes=lb`
         );
         const data = await response.json();
 
