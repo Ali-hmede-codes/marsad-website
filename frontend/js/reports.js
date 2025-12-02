@@ -296,17 +296,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh button
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => {
+        refreshBtn.addEventListener('click', async () => {
             const filter = categoryFilter ? categoryFilter.value : '';
-            loadReports(filter);
+            await loadReports(filter);
+            if (window.showNotification) window.showNotification('تم تحديث تقارير اليوم', 'info');
         });
     }
 
     const refreshDailyBtn = document.getElementById('refreshDailyBtn');
     if (refreshDailyBtn) {
-        refreshDailyBtn.addEventListener('click', () => {
+        refreshDailyBtn.addEventListener('click', async () => {
             const filter = categoryFilter ? categoryFilter.value : '';
-            loadReports(filter);
+            await loadReports(filter);
+            if (window.showNotification) window.showNotification('تم تحديث تقارير اليوم', 'info');
         });
     }
 
@@ -375,10 +377,11 @@ function scheduleMidnightRefresh() {
     const next = new Date(now);
     next.setHours(24, 0, 0, 0);
     const ms = next.getTime() - now.getTime();
-    setTimeout(() => {
+    setTimeout(async () => {
         const filterSelect = document.getElementById('categoryFilter');
         const filter = filterSelect ? filterSelect.value : '';
-        loadReports(filter);
+        await loadReports(filter);
+        if (window.showNotification) window.showNotification('تم تحديث تقارير اليوم لليوم الجديد', 'info');
         scheduleMidnightRefresh();
     }, ms);
 }
