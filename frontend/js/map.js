@@ -2,6 +2,8 @@
 let map;
 let markers = [];
 let selectedLocation = null;
+let searchMarker = null; // Marker for searched location
+
 
 // Lebanon center coordinates
 const LEBANON_CENTER = [33.8547, 35.8623];
@@ -38,6 +40,29 @@ function initMap() {
     // Load initial reports
     if (window.loadReports) {
         window.loadReports();
+    }
+
+    // Add search button event listener
+    const searchBtn = document.getElementById('searchBtn');
+    const locationSearch = document.getElementById('locationSearch');
+
+    if (searchBtn && locationSearch) {
+        searchBtn.addEventListener('click', () => {
+            const query = locationSearch.value.trim();
+            if (query) {
+                searchLocation(query);
+            }
+        });
+
+        // Allow search on Enter key
+        locationSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = locationSearch.value.trim();
+                if (query) {
+                    searchLocation(query);
+                }
+            }
+        });
     }
 }
 
@@ -130,6 +155,98 @@ async function openReportModal(latlng) {
 
     modal.style.display = 'block';
 }
+
+// Search for a location by name
+async function searchLocation(query) {
+    try {
+        // Show loading notification
+        if (window.showNotification) {
+            showNotification('جاري البحث...', 'info');
+        }
+
+        // Use Nominatim geocoding API
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1`
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const result = data[0];
+            const lat = parseFloat(result.lat);
+            const lng = parseFloat(result.lon);
+
+            // Add marker at searched location
+            addSearchMarker({ lat, lng }, result.display_name);
+
+            // Center map on location
+            map.setView([lat, lng], 14);
+
+            if (window.showNotification) {
+                showNotification(`تم العثور على: ${result.display_name}`, 'success');
+            }
+        } else {
+            if (window.showNotification) {
+                showNotification('لم يتم العثور على الموقع', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        if (window.showNotification) {
+            showNotification('حدث خطأ أثناء البحث', 'error');
+        }
+    }
+}
+
+// Add a marker for the searched location
+function addSearchMarker(latlng, address) {
+    // Remove existing search marker if any
+    if (searchMarker) {
+        map.removeLayer(searchMarker);
+    }
+
+    // Create custom icon for search marker
+    const iconHtml = `
+        <div style="
+            background-color: #ef4444;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        ">
+            📍
+        </div>
+    `;
+
+    const icon = L.divIcon({
+        html: iconHtml,
+        className: 'custom-search-marker',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
+    });
+
+    // Create marker
+    searchMarker = L.marker([latlng.lat, latlng.lng], {
+        icon: icon,
+        title: 'موقع البحث'
+    }).addTo(map);
+
+    // Add popup with location info
+    const popupContent = `
+        <div style="text-align: right; direction: rtl;">
+            <h3 style="margin: 0 0 10px 0; color: #ef4444;">موقع البحث</h3>
+            <p style="margin: 5px 0;"><strong>العنوان:</strong> ${address || 'غير محدد'}</p>
+        </div>
+    `;
+
+    searchMarker.bindPopup(popupContent).openPopup();
+}
+
 
 // Create custom marker icon with category color and picture
 function createCategoryIcon(category) {
