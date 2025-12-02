@@ -21,16 +21,15 @@ async function loadCategories() {
                 if (hasChildren) {
                     const optgroup = document.createElement('optgroup');
                     optgroup.label = parent.catg_name;
-                    parent.children.forEach(cat => {
-                        const option = document.createElement('option');
-                        option.value = cat.catg_id;
-                        const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
-                        const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
-                        option.textContent = `${emoji} ${cat.catg_name}`;
-                        option.style.color = color;
-                        option.style.fontWeight = 'bold';
-                        optgroup.appendChild(option);
-                    });
+                parent.children.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.catg_id;
+                    const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
+                    option.textContent = cat.catg_name;
+                    option.style.color = color;
+                    option.style.fontWeight = 'bold';
+                    optgroup.appendChild(option);
+                });
                     filterSelect.appendChild(optgroup);
                 }
             });
@@ -53,9 +52,8 @@ async function loadCategories() {
                 children.forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat.catg_id;
-                    const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[cat.catg_name]) || '📍';
                     const color = `rgb(${cat.catg_color_r || 100}, ${cat.catg_color_g || 100}, ${cat.catg_color_b || 100})`;
-                    option.textContent = `${emoji} ${cat.catg_name}`;
+                    option.textContent = cat.catg_name;
                     option.style.color = color;
                     option.style.fontWeight = 'bold';
                     reportCategorySelect.appendChild(option);
@@ -139,7 +137,6 @@ function showReportDetails(report) {
     });
 
     const categoryName = report.category_name || getCategoryName(report.categorie);
-    const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[categoryName]) || '📍';
     const colorR = report.category_color_r || 100;
     const colorG = report.category_color_g || 100;
     const colorB = report.category_color_b || 100;
@@ -159,7 +156,12 @@ function showReportDetails(report) {
                     font-size: 28px;
                     border: 3px solid white;
                     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                ">${emoji}</div>
+                ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>
+                        <circle cx="12" cy="9" r="2" fill="white"></circle>
+                    </svg>
+                </div>
                 <h3 style="margin: 0; color: ${color};">${categoryName}</h3>
             </div>
             <p><strong>الموقع:</strong> ${report.report_address}</p>
@@ -198,9 +200,12 @@ function renderDailyReportsForDate(dateStr) {
         const tr = document.createElement('tr');
         const time = new Date(r.date_and_time).toLocaleTimeString('ar-LB', { hour: '2-digit', minute: '2-digit' });
         const typeName = r.category_name || getCategoryName(r.categorie);
-        const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[typeName]) || '📍';
         const city = extractCity(r.report_address);
-        tr.innerHTML = `<td>${time}</td><td>${emoji} ${typeName}</td><td>${city}</td>`;
+        tr.innerHTML = `<td>${time}</td><td><span style="display:inline-flex;align-items:center;gap:6px;">\
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\
+                <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>\
+                <circle cx="12" cy="9" r="2" fill="currentColor"></circle>\
+            </svg> ${typeName}</span></td><td>${city}</td>`;
         tbody.appendChild(tr);
     });
 }

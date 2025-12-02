@@ -171,7 +171,12 @@ function setupAddressSearch() {
 
         // Show loading state
         const originalBtnText = searchBtn.innerHTML;
-        searchBtn.innerHTML = '<span class="loading">⌛</span>';
+        searchBtn.innerHTML = '<span class="loading" style="display:inline-flex;align-items:center;">\
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">\
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="4" opacity="0.2"></circle>\
+                <path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="currentColor" stroke-width="4"></path>\
+            </svg>\
+        </span>';
         searchBtn.disabled = true;
 
         try {
@@ -284,11 +289,13 @@ function addSearchMarker(latlng, address) {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
             border: 3px solid white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         ">
-            📍
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>
+                <circle cx="12" cy="9" r="2" fill="white"></circle>
+            </svg>
         </div>
     `;
 
@@ -326,7 +333,6 @@ function createCategoryIcon(category) {
     const color = `rgb(${colorR}, ${colorG}, ${colorB})`;
 
     const categoryName = category.catg_name || category.category_name || '';
-    const emoji = (window.CATEGORY_ICONS && window.CATEGORY_ICONS[categoryName]) || '📍';
 
     // Create custom HTML icon
     const iconHtml = `
@@ -338,11 +344,13 @@ function createCategoryIcon(category) {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
             border: 3px solid white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         ">
-            ${emoji}
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>
+                <circle cx="12" cy="9" r="2" fill="white"></circle>
+            </svg>
         </div>
     `;
 

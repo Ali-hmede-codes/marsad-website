@@ -28,7 +28,12 @@
         <div class="container">
             <div class="header-content">
                 <a href="index.html" class="logo">
-                    <span class="logo-icon">🇱🇧</span>
+                    <span class="logo-icon" style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>
+                            <circle cx="12" cy="9" r="2" fill="currentColor"></circle>
+                        </svg>
+                    </span>
                     <span>نظام الإبلاغ عن الخروقات</span>
                 </a>
 
@@ -114,8 +119,12 @@
                         <input type="text" id="reportAddress" class="form-control" required
                             placeholder="ابحث عن موقع أو أدخل العنوان يدوياً">
                         <button type="button" id="searchAddressBtn" class="btn btn-secondary"
-                            style="white-space: nowrap;">
-                            <span>🔍</span> بحث
+                            style="white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            بحث
                         </button>
                     </div>
                 </div>
