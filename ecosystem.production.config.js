@@ -2,7 +2,7 @@ module.exports = {
     apps: [{
         name: 'lebanon-breach-reporting',
         script: 'backend/server.js',
-        cwd: '/var/www/marsad-website',
+        cwd: '.',
         instances: 1,
         autorestart: true,
         watch: false,
