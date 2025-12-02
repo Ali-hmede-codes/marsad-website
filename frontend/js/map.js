@@ -1,6 +1,7 @@
 // Leaflet.js Map Integration with OpenStreetMap
 let map;
 let markers = [];
+let markerLayer = null;
 let selectedLocation = null;
 let searchMarker = null; // Marker for searched location
 
@@ -20,6 +21,8 @@ function initMap() {
         maxZoom: 19,
         minZoom: 7
     }).addTo(map);
+
+    markerLayer = L.layerGroup().addTo(map);
 
     // Add click listener for creating new reports (logged in users only)
     map.on('click', (e) => {
@@ -365,8 +368,8 @@ function createCategoryIcon(category) {
 
 // Update map markers
 function updateMapMarkers(reports) {
-    // Clear existing markers
-    markers.forEach(marker => map.removeLayer(marker));
+    if (!markerLayer) markerLayer = L.layerGroup().addTo(map);
+    markerLayer.clearLayers();
     markers = [];
 
     const cityCounts = {};
@@ -376,7 +379,7 @@ function updateMapMarkers(reports) {
         cityCounts[city] = (cityCounts[city] || 0) + 1;
     });
 
-    // Add new markers
+    const newMarkers = [];
     reports.forEach(report => {
         const position = [parseFloat(report.latitude), parseFloat(report.longitude)];
 
@@ -387,7 +390,7 @@ function updateMapMarkers(reports) {
         const marker = L.marker(position, {
             icon: icon,
             title: report.category_name || 'تقرير'
-        }).addTo(map);
+        });
 
         // Add popup with report info
         const city = (report.report_address || '').split(',')[0].trim();
@@ -422,12 +425,11 @@ function updateMapMarkers(reports) {
         });
 
         markers.push(marker);
+        newMarkers.push(marker);
     });
-
-    // Fit map to show all markers if there are any
-    if (markers.length > 0) {
-        const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1));
+    if (newMarkers.length > 0) {
+        const group = L.featureGroup(newMarkers);
+        markerLayer.addLayer(group);
     }
 }
 
@@ -448,3 +450,38 @@ if (document.readyState === 'loading') {
 window.initMap = initMap;
 window.updateMapMarkers = updateMapMarkers;
 window.openReportModal = openReportModal;
+window.clearMarkers = clearMarkers;
+window.setMapLoading = setMapLoading;
+function clearMarkers() {
+    if (!map) return;
+    if (markerLayer) markerLayer.clearLayers();
+    markers = [];
+}
+
+function setMapLoading(loading) {
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
+    let overlay = document.getElementById('mapLoading');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'mapLoading';
+        overlay.style.position = 'absolute';
+        overlay.style.top = '12px';
+        overlay.style.right = '12px';
+        overlay.style.background = 'rgba(0,0,0,0.6)';
+        overlay.style.color = 'white';
+        overlay.style.padding = '8px 12px';
+        overlay.style.borderRadius = '8px';
+        overlay.style.zIndex = '1000';
+        overlay.style.display = 'none';
+        overlay.style.fontSize = '14px';
+        overlay.style.alignItems = 'center';
+        overlay.style.gap = '8px';
+        overlay.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.display = 'flex';
+        overlay.innerHTML = '<span>جاري التحديث...</span>';
+        mapEl.appendChild(overlay);
+    }
+    overlay.style.display = loading ? 'flex' : 'none';
+}

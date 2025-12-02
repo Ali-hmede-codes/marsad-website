@@ -2,6 +2,21 @@
 let allReports = [];
 let categories = [];
 
+function debounce(fn, delay = 500, immediate = true) {
+    let timeout;
+    return function () {
+        const context = this;
+        const args = arguments;
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(function () {
+            timeout = null;
+            if (!immediate) fn.apply(context, args);
+        }, delay);
+        if (callNow) fn.apply(context, args);
+    };
+}
+
 
 // Load categories
 async function loadCategories() {
@@ -133,12 +148,19 @@ async function loadReports(categoryFilter = '') {
         }
 
         const response = await fetch(url);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || 'فشل تحميل التقارير');
+        }
         const data = await response.json();
-        allReports = data;
+        allReports = Array.isArray(data) ? data : [];
 
-        // Update map markers
         if (window.updateMapMarkers) {
-            window.updateMapMarkers(allReports);
+            try {
+                window.updateMapMarkers(allReports);
+            } catch (e) {
+                if (window.showNotification) window.showNotification('حدث خطأ في عرض العلامات', 'error');
+            }
         }
 
         const dailyInputEl = document.getElementById('dailyDate');
@@ -148,6 +170,11 @@ async function loadReports(categoryFilter = '') {
         return allReports;
     } catch (error) {
         console.error('Error loading reports:', error);
+        if (!navigator.onLine) {
+            if (window.showNotification) window.showNotification('لا يوجد اتصال بالشبكة', 'error');
+        } else {
+            if (window.showNotification) window.showNotification(error.message || 'فشل تحميل التقارير', 'error');
+        }
         return [];
     }
 }
@@ -296,20 +323,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Refresh button
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', async () => {
-            const filter = categoryFilter ? categoryFilter.value : '';
-            await loadReports(filter);
-            if (window.showNotification) window.showNotification('تم تحديث تقارير اليوم', 'info');
-        });
+        refreshBtn.addEventListener('click', debounce(async () => {
+            await refreshTodayReports(false);
+        }, 800, true));
     }
 
     const refreshDailyBtn = document.getElementById('refreshDailyBtn');
     if (refreshDailyBtn) {
-        refreshDailyBtn.addEventListener('click', async () => {
-            const filter = categoryFilter ? categoryFilter.value : '';
-            await loadReports(filter);
-            if (window.showNotification) window.showNotification('تم تحديث تقارير اليوم', 'info');
-        });
+        refreshDailyBtn.addEventListener('click', debounce(async () => {
+            await refreshTodayReports(false);
+        }, 800, true));
     }
 
     // Report form submission
@@ -378,10 +401,7 @@ function scheduleMidnightRefresh() {
     next.setHours(24, 0, 0, 0);
     const ms = next.getTime() - now.getTime();
     setTimeout(async () => {
-        const filterSelect = document.getElementById('categoryFilter');
-        const filter = filterSelect ? filterSelect.value : '';
-        await loadReports(filter);
-        if (window.showNotification) window.showNotification('تم تحديث تقارير اليوم لليوم الجديد', 'info');
+        await refreshTodayReports(true);
         scheduleMidnightRefresh();
     }, ms);
 }
@@ -390,3 +410,40 @@ document.addEventListener('DOMContentLoaded', () => {
     scheduleMidnightRefresh();
 });
 });
+
+async function refreshTodayReports(isMidnight) {
+    const filterSelect = document.getElementById('categoryFilter');
+    const filter = filterSelect ? filterSelect.value : '';
+    const refreshBtn = document.getElementById('refreshBtn');
+    const refreshDailyBtn = document.getElementById('refreshDailyBtn');
+    if (window.setMapLoading) window.setMapLoading(true);
+    if (refreshBtn) {
+        refreshBtn.disabled = true;
+        const t = refreshBtn.innerHTML;
+        refreshBtn.dataset.prev = t;
+        refreshBtn.innerHTML = '<span class="loading" style="display:inline-flex;align-items:center;gap:6px;">\
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\
+                <circle cx="12" cy="12" r="10" opacity="0.2"></circle>\
+                <path d="M12 2a10 10 0 0 1 10 10" />\
+            </svg>\
+            جاري التحديث...\
+        </span>';
+    }
+    if (refreshDailyBtn) {
+        refreshDailyBtn.disabled = true;
+    }
+    try {
+        if (window.clearMarkers) window.clearMarkers();
+        await loadReports(filter);
+        if (window.showNotification) window.showNotification(isMidnight ? 'تم تحديث تقارير اليوم لليوم الجديد' : 'تم تحديث تقارير اليوم', 'info');
+    } catch (e) {
+        if (window.showNotification) window.showNotification('حدث خطأ أثناء التحديث', 'error');
+    } finally {
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+            if (refreshBtn.dataset.prev) refreshBtn.innerHTML = refreshBtn.dataset.prev;
+        }
+        if (refreshDailyBtn) refreshDailyBtn.disabled = false;
+        if (window.setMapLoading) window.setMapLoading(false);
+    }
+}
