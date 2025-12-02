@@ -176,9 +176,22 @@ exports.deleteReport = async (req, res) => {
 // Get all reports
 exports.getAllReports = async (req, res) => {
     try {
-        const [reports] = await db.query(
-            'SELECT * FROM report_details WHERE is_active = TRUE ORDER BY date_and_time DESC'
-        );
+        const { category, limit, today } = req.query;
+        let sql = 'SELECT * FROM report_details WHERE is_active = TRUE';
+        const params = [];
+        if (today === 'true') {
+            sql += ' AND DATE(date_and_time) = CURDATE()';
+        }
+        if (category) {
+            sql += ' AND categorie = ?';
+            params.push(parseInt(category));
+        }
+        sql += ' ORDER BY date_and_time DESC';
+        if (limit) {
+            sql += ' LIMIT ?';
+            params.push(parseInt(limit));
+        }
+        const [reports] = await db.query(sql, params);
 
         res.json(reports);
     } catch (error) {
@@ -204,6 +217,56 @@ exports.getReport = async (req, res) => {
         res.json(reports[0]);
     } catch (error) {
         console.error('Get report error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+exports.getTodayReports = async (req, res) => {
+    try {
+        const { category } = req.query;
+        let sql = 'SELECT * FROM report_details WHERE is_active = TRUE AND DATE(date_and_time) = CURDATE()';
+        const params = [];
+        if (category) {
+            sql += ' AND categorie = ?';
+            params.push(parseInt(category));
+        }
+        sql += ' ORDER BY date_and_time DESC';
+        const [reports] = await db.query(sql, params);
+        res.json(reports);
+    } catch (error) {
+        console.error('Get today reports error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+exports.getTodayReportsByType = async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT categorie AS category_id, category_name, COUNT(*) AS count
+             FROM report_details
+             WHERE is_active = TRUE AND DATE(date_and_time) = CURDATE()
+             GROUP BY categorie, category_name
+             ORDER BY count DESC`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Get today reports by type error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+exports.getTodayReportsByCity = async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            `SELECT TRIM(SUBSTRING_INDEX(report_address, ',', 1)) AS city, COUNT(*) AS count
+             FROM report_details
+             WHERE is_active = TRUE AND DATE(date_and_time) = CURDATE()
+             GROUP BY city
+             ORDER BY count DESC`
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Get today reports by city error:', error);
         res.status(500).json({ error: 'خطأ في الخادم' });
     }
 };

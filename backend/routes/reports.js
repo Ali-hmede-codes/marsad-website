@@ -4,6 +4,9 @@ const reportController = require('../controllers/reportController');
 const { verifyToken, isPublisher } = require('../middleware/auth');
 
 // Public routes
+router.get('/today', reportController.getTodayReports);
+router.get('/today/types', reportController.getTodayReportsByType);
+router.get('/today/cities', reportController.getTodayReportsByCity);
 router.get('/', reportController.getAllReports);
 router.get('/:id', reportController.getReport);
 

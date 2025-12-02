@@ -361,6 +361,13 @@ function updateMapMarkers(reports) {
     markers.forEach(marker => map.removeLayer(marker));
     markers = [];
 
+    const cityCounts = {};
+    reports.forEach(r => {
+        const city = (r.report_address || '').split(',')[0].trim();
+        if (!city) return;
+        cityCounts[city] = (cityCounts[city] || 0) + 1;
+    });
+
     // Add new markers
     reports.forEach(report => {
         const position = [parseFloat(report.latitude), parseFloat(report.longitude)];
@@ -375,6 +382,8 @@ function updateMapMarkers(reports) {
         }).addTo(map);
 
         // Add popup with report info
+        const city = (report.report_address || '').split(',')[0].trim();
+        const count = city ? (cityCounts[city] || 1) : 1;
         const popupContent = `
             <div style="text-align: right; direction: rtl;">
                 <h3 style="margin: 0 0 10px 0; color: rgb(${report.category_color_r || 100}, ${report.category_color_g || 100}, ${report.category_color_b || 100});">
@@ -382,6 +391,7 @@ function updateMapMarkers(reports) {
                 </h3>
                 <p style="margin: 5px 0;"><strong>الموقع:</strong> ${report.report_address || 'غير محدد'}</p>
                 <p style="margin: 5px 0;"><strong>التاريخ:</strong> ${new Date(report.date_and_time).toLocaleString('ar-LB')}</p>
+                <p style="margin: 5px 0;"><strong>عدد تقارير اليوم في هذه المدينة:</strong> ${count}</p>
                 <button onclick="showReportDetails(${report.rep_id})" style="
                     margin-top: 10px;
                     padding: 5px 15px;

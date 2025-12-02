@@ -74,9 +74,9 @@ async function loadCategories() {
 // Load reports
 async function loadReports(categoryFilter = '') {
     try {
-        let url = `${window.API_URL}/reports?limit=500`;
+        let url = `${window.API_URL}/reports/today`;
         if (categoryFilter) {
-            url += `&category=${categoryFilter}`;
+            url += `?category=${categoryFilter}`;
         }
 
         const response = await fetch(url);
@@ -295,5 +295,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === detailsModal) {
             detailsModal.classList.remove('active');
         }
+});
+
+function scheduleMidnightRefresh() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24, 0, 0, 0);
+    const ms = next.getTime() - now.getTime();
+    setTimeout(() => {
+        const filterSelect = document.getElementById('categoryFilter');
+        const filter = filterSelect ? filterSelect.value : '';
+        loadReports(filter);
+        scheduleMidnightRefresh();
+    }, ms);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    scheduleMidnightRefresh();
 });
 });
