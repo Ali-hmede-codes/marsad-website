@@ -64,6 +64,8 @@ function initMap() {
             }
         });
     }
+    // Setup address search in report modal
+    setupAddressSearch();
 }
 
 // Show login prompt for non-authenticated users
@@ -154,6 +156,73 @@ async function openReportModal(latlng) {
     }
 
     modal.style.display = 'block';
+}
+
+// Setup address search in report modal
+function setupAddressSearch() {
+    const addressInput = document.getElementById('reportAddress');
+    const searchBtn = document.getElementById('searchAddressBtn');
+    const latInput = document.getElementById('reportLat');
+    const lngInput = document.getElementById('reportLng');
+
+    if (!addressInput || !searchBtn) return;
+
+    const performSearch = async () => {
+        const query = addressInput.value.trim();
+        if (!query) return;
+
+        // Show loading state
+        const originalBtnText = searchBtn.innerHTML;
+        searchBtn.innerHTML = '<span class="loading">⌛</span>';
+        searchBtn.disabled = true;
+
+        try {
+            if (window.showNotification) showNotification('جاري البحث عن الموقع...', 'info');
+
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1`
+            );
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const result = data[0];
+
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+
+                // Update hidden inputs
+                if (latInput) latInput.value = lat;
+                if (lngInput) lngInput.value = lng;
+
+                // Update global selectedLocation
+                selectedLocation = { lat, lng };
+
+                // Update map view
+                if (map) {
+                    map.setView([lat, lng], 16);
+                }
+
+                if (window.showNotification) showNotification(`تم تحديد الموقع: ${result.display_name}`, 'success');
+            } else {
+                if (window.showNotification) showNotification('لم يتم العثور على الموقع', 'error');
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            if (window.showNotification) showNotification('حدث خطأ أثناء البحث', 'error');
+        } finally {
+            searchBtn.innerHTML = originalBtnText;
+            searchBtn.disabled = false;
+        }
+    };
+
+    searchBtn.addEventListener('click', performSearch);
+
+    addressInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
+            performSearch();
+        }
+    });
 }
 
 // Search for a location by name

@@ -84,7 +84,14 @@
 
                 <div class="form-group">
                     <label for="reportAddress">العنوان *</label>
-                    <input type="text" id="reportAddress" class="form-control" required>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="reportAddress" class="form-control" required
+                            placeholder="ابحث عن موقع أو أدخل العنوان يدوياً">
+                        <button type="button" id="searchAddressBtn" class="btn btn-secondary"
+                            style="white-space: nowrap;">
+                            <span>🔍</span> بحث
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-actions">
