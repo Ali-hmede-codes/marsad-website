@@ -46,8 +46,8 @@ function updateAuthUI() {
     if (isLoggedIn()) {
         const user = getCurrentUser();
         if (userInfo && authButtons && userName) {
-            userInfo.style.display = 'flex';
-            authButtons.style.display = 'none';
+            userInfo.classList.remove('hidden');
+            authButtons.classList.add('hidden');
             userName.textContent = `مرحباً، ${user.name}`;
 
             if (logoutBtn) {
@@ -56,8 +56,8 @@ function updateAuthUI() {
         }
     } else {
         if (userInfo && authButtons) {
-            userInfo.style.display = 'none';
-            authButtons.style.display = 'flex';
+            userInfo.classList.add('hidden');
+            authButtons.classList.remove('hidden');
         }
     }
 }
