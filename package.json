@@ -5,7 +5,14 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:start:prod": "pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop lebanon-breach-reporting",
+    "pm2:restart": "pm2 restart lebanon-breach-reporting",
+    "pm2:delete": "pm2 delete lebanon-breach-reporting",
+    "pm2:logs": "pm2 logs lebanon-breach-reporting",
+    "pm2:monit": "pm2 monit"
   },
   "keywords": [
     "lebanon",
@@ -28,6 +35,7 @@
     "nodemailer": "^7.0.11"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "pm2": "^6.0.14"
   }
 }
