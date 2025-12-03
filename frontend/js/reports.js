@@ -578,20 +578,31 @@ async function refreshTodayReports(isMidnight) {
             locationMode = mode;
             if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
             if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
+            if (autoGroup) autoGroup.style.display = mode === 'auto' ? '' : 'none';
             if (manualGroup) manualGroup.style.display = mode === 'manual' ? '' : 'none';
             const searchBtn = document.getElementById('searchAddressBtn');
+            const latManualEl = document.getElementById('reportLatManual');
+            const lngManualEl = document.getElementById('reportLngManual');
+            const admin = (isAdmin && isAdmin());
             if (addressInput) {
                 addressInput.readOnly = mode === 'manual';
                 addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
+                addressInput.required = mode === 'auto';
             }
             if (searchBtn) {
                 searchBtn.style.display = mode === 'manual' ? 'none' : '';
                 searchBtn.disabled = mode === 'manual';
             }
+            if (latManualEl) latManualEl.required = (mode === 'manual' && admin);
+            if (lngManualEl) lngManualEl.required = (mode === 'manual' && admin);
             syncAddressRequirement();
             if (mode === 'manual') updateFromManualDebounced();
         };
         if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
         if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
+        if (manualBtn && !(isAdmin && isAdmin())) {
+            manualBtn.disabled = true;
+            manualBtn.title = 'للمدراء فقط';
+        }
         setMode('auto');
     }
