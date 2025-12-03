@@ -85,6 +85,7 @@ function initMap() {
     }
 
     const overlay = document.getElementById('mapActivateOverlay');
+    const exitBtn = document.getElementById('mapExitInteractBtn');
     if (overlay && window.innerWidth <= 768) {
         map.dragging.disable();
         map.touchZoom.disable();
@@ -92,11 +93,28 @@ function initMap() {
         map.doubleClickZoom.disable();
         overlay.addEventListener('click', () => {
             overlay.style.display = 'none';
+            if (exitBtn) exitBtn.style.display = 'inline-flex';
             map.dragging.enable();
             map.touchZoom.enable();
             map.scrollWheelZoom.enable();
             map.doubleClickZoom.enable();
+            const center = map.getCenter();
+            if (window.isLoggedIn && window.isLoggedIn() && window.isPublisher && window.isPublisher()) {
+                openReportModal(center);
+            } else {
+                if (window.showNotification) window.showNotification('سجّل الدخول ثم اضغط على الخريطة للإبلاغ', 'info');
+            }
         });
+        if (exitBtn) {
+            exitBtn.addEventListener('click', () => {
+                overlay.style.display = 'flex';
+                exitBtn.style.display = 'none';
+                map.dragging.disable();
+                map.touchZoom.disable();
+                map.scrollWheelZoom.disable();
+                map.doubleClickZoom.disable();
+            });
+        }
     }
 }
 
