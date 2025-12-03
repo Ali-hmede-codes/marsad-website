@@ -4,6 +4,8 @@ let markers = [];
 let markerLayer = null;
 let selectedLocation = null;
 let searchMarker = null; // Marker for searched location
+let interactModeEnabled = true;
+let ignoreNextMapClick = false;
 
 
 // Lebanon center coordinates
@@ -26,6 +28,13 @@ function initMap() {
 
     // Add click listener for creating new reports (logged in users only)
     map.on('click', (e) => {
+        if (ignoreNextMapClick) {
+            ignoreNextMapClick = false;
+            return;
+        }
+        if (window.innerWidth <= 768 && !interactModeEnabled) {
+            return;
+        }
         if (!window.isLoggedIn || !window.isLoggedIn()) {
             showLoginPrompt();
             return;
@@ -93,6 +102,7 @@ function initMap() {
         map.touchZoom.disable();
         map.scrollWheelZoom.disable();
         map.doubleClickZoom.disable();
+        interactModeEnabled = false;
         const activate = () => {
             overlay.style.display = 'none';
             if (exitBtn) exitBtn.style.display = 'inline-flex';
@@ -100,6 +110,9 @@ function initMap() {
             map.touchZoom.enable();
             map.scrollWheelZoom.enable();
             map.doubleClickZoom.enable();
+            interactModeEnabled = true;
+            ignoreNextMapClick = true;
+            setTimeout(() => { ignoreNextMapClick = false; }, 250);
         };
         if (overlayContent) overlayContent.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
         if (exitBtn) {
@@ -110,6 +123,7 @@ function initMap() {
                 map.touchZoom.disable();
                 map.scrollWheelZoom.disable();
                 map.doubleClickZoom.disable();
+                interactModeEnabled = false;
             });
         }
     }
