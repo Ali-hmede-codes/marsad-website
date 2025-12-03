@@ -578,12 +578,12 @@ async function refreshTodayReports(isMidnight) {
             locationMode = mode;
             if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
             if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
-            if (autoGroup) autoGroup.style.display = mode === 'auto' ? '' : 'none';
-            if (manualGroup) manualGroup.style.display = mode === 'manual' ? '' : 'none';
+            const admin = (isAdmin && isAdmin());
+            if (autoGroup) autoGroup.classList.toggle('hidden', mode !== 'auto');
+            if (manualGroup) manualGroup.classList.toggle('hidden', !(mode === 'manual' && admin));
             const searchBtn = document.getElementById('searchAddressBtn');
             const latManualEl = document.getElementById('reportLatManual');
             const lngManualEl = document.getElementById('reportLngManual');
-            const admin = (isAdmin && isAdmin());
             if (addressInput) {
                 addressInput.readOnly = mode === 'manual';
                 addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
