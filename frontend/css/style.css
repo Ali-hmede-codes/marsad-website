@@ -575,8 +575,7 @@ body {
     justify-content: center;
     background: rgba(0, 0, 0, 0.35);
     z-index: 2;
-    pointer-events: auto;
-    cursor: pointer;
+    pointer-events: none;
 }
 .map-activate-content {
     display: inline-flex;
@@ -588,6 +587,7 @@ body {
     border-radius: 10px;
     box-shadow: var(--shadow-md);
     font-weight: 600;
+    pointer-events: auto;
     cursor: pointer;
 }
 @media (min-width: 769px) {

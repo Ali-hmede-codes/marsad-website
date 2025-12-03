@@ -93,8 +93,14 @@ function initMap() {
         map.touchZoom.disable();
         map.scrollWheelZoom.disable();
         map.doubleClickZoom.disable();
-        const activate = () => {};
-        overlay.addEventListener('click', activate);
+        const activate = () => {
+            overlay.style.display = 'none';
+            if (exitBtn) exitBtn.style.display = 'inline-flex';
+            map.dragging.enable();
+            map.touchZoom.enable();
+            map.scrollWheelZoom.enable();
+            map.doubleClickZoom.enable();
+        };
         if (overlayContent) overlayContent.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
         if (exitBtn) {
             exitBtn.addEventListener('click', () => {
