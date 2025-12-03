@@ -313,6 +313,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReports();
 
     const manualGroup = document.getElementById('manualLocationGroup');
+    const addressInput = document.getElementById('reportAddress');
+    const latManualElInit = document.getElementById('reportLatManual');
+    const lngManualElInit = document.getElementById('reportLngManual');
     if (manualGroup) {
         if (isAdmin && isAdmin()) {
             manualGroup.classList.remove('hidden');
@@ -320,6 +323,17 @@ document.addEventListener('DOMContentLoaded', () => {
             manualGroup.classList.add('hidden');
         }
     }
+
+    function syncAddressRequirement() {
+        if (!addressInput) return;
+        const latEl = document.getElementById('reportLatManual');
+        const lngEl = document.getElementById('reportLngManual');
+        const manualActive = (isAdmin && isAdmin()) && latEl && lngEl && latEl.value && lngEl.value;
+        addressInput.required = !manualActive;
+    }
+    if (latManualElInit) latManualElInit.addEventListener('input', syncAddressRequirement);
+    if (lngManualElInit) lngManualElInit.addEventListener('input', syncAddressRequirement);
+    syncAddressRequirement();
 
     // Category filter
     const categoryFilter = document.getElementById('categoryFilter');
