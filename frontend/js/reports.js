@@ -554,9 +554,13 @@ async function refreshTodayReports(isMidnight) {
                     return;
                 }
             }
-            const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            const city = extractCity(name);
-            if (addressInput) addressInput.value = city || name;
+            const addr = data && data.address ? data.address : {};
+            let city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || addr.county || '';
+            if (!city) {
+                const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                city = extractCity(name);
+            }
+            if (addressInput) addressInput.value = city || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         } catch (e) {}
     }, 600, true);
 
@@ -574,9 +578,18 @@ async function refreshTodayReports(isMidnight) {
             locationMode = mode;
             if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
             if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
-            if (autoGroup) autoGroup.style.display = mode === 'auto' ? '' : 'none';
             if (manualGroup) manualGroup.style.display = mode === 'manual' ? '' : 'none';
+            const searchBtn = document.getElementById('searchAddressBtn');
+            if (addressInput) {
+                addressInput.readOnly = mode === 'manual';
+                addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
+            }
+            if (searchBtn) {
+                searchBtn.style.display = mode === 'manual' ? 'none' : '';
+                searchBtn.disabled = mode === 'manual';
+            }
             syncAddressRequirement();
+            if (mode === 'manual') updateFromManualDebounced();
         };
         if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
         if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
