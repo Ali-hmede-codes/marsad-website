@@ -182,7 +182,7 @@ async function loadReports(categoryFilter = '') {
 // Create new report
 async function createReport(reportData) {
     try {
-        const response = await window.fetchWithAuth(`${window.API_URL}/reports`, {
+        const response = await fetchWithAuth(`${window.API_URL}/reports`, {
             method: 'POST',
             body: JSON.stringify(reportData)
         });
@@ -228,10 +228,6 @@ function showReportDetails(report) {
     const colorB = report.category_color_b || 100;
     const color = `rgb(${colorR}, ${colorG}, ${colorB})`;
 
-    const latNum = typeof report.latitude === 'number' ? report.latitude : parseFloat(report.latitude);
-    const lngNum = typeof report.longitude === 'number' ? report.longitude : parseFloat(report.longitude);
-    const coordsText = (!isNaN(latNum) && !isNaN(lngNum)) ? `${latNum.toFixed(6)}, ${lngNum.toFixed(6)}` : 'غير متوفر';
-
     detailsDiv.innerHTML = `
         <div class="report-detail">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
@@ -256,7 +252,7 @@ function showReportDetails(report) {
             </div>
             <p><strong>الموقع:</strong> ${report.report_address}</p>
             <p><strong>التاريخ والوقت:</strong> ${formattedDate}</p>
-            <p><strong>الإحداثيات:</strong> ${coordsText}</p>
+            <p><strong>الإحداثيات:</strong> ${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}</p>
             ${report.reporter_name ? `<p><strong>المبلغ:</strong> ${report.reporter_name}</p>` : ''}
         </div>
     `;
@@ -329,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!addressInput) return;
         const latEl = document.getElementById('reportLatManual');
         const lngEl = document.getElementById('reportLngManual');
-        const manualActive = locationMode === 'manual' && (window.isAdmin && window.isAdmin()) && latEl && lngEl && latEl.value && lngEl.value;
+        const manualActive = locationMode === 'manual' && (isAdmin && isAdmin()) && latEl && lngEl && latEl.value && lngEl.value;
         addressInput.required = !manualActive;
     }
     if (latManualElInit) latManualElInit.addEventListener('input', syncAddressRequirement);
@@ -367,8 +363,8 @@ document.addEventListener('DOMContentLoaded', () => {
         reportForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            if (!window.isPublisher || !window.isPublisher()) {
-                if (window.showNotification) window.showNotification('يجب أن تكون ناشراً لإنشاء تقرير', 'error');
+            if (!isPublisher()) {
+                showNotification('يجب أن تكون ناشراً لإنشاء تقرير', 'error');
                 return;
             }
 
@@ -384,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const latM = parseDMS(latManualEl.value, false);
                 const lngM = parseDMS(lngManualEl.value, true);
                 if (latM == null || lngM == null) {
-                    if (window.showNotification) window.showNotification('صيغة الإحداثيات غير صحيحة', 'error');
+                    showNotification('صيغة الإحداثيات غير صحيحة', 'error');
                     return;
                 }
                 latitude = latM;
@@ -403,12 +399,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await createReport(reportData);
 
             if (result.success) {
-                if (window.showNotification) window.showNotification('تم إنشاء التقرير بنجاح', 'success');
+                showNotification('تم إنشاء التقرير بنجاح', 'success');
                 document.getElementById('reportModal').classList.remove('active');
                 reportForm.reset();
                 loadReports();
             } else {
-                if (window.showNotification) window.showNotification(result.error || 'حدث خطأ في إنشاء التقرير', 'error');
+                showNotification(result.error || 'حدث خطأ في إنشاء التقرير', 'error');
             }
         });
     }
@@ -571,14 +567,14 @@ async function refreshTodayReports(isMidnight) {
         const autoBtn = tabs.querySelector('[data-mode="auto"]');
         const manualBtn = tabs.querySelector('[data-mode="manual"]');
         const setMode = (mode) => {
-            if (mode === 'manual' && !(window.isAdmin && window.isAdmin())) {
+            if (mode === 'manual' && !(isAdmin && isAdmin())) {
                 if (window.showNotification) window.showNotification('الوضع اليدوي للمدراء فقط', 'error');
                 return;
             }
             locationMode = mode;
             if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
             if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
-            const admin = (window.isAdmin && window.isAdmin());
+            const admin = (isAdmin && isAdmin());
             if (autoGroup) autoGroup.classList.toggle('hidden', mode !== 'auto');
             if (manualGroup) manualGroup.classList.toggle('hidden', !(mode === 'manual' && admin));
             const searchBtn = document.getElementById('searchAddressBtn');
@@ -611,7 +607,7 @@ async function refreshTodayReports(isMidnight) {
                 setMode(mode === 'manual' ? 'manual' : 'auto');
             });
         }
-        if (manualBtn && !(window.isAdmin && window.isAdmin())) {
+        if (manualBtn && !(isAdmin && isAdmin())) {
             manualBtn.disabled = true;
             manualBtn.title = 'للمدراء فقط';
         }
