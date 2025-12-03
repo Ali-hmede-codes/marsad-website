@@ -328,8 +328,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const manualActive = locationMode === 'manual' && (isAdmin && isAdmin()) && latEl && lngEl && latEl.value && lngEl.value;
         addressInput.required = !manualActive;
     }
-    if (latManualElInit) latManualElInit.addEventListener('input', syncAddressRequirement);
-    if (lngManualElInit) lngManualElInit.addEventListener('input', syncAddressRequirement);
+    const updateFromManualDebounced = debounce(async () => {
+        const latStr = latManualElInit ? latManualElInit.value : '';
+        const lngStr = lngManualElInit ? lngManualElInit.value : '';
+        if (!latStr || !lngStr) return;
+        const lat = parseDMS(latStr, false);
+        const lng = parseDMS(lngStr, true);
+        if (lat == null || lng == null) return;
+        const latHiddenEl = document.getElementById('reportLat');
+        const lngHiddenEl = document.getElementById('reportLng');
+        if (latHiddenEl) latHiddenEl.value = lat;
+        if (lngHiddenEl) lngHiddenEl.value = lng;
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`);
+            const data = await response.json();
+            if (data && data.address) {
+                const country = data.address.country_code;
+                if (country && country.toLowerCase() !== 'lb') {
+                    if (window.showNotification) window.showNotification('يمكن تحديد مواقع داخل لبنان فقط', 'error');
+                    return;
+                }
+            }
+            const addr = data && data.address ? data.address : {};
+            let city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || addr.county || '';
+            if (!city) {
+                const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                city = extractCity(name);
+            }
+            if (addressInput) addressInput.value = city || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        } catch (e) {}
+    }, 600, true);
+
+    if (latManualElInit) latManualElInit.addEventListener('input', () => { syncAddressRequirement(); if (locationMode === 'manual') updateFromManualDebounced(); });
+    if (lngManualElInit) lngManualElInit.addEventListener('input', () => { syncAddressRequirement(); if (locationMode === 'manual') updateFromManualDebounced(); });
     syncAddressRequirement();
 
     
@@ -426,32 +457,84 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-        const reportModal = document.getElementById('reportModal');
-        const detailsModal = document.getElementById('detailsModal');
+        window.addEventListener('click', (e) => {
+            const reportModal = document.getElementById('reportModal');
+            const detailsModal = document.getElementById('detailsModal');
 
-        if (e.target === reportModal) {
-            reportModal.classList.remove('active');
-        }
-        if (e.target === detailsModal) {
-            detailsModal.classList.remove('active');
-        }
-});
+            if (e.target === reportModal) {
+                reportModal.classList.remove('active');
+            }
+            if (e.target === detailsModal) {
+                detailsModal.classList.remove('active');
+            }
+        });
 
-function scheduleMidnightRefresh() {
-    const now = new Date();
-    const next = new Date(now);
-    next.setHours(24, 0, 0, 0);
-    const ms = next.getTime() - now.getTime();
-    setTimeout(async () => {
-        await refreshTodayReports(true);
+    function scheduleMidnightRefresh() {
+        const now = new Date();
+        const next = new Date(now);
+        next.setHours(24, 0, 0, 0);
+        const ms = next.getTime() - now.getTime();
+        setTimeout(async () => {
+            await refreshTodayReports(true);
+            scheduleMidnightRefresh();
+        }, ms);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
         scheduleMidnightRefresh();
-    }, ms);
-}
+    });
 
-document.addEventListener('DOMContentLoaded', () => {
-    scheduleMidnightRefresh();
-});
+    if (tabs) {
+        const autoBtn = tabs.querySelector('[data-mode="auto"]');
+        const manualBtn = tabs.querySelector('[data-mode="manual"]');
+        const setMode = (mode) => {
+            if (mode === 'manual' && !(isAdmin && isAdmin())) {
+                if (window.showNotification) window.showNotification('الوضع اليدوي للمدراء فقط', 'error');
+                return;
+            }
+            locationMode = mode;
+            if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
+            if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
+            const admin = (isAdmin && isAdmin());
+            if (autoGroup) autoGroup.classList.toggle('hidden', mode !== 'auto');
+            if (manualGroup) manualGroup.classList.toggle('hidden', !(mode === 'manual' && admin));
+            const searchBtn = document.getElementById('searchAddressBtn');
+            const latManualEl = document.getElementById('reportLatManual');
+            const lngManualEl = document.getElementById('reportLngManual');
+            if (addressInput) {
+                addressInput.readOnly = mode === 'manual';
+                addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
+                addressInput.required = mode === 'auto';
+                if (mode === 'manual' && addressInput.value) {
+                    addressInput.value = extractCity(addressInput.value);
+                }
+            }
+            if (searchBtn) {
+                searchBtn.style.display = mode === 'manual' ? 'none' : '';
+                searchBtn.disabled = mode === 'manual';
+            }
+            if (latManualEl) latManualEl.required = (mode === 'manual' && admin);
+            if (lngManualEl) lngManualEl.required = (mode === 'manual' && admin);
+            syncAddressRequirement();
+            if (mode === 'manual') updateFromManualDebounced();
+        };
+        if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
+        if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
+        if (tabs) {
+            tabs.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-mode]');
+                if (!btn) return;
+                const mode = btn.getAttribute('data-mode');
+                setMode(mode === 'manual' ? 'manual' : 'auto');
+            });
+        }
+        if (manualBtn && !(isAdmin && isAdmin())) {
+            manualBtn.disabled = true;
+            manualBtn.title = 'للمدراء فقط';
+        }
+        setMode('auto');
+        window.setReportLocationMode = setMode;
+    }
 });
 
 async function refreshTodayReports(isMidnight) {
@@ -529,88 +612,3 @@ async function refreshTodayReports(isMidnight) {
         return signed;
     }
 
-    const updateFromManualDebounced = debounce(async () => {
-        const latStr = latManualElInit ? latManualElInit.value : '';
-        const lngStr = lngManualElInit ? lngManualElInit.value : '';
-        if (!latStr || !lngStr) return;
-        const lat = parseDMS(latStr, false);
-        const lng = parseDMS(lngStr, true);
-        if (lat == null || lng == null) return;
-        const latHiddenEl = document.getElementById('reportLat');
-        const lngHiddenEl = document.getElementById('reportLng');
-        if (latHiddenEl) latHiddenEl.value = lat;
-        if (lngHiddenEl) lngHiddenEl.value = lng;
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`);
-            const data = await response.json();
-            if (data && data.address) {
-                const country = data.address.country_code;
-                if (country && country.toLowerCase() !== 'lb') {
-                    if (window.showNotification) window.showNotification('يمكن تحديد مواقع داخل لبنان فقط', 'error');
-                    return;
-                }
-            }
-            const addr = data && data.address ? data.address : {};
-            let city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || addr.county || '';
-            if (!city) {
-                const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                city = extractCity(name);
-            }
-            if (addressInput) addressInput.value = city || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-        } catch (e) {}
-    }, 600, true);
-
-    if (latManualElInit) latManualElInit.addEventListener('input', () => { syncAddressRequirement(); if (locationMode === 'manual') updateFromManualDebounced(); });
-    if (lngManualElInit) lngManualElInit.addEventListener('input', () => { syncAddressRequirement(); if (locationMode === 'manual') updateFromManualDebounced(); });
-
-    if (tabs) {
-        const autoBtn = tabs.querySelector('[data-mode="auto"]');
-        const manualBtn = tabs.querySelector('[data-mode="manual"]');
-        const setMode = (mode) => {
-            if (mode === 'manual' && !(isAdmin && isAdmin())) {
-                if (window.showNotification) window.showNotification('الوضع اليدوي للمدراء فقط', 'error');
-                return;
-            }
-            locationMode = mode;
-            if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
-            if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
-            const admin = (isAdmin && isAdmin());
-            if (autoGroup) autoGroup.classList.toggle('hidden', mode !== 'auto');
-            if (manualGroup) manualGroup.classList.toggle('hidden', !(mode === 'manual' && admin));
-            const searchBtn = document.getElementById('searchAddressBtn');
-            const latManualEl = document.getElementById('reportLatManual');
-            const lngManualEl = document.getElementById('reportLngManual');
-            if (addressInput) {
-                addressInput.readOnly = mode === 'manual';
-                addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
-                addressInput.required = mode === 'auto';
-                if (mode === 'manual' && addressInput.value) {
-                    addressInput.value = extractCity(addressInput.value);
-                }
-            }
-            if (searchBtn) {
-                searchBtn.style.display = mode === 'manual' ? 'none' : '';
-                searchBtn.disabled = mode === 'manual';
-            }
-            if (latManualEl) latManualEl.required = (mode === 'manual' && admin);
-            if (lngManualEl) lngManualEl.required = (mode === 'manual' && admin);
-            syncAddressRequirement();
-            if (mode === 'manual') updateFromManualDebounced();
-        };
-        if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
-        if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
-        if (tabs) {
-            tabs.addEventListener('click', (e) => {
-                const btn = e.target.closest('button[data-mode]');
-                if (!btn) return;
-                const mode = btn.getAttribute('data-mode');
-                setMode(mode === 'manual' ? 'manual' : 'auto');
-            });
-        }
-        if (manualBtn && !(isAdmin && isAdmin())) {
-            manualBtn.disabled = true;
-            manualBtn.title = 'للمدراء فقط';
-        }
-        setMode('auto');
-        window.setReportLocationMode = setMode;
-    }
