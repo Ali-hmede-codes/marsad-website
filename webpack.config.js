@@ -39,6 +39,6 @@ module.exports = {
             splitStrings: true,
             splitStringsChunkLength: 5,
             unicodeEscapeSequence: false
-        }, ['config.min.js']) // Don't obfuscate config.js too heavily
+        }, ['config.min.js', 'reports.min.js'])
     ]
 };
