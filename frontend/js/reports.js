@@ -319,13 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const autoGroup = document.getElementById('autoLocationGroup');
     const tabs = document.getElementById('locationModeTabs');
     let locationMode = 'auto';
-    if (manualGroup) {
-        if (isAdmin && isAdmin()) {
-            manualGroup.classList.remove('hidden');
-        } else {
-            manualGroup.classList.add('hidden');
-        }
-    }
+    // اترك إظهار/إخفاء الحقول لمدير التبويبات فقط
 
     function syncAddressRequirement() {
         if (!addressInput) return;
@@ -588,6 +582,9 @@ async function refreshTodayReports(isMidnight) {
                 addressInput.readOnly = mode === 'manual';
                 addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
                 addressInput.required = mode === 'auto';
+                if (mode === 'manual' && addressInput.value) {
+                    addressInput.value = extractCity(addressInput.value);
+                }
             }
             if (searchBtn) {
                 searchBtn.style.display = mode === 'manual' ? 'none' : '';
@@ -600,9 +597,18 @@ async function refreshTodayReports(isMidnight) {
         };
         if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
         if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
+        if (tabs) {
+            tabs.addEventListener('click', (e) => {
+                const btn = e.target.closest('button[data-mode]');
+                if (!btn) return;
+                const mode = btn.getAttribute('data-mode');
+                setMode(mode === 'manual' ? 'manual' : 'auto');
+            });
+        }
         if (manualBtn && !(isAdmin && isAdmin())) {
             manualBtn.disabled = true;
             manualBtn.title = 'للمدراء فقط';
         }
         setMode('auto');
+        window.setReportLocationMode = setMode;
     }
