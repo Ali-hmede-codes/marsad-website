@@ -85,13 +85,14 @@ function initMap() {
     }
 
     const overlay = document.getElementById('mapActivateOverlay');
+    const overlayContent = overlay ? overlay.querySelector('.map-activate-content') : null;
     const exitBtn = document.getElementById('mapExitInteractBtn');
     if (overlay && window.innerWidth <= 768) {
         map.dragging.disable();
         map.touchZoom.disable();
         map.scrollWheelZoom.disable();
         map.doubleClickZoom.disable();
-        overlay.addEventListener('click', () => {
+        const activate = () => {
             overlay.style.display = 'none';
             if (exitBtn) exitBtn.style.display = 'inline-flex';
             map.dragging.enable();
@@ -104,7 +105,9 @@ function initMap() {
             } else {
                 if (window.showNotification) window.showNotification('سجّل الدخول ثم اضغط على الخريطة للإبلاغ', 'info');
             }
-        });
+        };
+        overlay.addEventListener('click', activate);
+        if (overlayContent) overlayContent.addEventListener('click', activate);
         if (exitBtn) {
             exitBtn.addEventListener('click', () => {
                 overlay.style.display = 'flex';
