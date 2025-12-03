@@ -332,6 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lngManualElInit) lngManualElInit.addEventListener('input', syncAddressRequirement);
     syncAddressRequirement();
 
+    
+
     // Category filter
     const categoryFilter = document.getElementById('categoryFilter');
     if (categoryFilter) {
