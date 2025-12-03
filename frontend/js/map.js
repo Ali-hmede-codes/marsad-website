@@ -70,7 +70,8 @@ function initMap() {
 
     const reportBtn = document.getElementById('mapReportBtn');
     if (reportBtn) {
-        reportBtn.addEventListener('click', () => {
+        reportBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             if (!window.isLoggedIn || !window.isLoggedIn()) {
                 showLoginPrompt();
                 return;
@@ -107,7 +108,7 @@ function initMap() {
             }
         };
         overlay.addEventListener('click', activate);
-        if (overlayContent) overlayContent.addEventListener('click', activate);
+        if (overlayContent) overlayContent.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
         if (exitBtn) {
             exitBtn.addEventListener('click', () => {
                 overlay.style.display = 'flex';
