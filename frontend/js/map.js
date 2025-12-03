@@ -93,20 +93,7 @@ function initMap() {
         map.touchZoom.disable();
         map.scrollWheelZoom.disable();
         map.doubleClickZoom.disable();
-        const activate = () => {
-            overlay.style.display = 'none';
-            if (exitBtn) exitBtn.style.display = 'inline-flex';
-            map.dragging.enable();
-            map.touchZoom.enable();
-            map.scrollWheelZoom.enable();
-            map.doubleClickZoom.enable();
-            const center = map.getCenter();
-            if (window.isLoggedIn && window.isLoggedIn() && window.isPublisher && window.isPublisher()) {
-                openReportModal(center);
-            } else {
-                if (window.showNotification) window.showNotification('سجّل الدخول ثم اضغط على الخريطة للإبلاغ', 'info');
-            }
-        };
+        const activate = () => {};
         overlay.addEventListener('click', activate);
         if (overlayContent) overlayContent.addEventListener('click', (e) => { e.stopPropagation(); activate(); });
         if (exitBtn) {
