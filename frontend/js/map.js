@@ -449,22 +449,13 @@ function updateMapMarkers(reports) {
         const city = (report.report_address || '').split(',')[0].trim();
         const count = city ? (cityCounts[city] || 1) : 1;
         const popupContent = `
-            <div style="text-align: right; direction: rtl;">
-                <h3 style="margin: 0 0 10px 0; color: rgb(${report.category_color_r || 100}, ${report.category_color_g || 100}, ${report.category_color_b || 100});">
+            <div style="text-align: right; direction: rtl; font-family: var(--font-sans); line-height: 1.7; font-size: 0.95rem;">
+                <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; font-weight: 700; color: rgb(${report.category_color_r || 100}, ${report.category_color_g || 100}, ${report.category_color_b || 100});">
                     ${report.category_name || 'تقرير'}
                 </h3>
-                <p style="margin: 5px 0;"><strong>الموقع:</strong> ${report.report_address || 'غير محدد'}</p>
-                <p style="margin: 5px 0;"><strong>التاريخ:</strong> ${new Date(report.date_and_time).toLocaleString('ar-LB')}</p>
-                <p style="margin: 5px 0;"><strong>عدد تقارير اليوم في هذه المدينة:</strong> ${count}</p>
-                <button onclick="showReportDetails(${report.rep_id})" style="
-                    margin-top: 10px;
-                    padding: 5px 15px;
-                    background-color: #3b82f6;
-                    color: white;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                ">عرض التفاصيل</button>
+                <p style="margin: 4px 0;"><strong>الموقع:</strong> ${report.report_address || 'غير محدد'}</p>
+                <p style="margin: 4px 0;"><strong>التاريخ:</strong> ${new Date(report.date_and_time).toLocaleString('ar-LB')}</p>
+                <p style="margin: 4px 0; font-weight: 600;"><strong>عدد التقارير :</strong> ${count}</p>
             </div>
         `;
 
