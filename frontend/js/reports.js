@@ -312,6 +312,15 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCategories();
     loadReports();
 
+    const manualGroup = document.getElementById('manualLocationGroup');
+    if (manualGroup) {
+        if (isAdmin && isAdmin()) {
+            manualGroup.classList.remove('hidden');
+        } else {
+            manualGroup.classList.add('hidden');
+        }
+    }
+
     // Category filter
     const categoryFilter = document.getElementById('categoryFilter');
     if (categoryFilter) {
@@ -346,11 +355,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const latHiddenEl = document.getElementById('reportLat');
+            const lngHiddenEl = document.getElementById('reportLng');
+            const latManualEl = document.getElementById('reportLatManual');
+            const lngManualEl = document.getElementById('reportLngManual');
+            let latitude = latHiddenEl ? latHiddenEl.value : '';
+            let longitude = lngHiddenEl ? lngHiddenEl.value : '';
+            let isManual = false;
+
+            if (isAdmin && isAdmin() && latManualEl && lngManualEl && latManualEl.value && lngManualEl.value) {
+                const latM = parseFloat(latManualEl.value);
+                const lngM = parseFloat(lngManualEl.value);
+                if (isNaN(latM) || isNaN(lngM) || latM < -90 || latM > 90 || lngM < -180 || lngM > 180) {
+                    showNotification('إحداثيات غير صالحة', 'error');
+                    return;
+                }
+                latitude = latM;
+                longitude = lngM;
+                isManual = true;
+            }
+
             const reportData = {
-                latitude: document.getElementById('reportLat').value,
-                longitude: document.getElementById('reportLng').value,
+                latitude,
+                longitude,
                 category: document.getElementById('reportCategory').value,
-                report_address: document.getElementById('reportAddress').value
+                report_address: document.getElementById('reportAddress').value,
+                is_manual_location: isManual
             };
 
             const result = await createReport(reportData);

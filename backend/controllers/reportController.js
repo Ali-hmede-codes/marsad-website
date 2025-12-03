@@ -7,7 +7,11 @@ const { getAddressFromCoordinates } = require('../utils/geocoding');
 // Create new report
 exports.createReport = async (req, res) => {
     try {
-        const { latitude, longitude, category, report_address } = req.body;
+        const { latitude, longitude, category, report_address, is_manual_location } = req.body;
+
+        if (is_manual_location && !req.user.is_admin) {
+            return res.status(403).json({ error: 'الإحداثيات اليدوية متاحة للمدراء فقط' });
+        }
 
         // Validate required fields
         if (!latitude || !longitude || !category) {
