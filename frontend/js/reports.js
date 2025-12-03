@@ -316,6 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addressInput = document.getElementById('reportAddress');
     const latManualElInit = document.getElementById('reportLatManual');
     const lngManualElInit = document.getElementById('reportLngManual');
+    const autoGroup = document.getElementById('autoLocationGroup');
+    const tabs = document.getElementById('locationModeTabs');
+    let locationMode = 'auto';
     if (manualGroup) {
         if (isAdmin && isAdmin()) {
             manualGroup.classList.remove('hidden');
@@ -328,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!addressInput) return;
         const latEl = document.getElementById('reportLatManual');
         const lngEl = document.getElementById('reportLngManual');
-        const manualActive = (isAdmin && isAdmin()) && latEl && lngEl && latEl.value && lngEl.value;
+        const manualActive = locationMode === 'manual' && (isAdmin && isAdmin()) && latEl && lngEl && latEl.value && lngEl.value;
         addressInput.required = !manualActive;
     }
     if (latManualElInit) latManualElInit.addEventListener('input', syncAddressRequirement);
@@ -377,11 +380,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let longitude = lngHiddenEl ? lngHiddenEl.value : '';
             let isManual = false;
 
-            if (isAdmin && isAdmin() && latManualEl && lngManualEl && latManualEl.value && lngManualEl.value) {
-                const latM = parseFloat(latManualEl.value);
-                const lngM = parseFloat(lngManualEl.value);
-                if (isNaN(latM) || isNaN(lngM) || latM < -90 || latM > 90 || lngM < -180 || lngM > 180) {
-                    showNotification('إحداثيات غير صالحة', 'error');
+            if (locationMode === 'manual' && (isAdmin && isAdmin()) && latManualEl && lngManualEl && latManualEl.value && lngManualEl.value) {
+                const latM = parseDMS(latManualEl.value, false);
+                const lngM = parseDMS(lngManualEl.value, true);
+                if (latM == null || lngM == null) {
+                    showNotification('صيغة الإحداثيات غير صحيحة', 'error');
                     return;
                 }
                 latitude = latM;
@@ -491,3 +494,91 @@ async function refreshTodayReports(isMidnight) {
         if (window.setMapLoading) window.setMapLoading(false);
     }
 }
+    function parseDMS(input, isLongitude) {
+        if (!input) return null;
+        const s = String(input).trim().replace(/\s+/g, ' ');
+        let dir = 1;
+        const dirm = s.match(/[NSEW]/i);
+        if (dirm) {
+            const ch = dirm[0].toUpperCase();
+            if (ch === 'S' || ch === 'W') dir = -1;
+        }
+        const parts = s
+            .replace(/°/g, ' ')
+            .replace(/'/g, ' ')
+            .replace(/"/g, ' ')
+            .trim()
+            .split(' ')
+            .filter(Boolean);
+        let deg = 0, min = 0, sec = 0;
+        if (parts.length === 1) {
+            const val = parseFloat(parts[0]);
+            if (isNaN(val)) return null;
+            return val * dir;
+        }
+        if (parts.length === 2) {
+            deg = parseFloat(parts[0]);
+            min = parseFloat(parts[1]);
+            if (isNaN(deg) || isNaN(min)) return null;
+        } else {
+            deg = parseFloat(parts[0]);
+            min = parseFloat(parts[1]);
+            sec = parseFloat(parts[2]);
+            if (isNaN(deg) || isNaN(min) || isNaN(sec)) return null;
+        }
+        const dec = Math.abs(deg) + (Math.abs(min) / 60) + (Math.abs(sec) / 3600);
+        const signed = dec * (deg < 0 ? -1 : 1) * dir;
+        if (isLongitude && Math.abs(signed) > 180) return null;
+        if (!isLongitude && Math.abs(signed) > 90) return null;
+        return signed;
+    }
+
+    const updateFromManualDebounced = debounce(async () => {
+        const latStr = latManualElInit ? latManualElInit.value : '';
+        const lngStr = lngManualElInit ? lngManualElInit.value : '';
+        if (!latStr || !lngStr) return;
+        const lat = parseDMS(latStr, false);
+        const lng = parseDMS(lngStr, true);
+        if (lat == null || lng == null) return;
+        const latHiddenEl = document.getElementById('reportLat');
+        const lngHiddenEl = document.getElementById('reportLng');
+        if (latHiddenEl) latHiddenEl.value = lat;
+        if (lngHiddenEl) lngHiddenEl.value = lng;
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`);
+            const data = await response.json();
+            if (data && data.address) {
+                const country = data.address.country_code;
+                if (country && country.toLowerCase() !== 'lb') {
+                    if (window.showNotification) window.showNotification('يمكن تحديد مواقع داخل لبنان فقط', 'error');
+                    return;
+                }
+            }
+            const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            const city = extractCity(name);
+            if (addressInput) addressInput.value = city || name;
+        } catch (e) {}
+    }, 600, true);
+
+    if (latManualElInit) latManualElInit.addEventListener('input', () => { syncAddressRequirement(); if (locationMode === 'manual') updateFromManualDebounced(); });
+    if (lngManualElInit) lngManualElInit.addEventListener('input', () => { syncAddressRequirement(); if (locationMode === 'manual') updateFromManualDebounced(); });
+
+    if (tabs) {
+        const autoBtn = tabs.querySelector('[data-mode="auto"]');
+        const manualBtn = tabs.querySelector('[data-mode="manual"]');
+        const setMode = (mode) => {
+            if (mode === 'manual' && !(isAdmin && isAdmin())) {
+                if (window.showNotification) window.showNotification('الوضع اليدوي للمدراء فقط', 'error');
+                return;
+            }
+            locationMode = mode;
+            if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
+            if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
+            if (autoGroup) autoGroup.style.display = mode === 'auto' ? '' : 'none';
+            if (manualGroup) manualGroup.style.display = mode === 'manual' ? '' : 'none';
+            syncAddressRequirement();
+        };
+        if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
+        if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
+        setMode('auto');
+    }

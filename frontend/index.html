@@ -109,6 +109,11 @@
                 <input type="hidden" id="reportLat">
                 <input type="hidden" id="reportLng">
 
+                <div id="locationModeTabs" class="button-group" style="display:flex;gap:8px;margin-bottom:12px;">
+                    <button type="button" data-mode="auto" class="btn btn-secondary btn-sm active">تلقائي</button>
+                    <button type="button" data-mode="manual" class="btn btn-secondary btn-sm">يدوي</button>
+                </div>
+
                 <div class="form-group">
                     <label for="reportMainCategory">الفئة الرئيسية</label>
                     <select id="reportMainCategory" class="form-control">
@@ -126,13 +131,13 @@
                 <div id="manualLocationGroup" class="form-group hidden">
                     <label>الإحداثيات اليدوية (للمدراء فقط)</label>
                     <div style="display: flex; gap: 10px;">
-                        <input type="number" id="reportLatManual" class="form-control" placeholder="خط العرض (N)" step="0.000001" min="-90" max="90">
-                        <input type="number" id="reportLngManual" class="form-control" placeholder="خط الطول (E)" step="0.000001" min="-180" max="180">
+                        <input type="text" id="reportLatManual" class="form-control" placeholder="خط العرض (N)">
+                        <input type="text" id="reportLngManual" class="form-control" placeholder="خط الطول (E)">
                     </div>
                     <small class="text-muted">ادخل N و E بدقة ستة منازل عشرية.</small>
                 </div>
 
-                <div class="form-group">
+                <div id="autoLocationGroup" class="form-group">
                     <label for="reportAddress">العنوان *</label>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="reportAddress" class="form-control" required
