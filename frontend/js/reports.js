@@ -392,6 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const locationSearchInput = document.getElementById('locationSearch');
     const searchCityBtn = document.getElementById('searchBtn');
+    const suggestionsEl = document.getElementById('locationSuggestions');
     const applyCitySearch = debounce(() => {
         cityQuery = locationSearchInput ? String(locationSearchInput.value || '').trim() : '';
         const dailyInputEl2 = document.getElementById('dailyDate');
@@ -406,10 +407,73 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (_) {}
         renderDailyReportsForDate(dateStr2);
         if (window.showNotification) window.showNotification(cityQuery ? `تمت التصفية حسب المدينة: ${cityQuery}` : 'تم إلغاء التصفية حسب المدينة', 'info');
+        if (suggestionsEl) suggestionsEl.style.display = 'none';
     }, 300, true);
     if (searchCityBtn) searchCityBtn.addEventListener('click', applyCitySearch);
     if (locationSearchInput) locationSearchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); applyCitySearch(); }
+    });
+
+    async function fetchCitySuggestions(q) {
+        if (!suggestionsEl) return;
+        const query = String(q || '').trim();
+        if (!query || query.length < 2) {
+            suggestionsEl.style.display = 'none';
+            suggestionsEl.innerHTML = '';
+            return;
+        }
+        try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=10&accept-language=ar&q=${encodeURIComponent(query)}`);
+            const items = await resp.json();
+            const filtered = (Array.isArray(items) ? items : []).filter(it => ['city','town','village','hamlet','municipality'].includes(it.type));
+            const names = [];
+            filtered.forEach(it => {
+                const a = it.address || {};
+                let city = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || '';
+                if (!city) {
+                    const name = it.display_name || '';
+                    city = extractCity(name);
+                }
+                city = String(city || '').trim();
+                if (city && !names.includes(city)) names.push(city);
+            });
+            const localSet = new Set();
+            allReports.forEach(r => {
+                const c = extractCity(r.report_address || '');
+                if (c && c.toLowerCase().includes(query.toLowerCase())) localSet.add(c);
+            });
+            const merged = Array.from(new Set([...names, ...Array.from(localSet)]));
+            if (merged.length) {
+                suggestionsEl.innerHTML = merged.slice(0, 10).map(c => `<button type="button" class="suggestion-item" data-city="${c}">${c}</button>`).join('');
+                suggestionsEl.style.display = 'block';
+            } else {
+                suggestionsEl.innerHTML = '';
+                suggestionsEl.style.display = 'none';
+            }
+        } catch (_) {
+            suggestionsEl.innerHTML = '';
+            suggestionsEl.style.display = 'none';
+        }
+    }
+
+    const debouncedFetchSuggestions = debounce(() => fetchCitySuggestions(locationSearchInput ? locationSearchInput.value : ''), 300, true);
+    if (locationSearchInput) {
+        locationSearchInput.addEventListener('input', debouncedFetchSuggestions);
+        locationSearchInput.addEventListener('focus', debouncedFetchSuggestions);
+    }
+    if (suggestionsEl) {
+        suggestionsEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('.suggestion-item');
+            if (!btn) return;
+            if (locationSearchInput) locationSearchInput.value = btn.dataset.city || '';
+            applyCitySearch();
+            suggestionsEl.style.display = 'none';
+        });
+    }
+    document.addEventListener('click', (e) => {
+        if (!suggestionsEl) return;
+        const inside = suggestionsEl.contains(e.target) || (locationSearchInput && locationSearchInput.contains && locationSearchInput.contains(e.target));
+        if (!inside) suggestionsEl.style.display = 'none';
     });
 
     async function getBrowserLocation() {

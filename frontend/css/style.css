@@ -1568,3 +1568,25 @@ body {
 .btn-refresh:hover {
     box-shadow: var(--shadow-md), var(--shadow-glow);
 }
+.suggestions {
+    margin-top: var(--space-2);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    max-height: 220px;
+    overflow-y: auto;
+}
+.suggestion-item {
+    display: block;
+    width: 100%;
+    text-align: right;
+    padding: var(--space-3) var(--space-4);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+}
+.suggestion-item:hover {
+    background-color: var(--color-surface-hover);
+}
