@@ -381,6 +381,85 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800, true));
     }
 
+    async function getBrowserLocation() {
+        return new Promise((resolve, reject) => {
+            if (!('geolocation' in navigator)) {
+                reject(new Error('المتصفح لا يدعم تحديد الموقع'));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve(pos.coords),
+                (err) => reject(err),
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+            );
+        });
+    }
+
+    async function setLocationFromGPS(mode) {
+        const gpsBtn = mode === 'manual' ? document.getElementById('gpsManualBtn') : document.getElementById('gpsAutoBtn');
+        try {
+            if (gpsBtn) gpsBtn.disabled = true;
+            if (window.setMapLoading) window.setMapLoading(true);
+            if (window.showNotification) window.showNotification('جارٍ تحديد موقعك...', 'info');
+            const coords = await getBrowserLocation();
+            const lat = coords.latitude;
+            const lng = coords.longitude;
+            const latHiddenEl = document.getElementById('reportLat');
+            const lngHiddenEl = document.getElementById('reportLng');
+            if (latHiddenEl) latHiddenEl.value = lat;
+            if (lngHiddenEl) lngHiddenEl.value = lng;
+
+            if (mode === 'manual' && latManualElInit && lngManualElInit) {
+                latManualElInit.value = lat.toFixed(6);
+                lngManualElInit.value = lng.toFixed(6);
+                updateFromManualDebounced();
+            } else {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`);
+                    const data = await response.json();
+                    if (data && data.address) {
+                        const country = data.address.country_code;
+                        if (country && country.toLowerCase() !== 'lb') {
+                            if (window.showNotification) window.showNotification('يمكن تحديد مواقع داخل لبنان فقط', 'error');
+                        }
+                    }
+                    const addr = data && data.address ? data.address : {};
+                    let city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || addr.county || '';
+                    if (!city) {
+                        const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        city = extractCity(name);
+                    }
+                    if (addressInput) addressInput.value = city || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                } catch (_) {}
+            }
+            if (window.showNotification) window.showNotification('تم تحديد الموقع بنجاح', 'success');
+        } catch (e) {
+            const msg = e && e.message ? e.message : 'تعذر تحديد موقعك';
+            if (e && e.code === 1) {
+                if (window.showNotification) window.showNotification('تم رفض الإذن للوصول إلى الموقع', 'error');
+            } else if (e && e.code === 2) {
+                if (window.showNotification) window.showNotification('إشارة GPS ضعيفة أو غير متاحة', 'error');
+            } else if (e && e.code === 3) {
+                if (window.showNotification) window.showNotification('انتهى الوقت دون استرجاع الموقع', 'error');
+            } else {
+                if (window.showNotification) window.showNotification(msg, 'error');
+            }
+        } finally {
+            const gpsBtn2 = mode === 'manual' ? document.getElementById('gpsManualBtn') : document.getElementById('gpsAutoBtn');
+            if (gpsBtn2) gpsBtn2.disabled = false;
+            if (window.setMapLoading) window.setMapLoading(false);
+        }
+    }
+
+    const gpsAutoBtn = document.getElementById('gpsAutoBtn');
+    if (gpsAutoBtn) {
+        gpsAutoBtn.addEventListener('click', () => setLocationFromGPS('auto'));
+    }
+    const gpsManualBtn = document.getElementById('gpsManualBtn');
+    if (gpsManualBtn) {
+        gpsManualBtn.addEventListener('click', () => setLocationFromGPS('manual'));
+    }
+
     const refreshDailyBtn = document.getElementById('refreshDailyBtn');
     if (refreshDailyBtn) {
         refreshDailyBtn.addEventListener('click', debounce(async () => {

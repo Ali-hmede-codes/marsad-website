@@ -129,18 +129,36 @@
 
                 <div id="manualLocationGroup" class="form-group hidden">
                     <label>الإحداثيات اليدوية (للمدراء فقط)</label>
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
                         <input type="text" id="reportLatManual" class="form-control" placeholder="خط العرض (N)">
                         <input type="text" id="reportLngManual" class="form-control" placeholder="خط الطول (E)">
+                        <button type="button" id="gpsManualBtn" class="btn btn-secondary btn-icon" title="موقعي" aria-label="موقعي">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <circle cx="12" cy="12" r="7"></circle>
+                                <line x1="12" y1="5" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
                     </div>
                     <small class="text-muted">ادخل N و E بدقة ستة منازل عشرية.</small>
                 </div>
 
                 <div id="autoLocationGroup" class="form-group">
                     <label for="reportAddress">العنوان *</label>
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
                         <input type="text" id="reportAddress" class="form-control" required
                             placeholder="ابحث عن موقع أو أدخل العنوان يدوياً">
+                        <button type="button" id="gpsAutoBtn" class="btn btn-primary btn-icon" title="موقعي" aria-label="موقعي">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <circle cx="12" cy="12" r="7"></circle>
+                                <line x1="12" y1="5" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
                         <button type="button" id="searchAddressBtn" class="btn btn-secondary"
                             style="white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -218,7 +236,7 @@
     <script src="js/dist/config.min.js"></script>
     <script src="js/dist/notifications.min.js"></script>
     <script src="js/dist/auth.min.js"></script>
-    <script src="js/dist/reports.min.js"></script>
+    <script src="js/reports.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="js/dist/map.min.js"></script>
