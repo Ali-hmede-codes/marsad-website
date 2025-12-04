@@ -55,6 +55,7 @@
     <!-- Scripts -->
     <script src="js/dist/config.min.js"></script>
     <script src="js/dist/notifications.min.js"></script>
+    <script>try{if(localStorage.getItem('user')==='undefined'){localStorage.removeItem('user');}}catch(_){}</script>
     <script src="js/dist/auth.min.js"></script>
     <script>
         const loginForm = document.getElementById('loginForm');

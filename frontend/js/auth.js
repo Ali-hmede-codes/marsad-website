@@ -9,7 +9,8 @@ function getToken() {
 // Get current user from localStorage
 function getCurrentUser() {
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === 'undefined') return null;
+    try { return JSON.parse(userStr); } catch (_) { return null; }
 }
 
 // Check if user is logged in
