@@ -1,18 +1,35 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+function createTransporter() {
+    if (process.env.SMTP_HOST) {
+        return nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT || '587', 10),
+            secure: (process.env.SMTP_SECURE || '').toString().toLowerCase() === 'true' || (process.env.SMTP_PORT === '465'),
+            auth: {
+                user: process.env.SMTP_USER || process.env.EMAIL_USER,
+                pass: process.env.SMTP_PASS || process.env.EMAIL_PASS
+            }
+        });
     }
-});
+
+    return nodemailer.createTransport({
+        service: process.env.EMAIL_SERVICE || 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+}
+
+const transporter = createTransporter();
 
 exports.sendVerificationEmail = async (email, token) => {
-    const verificationUrl = `${process.env.FRONTEND_URL}/login.html?token=${token}`;
+    const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const verificationUrl = `${frontend}/login.html?token=${token}`;
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.SMTP_FROM || process.env.SMTP_USER || process.env.EMAIL_USER,
         to: email,
         subject: 'تأكيد البريد الإلكتروني - مرصد لبنان',
         html: `
