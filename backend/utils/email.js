@@ -26,20 +26,22 @@ const transporter = createTransporter();
 
 exports.sendVerificationEmail = async (email, token) => {
     const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const siteName = process.env.SITE_NAME || 'الرادار961';
     const verificationUrl = `${frontend}/login.html?token=${token}`;
 
     const mailOptions = {
         from: process.env.SMTP_FROM || process.env.SMTP_USER || process.env.EMAIL_USER,
         to: email,
-        subject: 'تأكيد البريد الإلكتروني - مرصد لبنان',
+        subject: `تأكيد البريد الإلكتروني - ${siteName}`,
         html: `
             <div dir="rtl" style="text-align: right; font-family: Arial, sans-serif;">
-                <h1>تأكيد البريد الإلكتروني</h1>
+                <h1>${siteName}</h1>
                 <p>مرحباً،</p>
                 <p>الرجاء النقر على الرابط أدناه لتفعيل حسابك:</p>
                 <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">تفعيل الحساب</a>
                 <p>أو انسخ الرابط التالي:</p>
                 <p>${verificationUrl}</p>
+                <p style="margin-top: 16px; color: #555;">هذا البريد مرسل من ${siteName} (${new URL(frontend).hostname})</p>
             </div>
         `
     };
