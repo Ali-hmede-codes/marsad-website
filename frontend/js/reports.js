@@ -1,6 +1,7 @@
 // Reports management
 let allReports = [];
 let categories = [];
+let cityQuery = '';
 
 function debounce(fn, delay = 500, immediate = true) {
     let timeout;
@@ -157,7 +158,11 @@ async function loadReports(categoryFilter = '') {
 
         if (window.updateMapMarkers) {
             try {
-                window.updateMapMarkers(allReports);
+                const base = cityQuery ? allReports.filter(r => {
+                    const city = extractCity(r.report_address || '');
+                    return city.toLowerCase().includes(cityQuery.toLowerCase());
+                }) : allReports;
+                window.updateMapMarkers(base);
             } catch (e) {
                 if (window.showNotification) window.showNotification('حدث خطأ في عرض العلامات', 'error');
             }
@@ -278,7 +283,11 @@ function renderDailyReportsForDate(dateStr) {
     const tbody = document.querySelector('#dailyReportsTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const filtered = allReports.filter(r => {
+    const base = cityQuery ? allReports.filter(r => {
+        const city = extractCity(r.report_address || '');
+        return city.toLowerCase().includes(cityQuery.toLowerCase());
+    }) : allReports;
+    const filtered = base.filter(r => {
         const d = new Date(r.date_and_time);
         return formatDateISO(d) === dateStr;
     });
@@ -380,6 +389,28 @@ document.addEventListener('DOMContentLoaded', () => {
             await refreshTodayReports(false);
         }, 800, true));
     }
+
+    const locationSearchInput = document.getElementById('locationSearch');
+    const searchCityBtn = document.getElementById('searchBtn');
+    const applyCitySearch = debounce(() => {
+        cityQuery = locationSearchInput ? String(locationSearchInput.value || '').trim() : '';
+        const dailyInputEl2 = document.getElementById('dailyDate');
+        const dateStr2 = dailyInputEl2 ? dailyInputEl2.value : formatDateISO(new Date());
+        if (window.clearMarkers) window.clearMarkers();
+        try {
+            const base = cityQuery ? allReports.filter(r => {
+                const city = extractCity(r.report_address || '');
+                return city.toLowerCase().includes(cityQuery.toLowerCase());
+            }) : allReports;
+            if (window.updateMapMarkers) window.updateMapMarkers(base);
+        } catch (_) {}
+        renderDailyReportsForDate(dateStr2);
+        if (window.showNotification) window.showNotification(cityQuery ? `تمت التصفية حسب المدينة: ${cityQuery}` : 'تم إلغاء التصفية حسب المدينة', 'info');
+    }, 300, true);
+    if (searchCityBtn) searchCityBtn.addEventListener('click', applyCitySearch);
+    if (locationSearchInput) locationSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); applyCitySearch(); }
+    });
 
     async function getBrowserLocation() {
         return new Promise((resolve, reject) => {
