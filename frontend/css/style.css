@@ -1556,3 +1556,11 @@ body {
         display: none;
     }
 }
+.btn-refresh {
+    background-image: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+}
+.btn-refresh:hover {
+    box-shadow: var(--shadow-md), var(--shadow-glow);
+}
