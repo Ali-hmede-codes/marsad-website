@@ -59,6 +59,39 @@
     <script>
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenParam = urlParams.get('token');
+
+        async function handleVerifyToken() {
+            if (!tokenParam) return;
+            try {
+                const response = await fetch(`${API_URL}/auth/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenParam })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    errorMessage.classList.add('hidden');
+                    showNotification(data.message || 'تم تفعيل الحساب بنجاح', 'success');
+                    history.replaceState(null, '', window.location.pathname);
+                } else {
+                    errorMessage.textContent = data.error || 'فشل في التحقق من البريد الإلكتروني';
+                    errorMessage.classList.remove('hidden');
+                    showNotification(data.error || 'فشل في التحقق من البريد الإلكتروني', 'error');
+                }
+            } catch (_) {
+                errorMessage.textContent = 'حدث خطأ في الاتصال بالخادم';
+                errorMessage.classList.remove('hidden');
+                showNotification('حدث خطأ في الاتصال بالخادم', 'error');
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', handleVerifyToken);
+        } else {
+            handleVerifyToken();
+        }
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
