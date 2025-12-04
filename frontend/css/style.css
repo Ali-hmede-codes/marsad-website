@@ -1536,3 +1536,21 @@ body {
 .table-modern tbody tr:hover td {
     background-color: var(--color-surface-hover);
 }
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+}
+.btn-icon img {
+    width: 22px;
+    height: 22px;
+    filter: brightness(0) invert(1);
+}
+@media (max-width: 768px) {
+    .header .logo > span:not(.logo-icon) {
+        display: none;
+    }
+}

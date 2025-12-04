@@ -48,7 +48,7 @@ function updateAuthUI() {
         if (userInfo && authButtons && userName) {
             userInfo.classList.remove('hidden');
             authButtons.classList.add('hidden');
-            userName.textContent = `مرحباً، ${user.name}`;
+            userName.textContent = `${user.name}`;
 
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', logout);
