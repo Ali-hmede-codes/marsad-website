@@ -4,14 +4,17 @@ const db = require('../config/database');
 // Verify JWT token
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader ? authHeader.split(' ')[1] : null; // Bearer TOKEN
+    const token = authHeader ? authHeader.split(' ')[1] : null;
 
     if (!token) {
         return res.status(401).json({ error: 'لا يوجد رمز مصادقة' });
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+            issuer: process.env.JWT_ISSUER || 'radar961',
+            audience: process.env.JWT_AUDIENCE || 'radar961-app'
+        });
         req.user = decoded;
         next();
     } catch (error) {

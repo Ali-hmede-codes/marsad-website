@@ -133,7 +133,11 @@ exports.login = async (req, res) => {
                 is_publisher: user.is_publisher
             },
             process.env.JWT_SECRET,
-            { expiresIn: '7d' }
+            {
+                expiresIn: '7d',
+                issuer: process.env.JWT_ISSUER || 'radar961',
+                audience: process.env.JWT_AUDIENCE || 'radar961-app'
+            }
         );
 
         res.json({
