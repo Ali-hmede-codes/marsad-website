@@ -7,6 +7,7 @@ const https = require('https');
 require('dotenv').config();
 
 const app = express();
+app.set('trust proxy', true);
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -70,21 +71,23 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
+const ENABLE_HTTPS = (process.env.ENABLE_HTTPS || 'false').toLowerCase() === 'true';
 const keyPath = process.env.SSL_KEY_PATH;
 const certPath = process.env.SSL_CERT_PATH;
 const caPath = process.env.SSL_CA_PATH;
-if (keyPath && certPath && fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+if (ENABLE_HTTPS && keyPath && certPath && fs.existsSync(keyPath) && fs.existsSync(certPath)) {
     const options = {
         key: fs.readFileSync(keyPath),
         cert: fs.readFileSync(certPath)
     };
     if (caPath && fs.existsSync(caPath)) options.ca = fs.readFileSync(caPath);
-    https.createServer(options, app).listen(PORT, '127.0.0.1', () => {
+    https.createServer(options, app).listen(PORT, HOST, () => {
         console.log(`✓ HTTPS server running on port ${PORT}`);
         console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 } else {
-    app.listen(PORT, '127.0.0.1', () => {
+    app.listen(PORT, HOST, () => {
         console.log(`✓ Server running on port ${PORT}`);
         console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
     });
