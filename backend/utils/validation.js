@@ -38,14 +38,16 @@ const extractCityName = (address) => {
     const parts = String(address).split(',').map(s => s.trim()).filter(Boolean);
     const isBad = (p) => badArabic.test(p) || badEnglish.test(p);
     const hasDigits = (p) => /\d/.test(p);
-    for (let i = 0; i < Math.min(parts.length, 6); i++) {
-        const p = parts[i];
-        if (isBad(p)) continue;
-        if (hasDigits(p)) continue;
-        return p;
-    }
-    const fallback = parts.find(p => !isBad(p)) || String(address).trim();
-    return fallback;
+    const adminRx = /(قضاء|محافظة|لبنان|lebanon|liban)/i;
+    const isArabic = (p) => /[\u0600-\u06FF]/.test(p);
+    const adminIndex = parts.findIndex(p => adminRx.test(p));
+    const pool = adminIndex > 0
+        ? parts.slice(0, adminIndex).filter(p => !isBad(p) && !hasDigits(p))
+        : parts.filter(p => !isBad(p) && !hasDigits(p));
+    if (pool.length === 0) return String(address).trim();
+    const arabicPool = pool.filter(isArabic);
+    const candidate = arabicPool.length ? arabicPool[arabicPool.length - 1] : pool[pool.length - 1];
+    return candidate;
 };
 
 // Sanitize input to prevent SQL injection
