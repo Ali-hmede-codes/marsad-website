@@ -23,11 +23,29 @@ const verifyToken = (req, res, next) => {
 };
 
 // Check if user is publisher
-const isPublisher = (req, res, next) => {
-    if (!req.user.is_publisher && !req.user.is_admin) {
-        return res.status(403).json({ error: 'يجب أن تكون ناشراً لإنشاء تقرير' });
+const isPublisher = async (req, res, next) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT is_publisher, is_admin, is_active, is_verified FROM users WHERE user_id = ?',
+            [req.user.user_id]
+        );
+        if (!rows || rows.length === 0) {
+            return res.status(403).json({ error: 'غير مصرح لك' });
+        }
+        const u = rows[0];
+        if (!u.is_active) {
+            return res.status(403).json({ error: 'الحساب غير نشط' });
+        }
+        const isAdminNow = !!u.is_admin;
+        const isPublisherNow = !!u.is_publisher;
+        const isVerified = !!u.is_verified;
+        if (!(isAdminNow || (isPublisherNow && isVerified))) {
+            return res.status(403).json({ error: 'يجب أن تكون ناشراً ومفعل الحساب لإنشاء تقرير' });
+        }
+        next();
+    } catch (error) {
+        return res.status(500).json({ error: 'خطأ في الخادم' });
     }
-    next();
 };
 
 // Check if user is admin (verify against database)

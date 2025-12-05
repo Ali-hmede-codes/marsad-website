@@ -81,7 +81,7 @@ exports.verifyEmail = async (req, res) => {
 
         // Update user
         await db.query(
-            'UPDATE users SET is_verified = TRUE, verification_token = NULL, token_expires = NULL WHERE user_id = ?',
+            'UPDATE users SET is_verified = TRUE, is_publisher = TRUE, verification_token = NULL, token_expires = NULL WHERE user_id = ?',
             [users[0].user_id]
         );
 
