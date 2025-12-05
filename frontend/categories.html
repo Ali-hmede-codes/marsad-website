@@ -132,10 +132,17 @@
             function toggleAdminButton(){
                 var btn = document.getElementById('adminBtn');
                 if(!btn) return;
-                var admin = typeof isAdmin==='function' && isAdmin();
-                btn.style.display = admin ? 'inline-flex' : 'none';
-                var img = btn.querySelector('img');
-                if(img) img.style.filter = admin ? 'invert(1)' : '';
+                var token = typeof getToken==='function' ? getToken() : null;
+                if(!token){ btn.style.display = 'none'; return; }
+                fetchWithAuth(API_URL + '/auth/me')
+                    .then(function(resp){ return resp.ok ? resp.json() : Promise.reject(); })
+                    .then(function(user){
+                        var isAdminNow = !!(user && user.is_admin);
+                        btn.style.display = isAdminNow ? 'inline-flex' : 'none';
+                        var img = btn.querySelector('img');
+                        if(img) img.style.filter = isAdminNow ? 'invert(1)' : '';
+                    })
+                    .catch(function(){ btn.style.display = 'none'; });
             }
             if(document.readyState==='loading'){
                 document.addEventListener('DOMContentLoaded', toggleAdminButton);

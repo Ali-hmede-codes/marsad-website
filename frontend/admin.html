@@ -49,30 +49,31 @@
     <script src="js/dist/auth.min.js"></script>
     <script>
         (function(){
-            if(!isLoggedIn() || !isAdmin()){
-                showNotification('هذه الصفحة للمدراء فقط', 'error');
+            var token = typeof getToken==='function' ? getToken() : null;
+            if(!token){
                 window.location.href = 'login.html';
                 return;
             }
             document.getElementById('logoutBtn').addEventListener('click', logout);
             fetchWithAuth(API_URL + '/admin/status')
-                .then(function(resp){ return resp.json(); })
+                .then(function(resp){
+                    if(resp.ok) return resp.json();
+                    throw new Error('forbidden');
+                })
                 .then(function(data){
-                    if(data && data.ok){
-                        var user = getCurrentUser();
-                        document.getElementById('adminSubtitle').textContent = user && user.name ? ('مرحباً، ' + user.name) : '';
-                        document.getElementById('adminStatus').textContent = 'تم التحقق: لديك صلاحيات المدير';
-                    } else {
-                        document.getElementById('adminStatus').textContent = 'لا تملك صلاحيات الوصول';
-                        showNotification('غير مصرح لك', 'error');
-                    }
+                    document.getElementById('adminStatus').textContent = 'تم التحقق: لديك صلاحيات المدير';
+                    fetchWithAuth(API_URL + '/auth/me')
+                        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                        .then(function(user){
+                            document.getElementById('adminSubtitle').textContent = user && user.name ? ('مرحباً، ' + user.name) : '';
+                        })
+                        .catch(function(){});
                 })
                 .catch(function(){
-                    document.getElementById('adminStatus').textContent = 'فشل التحقق من الصلاحيات';
-                    showNotification('فشل التحقق من الصلاحيات', 'error');
+                    showNotification('غير مصرح لك', 'error');
+                    window.location.href = 'login.html';
                 });
         })();
     </script>
 </body>
 </html>
-
