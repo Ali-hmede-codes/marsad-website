@@ -179,7 +179,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-4) 0;
+    padding: var(--space-2) 0;
 }
 
 .logo {
@@ -201,6 +201,8 @@ body {
 .logo-icon {
     font-size: var(--font-size-2xl);
     transition: var(--transition);
+    width: 72px !important;
+    height: 72px !important;
 }
 
 .logo:hover .logo-icon {
@@ -905,7 +907,7 @@ body {
         gap: var(--space-2);
     }
 
-    .logo-icon { display: inline-flex !important; }
+    .logo-icon { display: inline-flex !important; width: 68px !important; height: 68px !important; }
     .logo-text { display: none !important; }
 
     .nav {
