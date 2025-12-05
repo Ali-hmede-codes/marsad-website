@@ -454,15 +454,15 @@ function updateMapMarkers(reports) {
 
         // Add popup with report info
         const city = (window.extractCity ? window.extractCity(report.report_address || '') : (report.report_address || '').split(',')[0].trim());
-        const count = city ? (cityCounts[city] || 1) : 1;
+        const count = Number(report.confirmation_count || 1);
         const popupContent = `
             <div style="text-align: right; direction: rtl; font-family: var(--font-sans); line-height: 1.7; font-size: 0.95rem;">
                 <h3 style="margin: 0 0 8px 0; font-size: 1.05rem; font-weight: 700; color: rgb(${report.category_color_r || 100}, ${report.category_color_g || 100}, ${report.category_color_b || 100});">
                     ${report.category_name || 'تقرير'}
                 </h3>
                 <p style="margin: 4px 0;"><strong>الموقع:</strong> ${city || 'غير محدد'}</p>
-                <p style="margin: 4px 0;"><strong>التاريخ:</strong> ${new Date(report.date_and_time).toLocaleString('ar-LB')}</p>
-                <p style="margin: 4px 0; font-weight: 600;"><strong>عدد التقارير :</strong> ${count}</p>
+                <p style="margin: 4px 0;"><strong>آخر تبليغ:</strong> ${new Date(report.last_confirmed_at || report.date_and_time).toLocaleString('ar-LB')}</p>
+                <p style="margin: 4px 0; font-weight: 600;"><strong>عدد البلاغات:</strong> ${count}</p>
             </div>
         `;
 

@@ -67,7 +67,7 @@ exports.createReport = async (req, res) => {
         if (duplicates.length > 0) {
             const dup = duplicates[0];
             await db.query(
-                'UPDATE reports SET confirmation_count = confirmation_count + 1, date_and_time = UTC_TIMESTAMP() WHERE rep_id = ?',
+                'UPDATE reports SET confirmation_count = confirmation_count + 1, last_confirmed_at = UTC_TIMESTAMP(), date_and_time = UTC_TIMESTAMP() WHERE rep_id = ?',
                 [dup.rep_id]
             );
             const [updated] = await db.query('SELECT confirmation_count FROM reports WHERE rep_id = ?', [dup.rep_id]);
