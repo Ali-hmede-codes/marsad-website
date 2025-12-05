@@ -57,7 +57,7 @@ exports.createReport = async (req, res) => {
         const [duplicates] = await db.query(`
             SELECT rep_id, confirmation_count FROM reports 
             WHERE categorie = ? 
-            AND TRIM(SUBSTRING_INDEX(report_address, ',', 1)) = TRIM(SUBSTRING_INDEX(?, ',', 1))
+            AND LOWER(TRIM(report_address)) = LOWER(TRIM(?))
             AND date_and_time > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)
             AND is_active = TRUE
             ORDER BY date_and_time DESC
