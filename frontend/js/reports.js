@@ -268,8 +268,19 @@ window.showReportDetails = showReportDetails;
 
 function extractCity(address) {
     if (!address) return '';
-    const parts = address.split(',');
-    return parts[0] ? parts[0].trim() : address;
+    const parts = String(address).split(',').map(s => s.trim()).filter(Boolean);
+    const bad = [/\b(?:مستشفى|مشفى|طريق|شارع|أوتوستراد|جسر|نفق|مطار|جامعة|محطة|قصر|مرفأ|ميناء|دوار|مستديرة|مدرسة|سوق|مول)\b/u];
+    for (let i = 0; i < Math.min(parts.length, 4); i++) {
+        const p = parts[i];
+        if (!bad.some(rx => rx.test(p))) return p;
+    }
+    return parts[0] || String(address).trim();
+}
+
+function getCityFromAddr(addr) {
+    const a = addr || {};
+    const city = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || '';
+    return String(city || '').trim();
 }
 
 function formatDateISO(d) {
@@ -359,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             const addr = data && data.address ? data.address : {};
-            let city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || addr.county || '';
+            let city = getCityFromAddr(addr);
             if (!city) {
                 const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                 city = extractCity(name);
@@ -519,7 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     const addr = data && data.address ? data.address : {};
-                    let city = addr.city || addr.town || addr.village || addr.hamlet || addr.municipality || addr.county || '';
+                    let city = getCityFromAddr(addr);
                     if (!city) {
                         const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                         city = extractCity(name);

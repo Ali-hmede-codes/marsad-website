@@ -23,11 +23,15 @@ exports.createReport = async (req, res) => {
             return res.status(400).json({ error: 'الموقع يجب أن يكون داخل لبنان' });
         }
 
-        // Auto-detect address if not provided
         let finalAddress = report_address;
         if (!finalAddress) {
             const autoAddress = await getAddressFromCoordinates(latitude, longitude);
             finalAddress = autoAddress || 'موقع غير معروف';
+        }
+        const firstCity = String(finalAddress).split(',')[0].trim();
+        const banned = ['مستشفى','مشفى','طريق','شارع','أوتوستراد','جسر','نفق','مطار','جامعة','محطة','قصر','مرفأ','ميناء','دوار','مستديرة','مدرسة','سوق','مول'];
+        if (banned.some(t => firstCity.includes(t))) {
+            return res.status(400).json({ error: 'العنوان يجب أن يكون مدينة أو بلدة فقط' });
         }
 
         // Check category exists and is a child category (not parent)
@@ -49,16 +53,15 @@ exports.createReport = async (req, res) => {
             return res.status(403).json({ error: 'غير مصرح لك بالنشر في هذه الفئة' });
         }
 
-        // Check for duplicates (Strict Blocking) - within 3km and 1 hour
-        // 3000 meters covers a typical village/small city area
         const [duplicates] = await db.query(`
             SELECT rep_id FROM reports 
             WHERE categorie = ? 
-            AND ST_Distance_Sphere(geolocation, POINT(?, ?)) < 3000 
+            AND TRIM(SUBSTRING_INDEX(report_address, ',', 1)) = TRIM(SUBSTRING_INDEX(?, ',', 1))
+            AND ST_Distance_Sphere(geolocation, POINT(?, ?)) < 1500 
             AND date_and_time > DATE_SUB(NOW(), INTERVAL 1 HOUR)
             AND is_active = TRUE
             LIMIT 1
-        `, [category, parseFloat(longitude), parseFloat(latitude)]);
+        `, [category, sanitizeInput(finalAddress), parseFloat(longitude), parseFloat(latitude)]);
 
         if (duplicates.length > 0) {
             // Strict blocking: Do not allow new report

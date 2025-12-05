@@ -18,26 +18,38 @@ exports.getAddressFromCoordinates = async (latitude, longitude) => {
         if (response.data.status === 'OK' && response.data.results.length > 0) {
             const result = response.data.results[0];
 
-            // Try to extract specific location components for Lebanon
-            let locationParts = [];
-
+            let city = null;
             if (result.address_components) {
                 for (const component of result.address_components) {
-                    // Extract locality (city/village), administrative areas (governorate/district)
-                    if (component.types.includes('locality') ||
-                        component.types.includes('administrative_area_level_1') ||
-                        component.types.includes('administrative_area_level_2')) {
-                        locationParts.push(component.long_name);
+                    if (component.types.includes('locality') || component.types.includes('sublocality') || component.types.includes('administrative_area_level_3')) {
+                        city = component.long_name;
+                        break;
+                    }
+                }
+                if (!city) {
+                    for (const component of result.address_components) {
+                        if (component.types.includes('administrative_area_level_2')) {
+                            city = component.long_name;
+                            break;
+                        }
+                    }
+                }
+                if (!city) {
+                    for (const component of result.address_components) {
+                        if (component.types.includes('administrative_area_level_1')) {
+                            city = component.long_name;
+                            break;
+                        }
                     }
                 }
             }
 
-            // Return specific location if found, otherwise use formatted address
-            if (locationParts.length > 0) {
-                return locationParts.join(', ');
+            if (city) {
+                return city;
             }
 
-            return result.formatted_address;
+            const first = String(result.formatted_address || '').split(',')[0].trim();
+            return first || null;
         }
 
         return null;
