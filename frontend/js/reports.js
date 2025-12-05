@@ -255,7 +255,7 @@ function showReportDetails(report) {
                 </div>
                 <h3 style="margin: 0; color: ${color};">${categoryName}</h3>
             </div>
-            <p><strong>الموقع:</strong> ${report.report_address}</p>
+            <p><strong>الموقع:</strong> ${extractCity(report.report_address)}</p>
             <p><strong>التاريخ والوقت:</strong> ${formattedDate}</p>
             <p><strong>الإحداثيات:</strong> ${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}</p>
             ${report.reporter_name ? `<p><strong>المبلغ:</strong> ${report.reporter_name}</p>` : ''}
@@ -269,13 +269,37 @@ window.showReportDetails = showReportDetails;
 function extractCity(address) {
     if (!address) return '';
     const parts = String(address).split(',').map(s => s.trim()).filter(Boolean);
-    const bad = [/\b(?:مستشفى|مشفى|طريق|شارع|أوتوستراد|جسر|نفق|مطار|جامعة|محطة|قصر|مرفأ|ميناء|دوار|مستديرة|مدرسة|سوق|مول)\b/u];
-    for (let i = 0; i < Math.min(parts.length, 4); i++) {
+    const bad = [
+        /\b(?:مستشفى|مشفى|طريق|شارع|أوتوستراد|جسر|نفق|مطار|جامعة|محطة|قصر|مرفأ|ميناء|دوار|مستديرة|مدرسة|سوق|مول|صيدلية|مطعم|فندق|معمل|مصنع)\b/u,
+        /\b(?:pharmacy|pharmacie|hospital|hopital|clinic|clinique|shop|store|market|supermarket|mall|restaurant|hotel|bank|atm|station|bridge|tunnel|airport|university|school|college|center|centre)\b/i,
+        /\b(?:lebanon|liban|لبنان|محافظة|قضاء)\b/i
+    ];
+    const isBad = (p) => bad.some(rx => rx.test(p));
+    const hasDigits = (p) => /\d/.test(p);
+    for (let i = 0; i < Math.min(parts.length, 6); i++) {
         const p = parts[i];
-        if (!bad.some(rx => rx.test(p))) return p;
+        if (isBad(p)) continue;
+        if (hasDigits(p)) continue;
+        return p;
     }
-    return parts[0] || String(address).trim();
+    const fallback = parts.find(p => !isBad(p)) || String(address).trim();
+    return fallback;
 }
+
+function isValidCityName(name) {
+    const s = String(name || '').trim();
+    if (!s) return false;
+    if (/\d/.test(s)) return false;
+    const bad = [
+        /\b(?:مستشفى|مشفى|طريق|شارع|أوتوستراد|جسر|نفق|مطار|جامعة|محطة|قصر|مرفأ|ميناء|دوار|مستديرة|مدرسة|سوق|مول|صيدلية|مطعم|فندق|معمل|مصنع)\b/u,
+        /\b(?:pharmacy|pharmacie|hospital|hopital|clinic|clinique|shop|store|market|supermarket|mall|restaurant|hotel|bank|atm|station|bridge|tunnel|airport|university|school|college|center|centre)\b/i,
+        /\b(?:lebanon|liban|لبنان|محافظة|قضاء)\b/i
+    ];
+    if (bad.some(rx => rx.test(s))) return false;
+    return true;
+}
+window.extractCity = extractCity;
+window.isValidCityName = isValidCityName;
 
 function getCityFromAddr(addr) {
     const a = addr || {};
@@ -604,11 +628,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 isManual = true;
             }
 
+            const rawAddress = document.getElementById('reportAddress').value;
+            const cityOnly = extractCity(rawAddress);
+            if (!isValidCityName(cityOnly)) {
+                showNotification('يرجى اختيار مدينة أو بلدة فقط', 'error');
+                return;
+            }
             const reportData = {
                 latitude,
                 longitude,
                 category: document.getElementById('reportCategory').value,
-                report_address: document.getElementById('reportAddress').value,
+                report_address: cityOnly,
                 is_manual_location: isManual
             };
 
