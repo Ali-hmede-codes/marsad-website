@@ -55,20 +55,27 @@ exports.createReport = async (req, res) => {
         }
 
         const [duplicates] = await db.query(`
-            SELECT rep_id FROM reports 
+            SELECT rep_id, confirmation_count FROM reports 
             WHERE categorie = ? 
             AND TRIM(SUBSTRING_INDEX(report_address, ',', 1)) = TRIM(SUBSTRING_INDEX(?, ',', 1))
-            AND ST_Distance_Sphere(geolocation, POINT(?, ?)) < 1500 
-            AND date_and_time > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            AND date_and_time > DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)
             AND is_active = TRUE
+            ORDER BY date_and_time DESC
             LIMIT 1
-        `, [category, sanitizeInput(finalAddress), parseFloat(longitude), parseFloat(latitude)]);
+        `, [category, sanitizeInput(finalAddress)]);
 
         if (duplicates.length > 0) {
-            // Strict blocking: Do not allow new report
-            return res.status(400).json({
-                error: 'عذراً، يوجد تقرير مشابه في نفس المنطقة (المدينة/القرية) تم تقديمه خلال الساعة الماضية. لا يمكن تقديم تقرير جديد حالياً.',
-                is_duplicate: true
+            const dup = duplicates[0];
+            await db.query(
+                'UPDATE reports SET confirmation_count = confirmation_count + 1, date_and_time = UTC_TIMESTAMP() WHERE rep_id = ?',
+                [dup.rep_id]
+            );
+            const [updated] = await db.query('SELECT confirmation_count FROM reports WHERE rep_id = ?', [dup.rep_id]);
+            return res.status(200).json({
+                message: 'تم تحديث عدد مرات التبليغ لهذا التقرير',
+                report_id: dup.rep_id,
+                updated: true,
+                confirmation_count: (updated && updated[0] && updated[0].confirmation_count) || (dup.confirmation_count + 1)
             });
         }
 

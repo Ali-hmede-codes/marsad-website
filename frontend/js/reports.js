@@ -331,11 +331,12 @@ function renderDailyReportsForDate(dateStr) {
         const time = new Date(r.date_and_time).toLocaleTimeString('ar-LB', { hour: '2-digit', minute: '2-digit' });
         const typeName = r.category_name || getCategoryName(r.categorie);
         const city = extractCity(r.report_address);
+        const count = Number(r.confirmation_count || 1);
         tr.innerHTML = `<td>${time}</td><td><span style="display:inline-flex;align-items:center;gap:6px;">\
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\
                 <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>\
                 <circle cx="12" cy="9" r="2" fill="currentColor"></circle>\
-            </svg> ${typeName}</span></td><td>${city}</td>`;
+            </svg> ${typeName}</span></td><td>${city}</td><td><span class="badge" style="display:inline-block;padding:2px 8px;border-radius:12px;background:#eee;color:#333;font-weight:600;">${count}</span></td>`;
         tbody.appendChild(tr);
     });
 }
@@ -645,7 +646,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await createReport(reportData);
 
             if (result.success) {
-                showNotification('تم إنشاء التقرير بنجاح', 'success');
+                const msg = (result.data && result.data.updated) ? 'تم تحديث عدد مرات التبليغ' : 'تم إنشاء التقرير بنجاح';
+                showNotification(msg, 'success');
                 document.getElementById('reportModal').classList.remove('active');
                 reportForm.reset();
                 loadReports();
