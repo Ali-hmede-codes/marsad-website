@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="لوحة المدير - الــرادار961">
+    <title>لوحة المدير - الــرادار961</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="assets/faveicon.png">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon" style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;overflow:hidden;">
+                        <img src="assets/logo.png" alt="الرادار961" style="width:100%;height:100%;object-fit:contain;" />
+                    </span>
+                </a>
+                <nav class="nav">
+                    <a href="index.html" class="btn btn-secondary btn-sm">الخريطة</a>
+                    <a href="dashboard.html" class="btn btn-secondary btn-sm">لوحة التحكم</a>
+                    <button id="logoutBtn" class="btn btn-secondary btn-icon" title="تسجيل الخروج" aria-label="تسجيل الخروج">
+                        <img src="https://img.icons8.com/ios/50/exit--v1.png" alt="Logout" />
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">لوحة المدير</h1>
+                <p class="dashboard-subtitle" id="adminSubtitle"></p>
+            </div>
+
+            <div class="card">
+                <div id="adminStatus" class="text-center">جاري التحقق من الصلاحيات...</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/dist/config.min.js"></script>
+    <script src="js/dist/notifications.min.js"></script>
+    <script src="js/dist/auth.min.js"></script>
+    <script>
+        (function(){
+            if(!isLoggedIn() || !isAdmin()){
+                showNotification('هذه الصفحة للمدراء فقط', 'error');
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            fetchWithAuth(API_URL + '/admin/status')
+                .then(function(resp){ return resp.json(); })
+                .then(function(data){
+                    if(data && data.ok){
+                        var user = getCurrentUser();
+                        document.getElementById('adminSubtitle').textContent = user && user.name ? ('مرحباً، ' + user.name) : '';
+                        document.getElementById('adminStatus').textContent = 'تم التحقق: لديك صلاحيات المدير';
+                    } else {
+                        document.getElementById('adminStatus').textContent = 'لا تملك صلاحيات الوصول';
+                        showNotification('غير مصرح لك', 'error');
+                    }
+                })
+                .catch(function(){
+                    document.getElementById('adminStatus').textContent = 'فشل التحقق من الصلاحيات';
+                    showNotification('فشل التحقق من الصلاحيات', 'error');
+                });
+        })();
+    </script>
+</body>
+</html>
+

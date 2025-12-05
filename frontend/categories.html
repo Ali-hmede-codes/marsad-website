@@ -36,6 +36,9 @@
                     <button id="logoutBtn" class="btn btn-secondary btn-icon" title="تسجيل الخروج" aria-label="تسجيل الخروج">
                         <img src="https://img.icons8.com/ios/50/exit--v1.png" alt="Logout" />
                     </button>
+                    <a href="admin.html" id="adminBtn" class="btn btn-secondary btn-icon" title="لوحة المدير" aria-label="لوحة المدير" style="display:none;">
+                        <img src="https://img.icons8.com/ios-filled/50/user-shield.png" alt="Admin" />
+                    </a>
                 </nav>
             </div>
         </div>
@@ -124,6 +127,23 @@
     <!-- Scripts -->
     <script src="js/dist/auth.min.js"></script>
     <script src="js/dist/categories.min.js"></script>
+    <script>
+        (function(){
+            function toggleAdminButton(){
+                var btn = document.getElementById('adminBtn');
+                if(!btn) return;
+                var admin = typeof isAdmin==='function' && isAdmin();
+                btn.style.display = admin ? 'inline-flex' : 'none';
+                var img = btn.querySelector('img');
+                if(img) img.style.filter = admin ? 'invert(1)' : '';
+            }
+            if(document.readyState==='loading'){
+                document.addEventListener('DOMContentLoaded', toggleAdminButton);
+            } else {
+                toggleAdminButton();
+            }
+        })();
+    </script>
 </body>
 
 </html>
