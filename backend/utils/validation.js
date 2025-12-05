@@ -22,6 +22,32 @@ const isValidEmail = (email) => {
     return emailRegex.test(email);
 };
 
+const badArabic = /(مستشفى|مشفى|طريق|شارع|أوتوستراد|جسر|نفق|مطار|جامعة|محطة|قصر|مرفأ|ميناء|دوار|مستديرة|مدرسة|سوق|مول|صيدلية|مطعم|فندق|معمل|مصنع|لبنان|محافظة|قضاء)/u;
+const badEnglish = /(pharmacy|pharmacie|hospital|hopital|clinic|clinique|shop|store|market|supermarket|mall|restaurant|hotel|bank|atm|station|bridge|tunnel|airport|university|school|college|center|centre|lebanon|liban|street|road|avenue)/i;
+
+const isValidCityName = (name) => {
+    const s = String(name || '').trim();
+    if (!s) return false;
+    if (/\d/.test(s)) return false;
+    if (badArabic.test(s) || badEnglish.test(s)) return false;
+    return true;
+};
+
+const extractCityName = (address) => {
+    if (!address) return '';
+    const parts = String(address).split(',').map(s => s.trim()).filter(Boolean);
+    const isBad = (p) => badArabic.test(p) || badEnglish.test(p);
+    const hasDigits = (p) => /\d/.test(p);
+    for (let i = 0; i < Math.min(parts.length, 6); i++) {
+        const p = parts[i];
+        if (isBad(p)) continue;
+        if (hasDigits(p)) continue;
+        return p;
+    }
+    const fallback = parts.find(p => !isBad(p)) || String(address).trim();
+    return fallback;
+};
+
 // Sanitize input to prevent SQL injection
 const sanitizeInput = (input) => {
     if (typeof input !== 'string') return input;
@@ -31,5 +57,7 @@ const sanitizeInput = (input) => {
 module.exports = {
     isInLebanon,
     isValidEmail,
-    sanitizeInput
+    sanitizeInput,
+    isValidCityName,
+    extractCityName
 };

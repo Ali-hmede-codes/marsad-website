@@ -28,12 +28,12 @@ exports.createReport = async (req, res) => {
             const autoAddress = await getAddressFromCoordinates(latitude, longitude);
             finalAddress = autoAddress || 'موقع غير معروف';
         }
-        const firstCity = String(finalAddress).split(',')[0].trim();
-        const s = firstCity.toLowerCase();
-        const banned = ['مستشفى','مشفى','طريق','شارع','أوتوستراد','جسر','نفق','مطار','جامعة','محطة','قصر','مرفأ','ميناء','دوار','مستديرة','مدرسة','سوق','مول','صيدلية','مطعم','فندق','معمل','مصنع','lebanon','liban','pharmacy','pharmacie','hospital','hopital','clinic','clinique','shop','store','market','supermarket','mall','restaurant','hotel','bank','atm','station','bridge','tunnel','airport','university','school','college','center','centre'];
-        if (banned.some(t => s.includes(t))) {
-            return res.status(400).json({ error: 'العنوان يجب أن يكون مدينة أو بلدة فقط' });
+        const { extractCityName, isValidCityName } = require('../utils/validation');
+        const cityOnly = extractCityName(finalAddress);
+        if (!isValidCityName(cityOnly)) {
+            return res.status(400).json({ error: 'يرجى اختيار مدينة أو بلدة فقط' });
         }
+        finalAddress = cityOnly;
 
         // Check category exists and is a child category (not parent)
         const [catData] = await db.query('SELECT required_role, parent_id FROM categories WHERE catg_id = ?', [category]);
