@@ -751,16 +751,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const latManualEl = document.getElementById('reportLatManual');
             const lngManualEl = document.getElementById('reportLngManual');
             if (addressInput) {
-                addressInput.readOnly = mode === 'manual';
-                addressInput.placeholder = mode === 'manual' ? 'اسم المدينة (يُحدد تلقائياً)' : 'ابحث عن موقع أو أدخل العنوان يدوياً';
+                const readonlyNow = (mode !== 'manual') || !isAdminNow;
+                addressInput.readOnly = readonlyNow;
+                addressInput.placeholder = 'اسم المدينة (يُحدد تلقائياً)';
                 addressInput.required = mode === 'auto';
-                if (mode === 'manual' && addressInput.value) {
+                if (!readonlyNow && addressInput.value) {
                     addressInput.value = extractCity(addressInput.value);
                 }
             }
             if (searchBtn) {
-                searchBtn.style.display = mode === 'manual' ? 'none' : '';
-                searchBtn.disabled = mode === 'manual';
+                searchBtn.style.display = 'none';
+                searchBtn.disabled = true;
             }
             if (latManualEl) latManualEl.required = (mode === 'manual' && isAdminNow);
             if (lngManualEl) lngManualEl.required = (mode === 'manual' && isAdminNow);

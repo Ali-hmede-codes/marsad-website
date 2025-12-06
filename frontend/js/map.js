@@ -211,9 +211,11 @@ async function openReportModal(latlng) {
         } else {
             addressInput.value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
         }
+        addressInput.readOnly = true;
     } catch (error) {
         console.error('Geocoding error:', error);
         addressInput.value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+        addressInput.readOnly = true;
     }
 
     modal.classList.add('active');
