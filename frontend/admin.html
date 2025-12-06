@@ -568,7 +568,15 @@
                     .then(function(chs){
                         var body = document.querySelector('#whatsappChannelsTable tbody');
                         if(!body) return;
-                        if(!chs || !chs.length){ body.innerHTML = '<tr><td class="text-center text-muted">لا توجد قنوات</td></tr>'; return; }
+                        if(!chs || !chs.length){
+                            return fetchWithAuth(API_URL + '/whatsapp/channels/all')
+                                .then(function(rr){ return rr.ok ? rr.json() : Promise.reject(); })
+                                .then(function(all){
+                                    if(!all || !all.length){ body.innerHTML = '<tr><td class="text-center text-muted">لا توجد قنوات</td></tr>'; return; }
+                                    body.innerHTML = all.map(function(c){ return '<tr><td>' + (c.name||c.id||'') + '</td></tr>'; }).join('');
+                                })
+                                .catch(function(){ body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });
+                        }
                         body.innerHTML = chs.map(function(c){ return '<tr><td>' + (c.name||c.id||'') + '</td></tr>'; }).join('');
                     })
                     .catch(function(){ var body = document.querySelector('#whatsappChannelsTable tbody'); if(body) body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });

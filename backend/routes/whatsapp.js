@@ -14,6 +14,11 @@ router.get('/channels', async (req, res) => {
   res.json(channels);
 });
 
+router.get('/channels/all', async (req, res) => {
+  const channels = await whatsapp.getAllChannels();
+  res.json(channels);
+});
+
 router.get('/qr.png', async (req, res) => {
   const buf = await whatsapp.getQrPng();
   if (!buf) {

@@ -76,11 +76,26 @@ async function getAdminChannels() {
       } catch (_) {
         subs = [];
       }
-      const mine = subs.find((s) => s.id && s.id._serialized === me);
-      const amAdmin = !!mine && (!!mine.isAdmin || !!mine.isSuperAdmin || !!mine.isOwner);
+      const mine = subs.find((s) => {
+        const sid = (s && (s.id && (s.id._serialized || s.id))) || s && (s.userId || s.wid && s.wid._serialized) || (s && s._serialized) || null;
+        return sid === me;
+      });
+      const amAdmin = !!mine && (!!mine.isAdmin || !!mine.isSuperAdmin || !!mine.isOwner || !!mine.isChannelAdmin);
       if (amAdmin) {
         out.push({ id: c.id && c.id._serialized ? c.id._serialized : c.id, name: c.name || c.formattedTitle || '' });
       }
+    }
+  }
+  return out;
+}
+
+async function getAllChannels() {
+  if (!client || !isReady) return [];
+  const chats = await client.getChats();
+  const out = [];
+  for (const c of chats) {
+    if (c.isChannel) {
+      out.push({ id: c.id && c.id._serialized ? c.id._serialized : c.id, name: c.name || c.formattedTitle || '' });
     }
   }
   return out;
@@ -142,4 +157,4 @@ async function restartClient() {
   return getStatus();
 }
 
-module.exports = { initWhatsApp, getAdminChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient };
+module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient };
