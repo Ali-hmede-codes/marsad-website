@@ -115,7 +115,8 @@
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
+                    var minimalUser = { is_admin: !!(data && data.user && data.user.is_admin), is_publisher: !!(data && data.user && data.user.is_publisher) };
+                    localStorage.setItem('user', JSON.stringify(minimalUser));
                     showNotification('تم تسجيل الدخول بنجاح', 'success');
                     setTimeout(() => {
                         window.location.href = '/';

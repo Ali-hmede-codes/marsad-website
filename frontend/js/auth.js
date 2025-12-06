@@ -37,7 +37,17 @@ function logout() {
     window.location.href = '/';
 }
 
-// Update UI based on auth status
+function sanitizeStoredUser() {
+    try {
+        const userStr = localStorage.getItem('user');
+        if (!userStr || userStr === 'undefined') return;
+        const u = JSON.parse(userStr);
+        if (!u || typeof u !== 'object') { localStorage.removeItem('user'); return; }
+        const compact = { is_admin: !!u.is_admin, is_publisher: !!u.is_publisher };
+        localStorage.setItem('user', JSON.stringify(compact));
+    } catch (_) { localStorage.removeItem('user'); }
+}
+
 function updateAuthUI() {
     const userInfo = document.getElementById('userInfo');
     const authButtons = document.getElementById('authButtons');
@@ -46,16 +56,17 @@ function updateAuthUI() {
     const adminBtn = document.getElementById('adminBtn');
 
     if (isLoggedIn()) {
-        const user = getCurrentUser();
-        if (userInfo && authButtons && userName) {
+        if (userInfo && authButtons) {
             userInfo.classList.remove('hidden');
             authButtons.classList.add('hidden');
-            userName.textContent = `${user.name}`;
-
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', logout);
-            }
         }
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', logout);
+        }
+        fetchWithAuth(API_URL + '/auth/me')
+            .then(function(resp){ return resp.ok ? resp.json() : Promise.reject(); })
+            .then(function(user){ if (userName) { userName.textContent = user && user.name ? String(user.name) : ''; } })
+            .catch(function(){ if (userName) { userName.textContent = ''; } });
         toggleAdminButton();
     } else {
         if (userInfo && authButtons) {
@@ -110,8 +121,9 @@ async function fetchWithAuth(url, options = {}) {
 
 // Initialize auth on page load
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateAuthUI);
+    document.addEventListener('DOMContentLoaded', function(){ sanitizeStoredUser(); updateAuthUI(); });
 } else {
+    sanitizeStoredUser();
     updateAuthUI();
 }
 
