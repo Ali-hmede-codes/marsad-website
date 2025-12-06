@@ -53,8 +53,16 @@ app.use((req, res, next) => {
 
 app.get('/index.html', (req, res) => res.redirect(301, '/'));
 app.get('/index', (req, res) => res.redirect(301, '/'));
-app.get('/login.html', (req, res) => res.redirect(301, '/login'));
-app.get('/register.html', (req, res) => res.redirect(301, '/register'));
+app.get('/login.html', (req, res) => {
+    const i = req.originalUrl.indexOf('?');
+    const qs = i >= 0 ? req.originalUrl.slice(i) : '';
+    res.redirect(301, '/login' + qs);
+});
+app.get('/register.html', (req, res) => {
+    const i = req.originalUrl.indexOf('?');
+    const qs = i >= 0 ? req.originalUrl.slice(i) : '';
+    res.redirect(301, '/register' + qs);
+});
 app.get('/admin.html', (req, res) => res.redirect(301, '/admin'));
 
 app.use(express.static(path.join(__dirname, '../frontend')));

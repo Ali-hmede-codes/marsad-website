@@ -27,7 +27,7 @@ const transporter = createTransporter();
 exports.sendVerificationEmail = async (email, token) => {
     const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
     const siteName = process.env.SITE_NAME || 'الرادار961';
-    const verificationUrl = `${frontend}/login.html?token=${token}`;
+    const verificationUrl = `${frontend}/login?token=${token}`;
 
     const mailOptions = {
         from: process.env.SMTP_FROM || process.env.SMTP_USER || process.env.EMAIL_USER,

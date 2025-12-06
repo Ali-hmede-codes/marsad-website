@@ -1,2 +1,13 @@
-manuall location admin only not working
-login verification code not working
+--manuall location admin only not working
+login verification when open not working
+put location in reports auto remove this -- high 
+put the categories icons -- low
+report can't be sended in same location only after one hour for whatsapp -- high
+features : 
+reset password
+profile (reports count)
+
+
+fixes : 
+map icons categories
+fix button of report in the map 
