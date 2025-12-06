@@ -22,7 +22,7 @@ function debounce(fn, delay = 500, immediate = true) {
 // Load categories
 async function loadCategories() {
     try {
-        const response = await fetch(`${window.API_URL}/categories`);
+        const response = await fetchWithAuth(`${window.API_URL}/categories`);
         const data = await response.json();
         categories = data;
 
@@ -148,7 +148,7 @@ async function loadReports(categoryFilter = '') {
             url += `?category=${categoryFilter}`;
         }
 
-        const response = await fetch(url);
+        const response = await fetchWithAuth(url);
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
             throw new Error(err.error || 'فشل تحميل التقارير');

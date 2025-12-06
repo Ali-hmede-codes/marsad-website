@@ -39,7 +39,7 @@ function setupEventListeners() {
 // Load all categories
 async function loadCategories() {
     try {
-        const response = await fetch(`${API_URL}/categories`);
+        const response = await fetchWithAuth(`${API_URL}/categories`);
         if (!response.ok) throw new Error('Failed to load categories');
 
         categories = await response.json();

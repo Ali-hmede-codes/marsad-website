@@ -4,10 +4,10 @@ const categoryController = require('../controllers/categoryController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const upload = require('../middleware/uploadMiddleware');
 
-// Public routes
-router.get('/', categoryController.getAllCategories);
-router.get('/children', categoryController.getChildCategories);
-router.get('/parents', categoryController.getParentCategories);
+// Protected routes
+router.get('/', verifyToken, categoryController.getAllCategories);
+router.get('/children', verifyToken, categoryController.getChildCategories);
+router.get('/parents', verifyToken, categoryController.getParentCategories);
 
 // Protected routes (admin only)
 router.post('/', verifyToken, isAdmin, upload.single('catg_picture'), categoryController.createCategory);
