@@ -93,6 +93,7 @@
                     <div class="daily-controls" style="display:flex;align-items:center;gap:12px;">
                         <button id="refreshWhatsappBtn" class="btn btn-secondary btn-sm">تحديث</button>
                         <button id="showQrBtn" class="btn btn-primary btn-sm">عرض QR</button>
+                        <button id="restartWhatsappBtn" class="btn btn-secondary btn-sm">إعادة تشغيل واتساب</button>
                     </div>
                 </div>
                 <div style="padding: 0 24px 16px;">
@@ -589,18 +590,21 @@
                                     .then(function(s2){
                                         if(s2 && s2.hasQr){
                                             resolve(fetchWithAuth(API_URL + '/whatsapp/qr.png'));
-                                        } else if(++attempts < 10){
+                                        } else if(++attempts < 30){
                                             setTimeout(poll, 1500);
                                         } else {
                                             reject(new Error('no-qr'));
                                         }
                                     })
-                                    .catch(function(){ if(++attempts < 10) setTimeout(poll, 1500); else reject(new Error('no-qr')); });
+                                    .catch(function(){ if(++attempts < 30) setTimeout(poll, 1500); else reject(new Error('no-qr')); });
                             }
                             poll();
                         });
                     })
-                    .then(function(r){ if(!r || !r.ok) throw new Error('fetch-qr'); return r.blob(); })
+                    .then(function(r){
+                        if(!r || !r.ok) throw new Error('fetch-qr');
+                        return r.blob();
+                    })
                     .then(function(b){
                         var url = URL.createObjectURL(b);
                         var img = document.getElementById('whatsappQrImg');
@@ -608,15 +612,43 @@
                         if(img) img.src = url;
                         if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
                     })
-                    .catch(function(){ showNotification('QR غير متاح حالياً', 'error'); });
+                    .catch(function(){
+                        fetchWithAuth(API_URL + '/whatsapp/qr-data')
+                            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                            .then(function(d){
+                                var img = document.getElementById('whatsappQrImg');
+                                var box = document.getElementById('whatsappQrBox');
+                                if(img && d && d.dataUrl){ img.src = d.dataUrl; }
+                                if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
+                            })
+                            .catch(function(){
+                                fetchWithAuth(API_URL + '/whatsapp/qr.svg')
+                                    .then(function(r){ return r.ok ? r.text() : Promise.reject(); })
+                                    .then(function(svgText){
+                                        var img = document.getElementById('whatsappQrImg');
+                                        var box = document.getElementById('whatsappQrBox');
+                                        var data = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgText);
+                                        if(img) img.src = data;
+                                        if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
+                                    })
+                                    .catch(function(){ showNotification('QR غير متاح حالياً', 'error'); });
+                            });
+                    });
             }
             window.loadWhatsapp = loadWhatsapp;
             window.showWhatsappQR = showWhatsappQR;
             function wireWhatsapp(){
                 var btnR = document.getElementById('refreshWhatsappBtn');
                 var btnQ = document.getElementById('showQrBtn');
+                var btnRestart = document.getElementById('restartWhatsappBtn');
                 if(btnR) btnR.addEventListener('click', loadWhatsapp);
                 if(btnQ) btnQ.addEventListener('click', showWhatsappQR);
+                if(btnRestart) btnRestart.addEventListener('click', function(){
+                    fetchWithAuth(API_URL + '/whatsapp/restart', { method: 'POST' })
+                        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                        .then(function(){ loadWhatsapp(); showWhatsappQR(); })
+                        .catch(function(){ showNotification('تعذر إعادة تشغيل واتساب', 'error'); });
+                });
             }
             document.addEventListener('DOMContentLoaded', function(){ wireWhatsapp(); loadWhatsapp(); });
         })();

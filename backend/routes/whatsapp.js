@@ -24,4 +24,28 @@ router.get('/qr.png', async (req, res) => {
   res.send(buf);
 });
 
+router.get('/qr.svg', async (req, res) => {
+  const svg = await whatsapp.getQrSvg();
+  if (!svg) {
+    res.status(404).json({ error: 'QR غير متاح' });
+    return;
+  }
+  res.set('Content-Type', 'image/svg+xml');
+  res.send(svg);
+});
+
+router.get('/qr-data', async (req, res) => {
+  const dataUrl = await whatsapp.getQrDataUrl();
+  if (!dataUrl) {
+    res.status(404).json({ error: 'QR غير متاح' });
+    return;
+  }
+  res.json({ dataUrl });
+});
+
+router.post('/restart', async (req, res) => {
+  const st = await whatsapp.restartClient();
+  res.json(st);
+});
+
 module.exports = router;

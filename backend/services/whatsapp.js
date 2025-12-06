@@ -114,4 +114,32 @@ async function getQrPng() {
   return buf;
 }
 
-module.exports = { initWhatsApp, getAdminChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng };
+async function getQrDataUrl() {
+  if (!lastQr) return null;
+  const data = await QRCode.toDataURL(lastQr);
+  return data;
+}
+
+async function getQrSvg() {
+  if (!lastQr) return null;
+  const svg = await QRCode.toString(lastQr, { type: 'svg' });
+  return svg;
+}
+
+async function restartClient() {
+  try {
+    if (client && typeof client.destroy === 'function') {
+      await client.destroy();
+    }
+  } catch (_) {}
+  client = null;
+  lastQr = null;
+  isReady = false;
+  isAuthenticated = false;
+  initError = null;
+  executablePathUsed = null;
+  initWhatsApp();
+  return getStatus();
+}
+
+module.exports = { initWhatsApp, getAdminChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient };
