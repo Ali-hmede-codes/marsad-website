@@ -19,6 +19,21 @@ router.get('/channels/all', async (req, res) => {
   res.json(channels);
 });
 
+router.get('/channels/manual', async (req, res) => {
+  const ids = whatsapp.getManualChannels();
+  res.json(ids);
+});
+
+router.put('/channels/manual', async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.ids) ? req.body.ids.map((s) => String(s).trim()).filter(Boolean) : [];
+    const saved = await whatsapp.saveManualChannels(ids);
+    res.json(saved);
+  } catch (e) {
+    res.status(400).json({ error: 'تعذر حفظ القنوات اليدوية' });
+  }
+});
+
 router.get('/qr.png', async (req, res) => {
   const buf = await whatsapp.getQrPng();
   if (!buf) {

@@ -99,8 +99,8 @@
                 </div>
                 <div style="padding: 0 24px 16px;">
                     <div id="whatsappStatus" class="text-muted" style="margin-bottom:12px;"></div>
-                    <div id="whatsappQrBox" style="display:none; align-items:center; justify-content:center;">
-                        <img id="whatsappQrImg" alt="WhatsApp QR" style="max-width:320px; border:1px solid var(--color-border); border-radius:8px;" />
+                    <div id="whatsappQrBox" style="display:none; align-items:center; justify-content:center; min-height:340px;">
+                        <img id="whatsappQrImg" alt="WhatsApp QR" style="max-width:360px; display:block; border:1px solid var(--color-border); border-radius:8px;" />
                     </div>
                 </div>
                 <div class="table-wrapper" style="margin-top:12px;">
@@ -112,6 +112,20 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                </div>
+                <div class="card" style="padding: 16px 24px; margin:12px 24px;">
+                    <h3 class="section-title" style="margin:0 0 8px 0;">القنوات اليدوية</h3>
+                    <div class="form-group">
+                        <label for="manualChannelsInput">أدخل Channel ID لكل سطر</label>
+                        <textarea id="manualChannelsInput" class="form-control" rows="3" placeholder="مثال: 12345@s.whatsapp.net"></textarea>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button id="saveManualChannelsBtn" class="btn btn-primary btn-sm">حفظ القنوات</button>
+                        <span id="manualChannelsStatus" class="text-muted"></span>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div id="manualChannelsList" class="text-muted"></div>
+                    </div>
                 </div>
             </section>
 
@@ -573,6 +587,19 @@
                         body.innerHTML = chs.map(function(c){ return '<tr><td>' + (c.name||c.id||'') + '</td></tr>'; }).join('');
                     })
                     .catch(function(){ var body = document.querySelector('#whatsappChannelsTable tbody'); if(body) body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });
+                fetchWithAuth(API_URL + '/whatsapp/channels/manual')
+                    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                    .then(function(ids){
+                        var listEl = document.getElementById('manualChannelsList');
+                        var inputEl = document.getElementById('manualChannelsInput');
+                        if(Array.isArray(ids)){
+                            if(listEl){ listEl.textContent = ids.length ? ('قنوات محفوظة: ' + ids.join(', ')) : 'لا توجد قنوات يدوية'; }
+                            if(inputEl){ inputEl.value = ids.join('\n'); }
+                        } else {
+                            if(listEl){ listEl.textContent = 'لا توجد قنوات يدوية'; }
+                        }
+                    })
+                    .catch(function(){ var listEl = document.getElementById('manualChannelsList'); if(listEl) listEl.textContent = 'تعذر تحميل القنوات اليدوية'; });
             }
             function showWhatsappQR(){
                 fetchWithAuth(API_URL + '/whatsapp/status')
@@ -582,7 +609,11 @@
                             return fetchWithAuth(API_URL + '/whatsapp/qr.png');
                         }
                         var box = document.getElementById('whatsappQrBox');
-                        if(box){ box.style.display = 'flex'; box.innerHTML = '<div class="text-muted">جاري توليد رمز QR...</div>'; }
+                        var img = document.getElementById('whatsappQrImg');
+                        var status = document.getElementById('whatsappStatus');
+                        if(box){ box.style.display = 'flex'; }
+                        if(img){ img.src = ''; }
+                        if(status){ status.textContent = 'جاري توليد رمز QR...'; }
                         return new Promise(function(resolve, reject){
                             var attempts = 0;
                             function poll(){
@@ -611,7 +642,7 @@
                         var img = document.getElementById('whatsappQrImg');
                         var box = document.getElementById('whatsappQrBox');
                         if(img) img.src = url;
-                        if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
+                        if(box){ box.style.display = 'flex'; }
                     })
                     .catch(function(){
                         fetchWithAuth(API_URL + '/whatsapp/qr-data')
@@ -620,7 +651,7 @@
                                 var img = document.getElementById('whatsappQrImg');
                                 var box = document.getElementById('whatsappQrBox');
                                 if(img && d && d.dataUrl){ img.src = d.dataUrl; }
-                                if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
+                                if(box){ box.style.display = 'flex'; }
                             })
                             .catch(function(){
                                 fetchWithAuth(API_URL + '/whatsapp/qr.svg')
@@ -630,7 +661,7 @@
                                         var box = document.getElementById('whatsappQrBox');
                                         var data = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgText);
                                         if(img) img.src = data;
-                                        if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
+                                        if(box){ box.style.display = 'flex'; }
                                     })
                                     .catch(function(){ showNotification('QR غير متاح حالياً', 'error'); });
                             });
@@ -656,6 +687,22 @@
                         .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
                         .then(function(){ loadWhatsapp(); showWhatsappQR(); })
                         .catch(function(){ showNotification('تعذر حذف المصادقة', 'error'); });
+                });
+                var btnSaveManual = document.getElementById('saveManualChannelsBtn');
+                if(btnSaveManual) btnSaveManual.addEventListener('click', function(){
+                    var inputEl = document.getElementById('manualChannelsInput');
+                    var statusEl = document.getElementById('manualChannelsStatus');
+                    var ids = [];
+                    if(inputEl){
+                        ids = String(inputEl.value || '')
+                            .split(/\r?\n|,/)
+                            .map(function(s){ return s.trim(); })
+                            .filter(function(s){ return !!s; });
+                    }
+                    fetchWithAuth(API_URL + '/whatsapp/channels/manual', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: ids }) })
+                        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                        .then(function(){ if(statusEl) statusEl.textContent = 'تم الحفظ'; loadWhatsapp(); })
+                        .catch(function(){ if(statusEl) statusEl.textContent = 'تعذر الحفظ'; });
                 });
             }
             document.addEventListener('DOMContentLoaded', function(){ wireWhatsapp(); loadWhatsapp(); });

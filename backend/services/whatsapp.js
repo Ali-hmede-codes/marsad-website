@@ -9,6 +9,7 @@ let isReady = false;
 let isAuthenticated = false;
 let initError = null;
 let executablePathUsed = null;
+let manualChannelsCache = null;
 
 const ENABLED = (process.env.WHATSAPP_ENABLED || 'true').toLowerCase() === 'true';
 
@@ -110,13 +111,59 @@ async function sendToAdminChannels(message) {
       if (!chat || !chat.isChannel) continue;
       await chat.sendMessage(String(message));
     } catch (_) {}
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+}
+
+function getManualChannels() {
+  if (Array.isArray(manualChannelsCache)) return manualChannelsCache;
+  const dataPath = path.join(__dirname, '../data/whatsapp_channels.json');
+  try {
+    const raw = fs.readFileSync(dataPath, 'utf-8');
+    const parsed = JSON.parse(raw);
+    manualChannelsCache = Array.isArray(parsed) ? parsed.map(s => String(s).trim()).filter(Boolean) : [];
+    return manualChannelsCache;
+  } catch (_) {
+    const env = (process.env.WHATSAPP_CHANNEL_IDS || '')
+      .split(',')
+      .map(s => String(s).trim())
+      .filter(Boolean);
+    manualChannelsCache = env;
+    return manualChannelsCache;
+  }
+}
+
+async function saveManualChannels(ids) {
+  const arr = Array.isArray(ids) ? ids.map(s => String(s).trim()).filter(Boolean) : [];
+  const dataPath = path.join(__dirname, '../data/whatsapp_channels.json');
+  await fs.promises.mkdir(path.dirname(dataPath), { recursive: true });
+  await fs.promises.writeFile(dataPath, JSON.stringify(arr, null, 2), 'utf-8');
+  manualChannelsCache = arr;
+  return manualChannelsCache;
+}
+
+async function sendToManualChannels(message) {
+  if (!client || !isReady) return;
+  const ids = getManualChannels();
+  for (const id of ids) {
+    try {
+      const chat = await client.getChatById(id);
+      if (!chat || !chat.isChannel) continue;
+      await chat.sendMessage(String(message));
+    } catch (_) {}
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 }
 
 async function onNewReport(categoryName, location) {
   if (!ENABLED) return;
   const msg = `${String(categoryName)} في منطقة : ${String(location)}`;
-  await sendToAdminChannels(msg);
+  const manual = getManualChannels();
+  if (manual && manual.length) {
+    await sendToManualChannels(msg);
+  } else {
+    await sendToAdminChannels(msg);
+  }
 }
 
 function getStatus() {
@@ -167,4 +214,4 @@ async function clearAuth() {
   return true;
 }
 
-module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth };
+module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, getManualChannels, saveManualChannels, sendToManualChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth };
