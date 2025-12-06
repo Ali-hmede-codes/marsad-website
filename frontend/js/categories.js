@@ -3,7 +3,7 @@ const API_URL = window.API_URL || 'http://localhost:3000/api';
 // Check authentication - admin only
 if (!isLoggedIn() || !isAdmin()) {
     alert('يجب أن تكون مديراً للوصول إلى هذه الصفحة');
-    window.location.href = 'login.html';
+    window.location.href = '/login';
 }
 
 let categories = [];

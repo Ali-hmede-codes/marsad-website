@@ -47,11 +47,11 @@
             </form>
 
             <div class="auth-footer">
-                <p>ليس لديك حساب؟ <a href="register.html" class="auth-link">إنشاء حساب جديد</a></p>
+                <p>ليس لديك حساب؟ <a href="/register" class="auth-link">إنشاء حساب جديد</a></p>
             </div>
 
             <div class="text-center">
-                <a href="index.html" class="back-link">← العودة إلى الصفحة الرئيسية</a>
+                <a href="/" class="back-link">← العودة إلى الصفحة الرئيسية</a>
             </div>
         </div>
     </div>
@@ -118,7 +118,7 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     showNotification('تم تسجيل الدخول بنجاح', 'success');
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = '/';
                     }, 1000);
                 } else {
                     errorMessage.textContent = data.error || 'فشل تسجيل الدخول';

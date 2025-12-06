@@ -18,13 +18,13 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="index.html" class="logo">
+                <a href="/" class="logo">
                     <span class="logo-icon" style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;overflow:hidden;">
                         <img src="assets/logo.png" alt="الرادار961" style="width:100%;height:100%;object-fit:contain;" />
                     </span>
                 </a>
                 <nav class="nav">
-                    <a href="index.html" class="btn btn-secondary btn-sm">الخريطة</a>
+                    <a href="/" class="btn btn-secondary btn-sm">الخريطة</a>
                     <button id="logoutBtn" class="btn btn-secondary btn-icon" title="تسجيل الخروج" aria-label="تسجيل الخروج">
                         <img src="https://img.icons8.com/ios/50/exit--v1.png" alt="Logout" />
                     </button>
@@ -204,7 +204,7 @@
         (function(){
             var token = typeof getToken==='function' ? getToken() : null;
             if(!token){
-                window.location.href = 'login.html';
+                window.location.href = '/login';
                 return;
             }
             document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -499,7 +499,7 @@
                     loadUsers();
                     loadCategoriesAdmin();
                 })
-                .catch(function(){ showNotification('غير مصرح لك', 'error'); window.location.href = 'login.html'; });
+                .catch(function(){ showNotification('غير مصرح لك', 'error'); window.location.href = '/login'; });
         })();
     </script>
 </body>

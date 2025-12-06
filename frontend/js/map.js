@@ -143,7 +143,7 @@ function showLoginPrompt() {
 
     // Handle confirm
     const handleConfirm = () => {
-        window.location.href = 'login.html';
+        window.location.href = '/login';
     };
 
     // Handle close/cancel

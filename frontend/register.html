@@ -63,11 +63,11 @@
             </form>
 
             <div class="auth-footer">
-                <p>لديك حساب بالفعل؟ <a href="login.html" class="auth-link">تسجيل الدخول</a></p>
+                <p>لديك حساب بالفعل؟ <a href="/login" class="auth-link">تسجيل الدخول</a></p>
             </div>
 
             <div class="text-center">
-                <a href="index.html" class="back-link">← العودة إلى الصفحة الرئيسية</a>
+                <a href="/" class="back-link">← العودة إلى الصفحة الرئيسية</a>
             </div>
         </div>
     </div>
@@ -114,7 +114,7 @@
                     showNotification('تم إنشاء الحساب بنجاح!', 'success');
 
                     setTimeout(() => {
-                        window.location.href = 'login.html';
+                        window.location.href = '/login';
                     }, 1500);
                 } else {
                     errorMessage.textContent = data.error || 'فشل إنشاء الحساب';

@@ -39,8 +39,8 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Serve frontend static files with extensionless HTML support
+app.use(express.static(path.join(__dirname, '../frontend'), { extensions: ['html'] }));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
