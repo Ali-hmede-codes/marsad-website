@@ -43,6 +43,7 @@ function updateAuthUI() {
     const authButtons = document.getElementById('authButtons');
     const userName = document.getElementById('userName');
     const logoutBtn = document.getElementById('logoutBtn');
+    const adminBtn = document.getElementById('adminBtn');
 
     if (isLoggedIn()) {
         const user = getCurrentUser();
@@ -55,12 +56,32 @@ function updateAuthUI() {
                 logoutBtn.addEventListener('click', logout);
             }
         }
+        toggleAdminButton();
     } else {
         if (userInfo && authButtons) {
             userInfo.classList.add('hidden');
             authButtons.classList.remove('hidden');
         }
+        if (adminBtn) {
+            adminBtn.style.display = 'none';
+        }
     }
+}
+
+function toggleAdminButton(){
+    const btn = document.getElementById('adminBtn');
+    if(!btn) return;
+    const token = getToken();
+    if(!token){ btn.style.display = 'none'; return; }
+    fetchWithAuth(API_URL + '/auth/me')
+        .then(function(resp){ return resp.ok ? resp.json() : Promise.reject(); })
+        .then(function(user){
+            const isAdminNow = !!(user && user.is_admin);
+            btn.style.display = isAdminNow ? 'inline-flex' : 'none';
+            const img = btn.querySelector('img');
+            if(img) img.style.filter = isAdminNow ? 'invert(1)' : '';
+        })
+        .catch(function(){ btn.style.display = 'none'; });
 }
 
 // Make authenticated API request
@@ -102,3 +123,4 @@ window.isAdmin = isAdmin;
 window.logout = logout;
 window.updateAuthUI = updateAuthUI;
 window.fetchWithAuth = fetchWithAuth;
+window.toggleAdminButton = toggleAdminButton;
