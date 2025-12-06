@@ -52,9 +52,9 @@ function initWhatsApp() {
     }
   });
   client.on('qr', (qr) => { lastQr = qr; });
-  client.on('authenticated', () => { isAuthenticated = true; initError = null; });
+  client.on('authenticated', () => { isAuthenticated = true; initError = null; lastQr = null; });
   client.on('auth_failure', (msg) => { isAuthenticated = false; initError = String(msg || 'auth_failure'); });
-  client.on('ready', () => { isReady = true; initError = null; });
+  client.on('ready', () => { isReady = true; initError = null; lastQr = null; });
   client.on('disconnected', (reason) => { isReady = false; initError = String(reason || 'disconnected'); });
   try {
     client.initialize();

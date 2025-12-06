@@ -546,8 +546,18 @@
                     .then(function(st){
                         var el = document.getElementById('whatsappStatus');
                         if(el){
-                            var t = 'مفعّل: ' + (st.enabled ? 'نعم' : 'لا') + ' | مصادق: ' + (st.authenticated ? 'نعم' : 'لا') + ' | جاهز: ' + (st.ready ? 'نعم' : 'لا') + (st.error ? (' | خطأ: ' + st.error) : '');
-                            el.textContent = t;
+                            var t = 'مفعّل: ' + (st.enabled ? 'نعم' : 'لا') + ' | مصادق: ' + (st.authenticated ? 'نعم' : 'لا') + ' | جاهز: ' + (st.ready ? 'نعم' : 'لا');
+                            var extra = '';
+                            if(st && st.error){
+                                var err = String(st.error || '');
+                                extra = ' | خطأ: ' + err;
+                                if(/error while loading shared libraries|Failed to launch the browser process/i.test(err)){
+                                    var hint = 'تحتاج الخادم إلى تثبيت مكتبات كروميوم (libatk, gtk, nss, asound وغيرها).';
+                                    if(!st.chromePath){ hint += ' لم يتم العثور على Chrome/Chromium في النظام.'; }
+                                    extra += ' \u2014 ' + hint;
+                                }
+                            }
+                            el.textContent = t + extra;
                         }
                         if(st && st.hasQr && !st.authenticated){ showWhatsappQR(); }
                     })
