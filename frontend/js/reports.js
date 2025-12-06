@@ -736,17 +736,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabs) {
         const autoBtn = tabs.querySelector('[data-mode="auto"]');
         const manualBtn = tabs.querySelector('[data-mode="manual"]');
+        const isAdminNow = (isAdmin && isAdmin());
         const setMode = (mode) => {
-            if (mode === 'manual' && !(isAdmin && isAdmin())) {
+            if (mode === 'manual' && !isAdminNow) {
                 if (window.showNotification) window.showNotification('الوضع اليدوي للمدراء فقط', 'error');
                 return;
             }
             locationMode = mode;
             if (autoBtn) autoBtn.classList.toggle('active', mode === 'auto');
             if (manualBtn) manualBtn.classList.toggle('active', mode === 'manual');
-            const admin = (isAdmin && isAdmin());
             if (autoGroup) autoGroup.classList.toggle('hidden', mode !== 'auto');
-            if (manualGroup) manualGroup.classList.toggle('hidden', !(mode === 'manual' && admin));
+            if (manualGroup) manualGroup.classList.toggle('hidden', !(mode === 'manual' && isAdminNow));
             const searchBtn = document.getElementById('searchAddressBtn');
             const latManualEl = document.getElementById('reportLatManual');
             const lngManualEl = document.getElementById('reportLngManual');
@@ -762,13 +762,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchBtn.style.display = mode === 'manual' ? 'none' : '';
                 searchBtn.disabled = mode === 'manual';
             }
-            if (latManualEl) latManualEl.required = (mode === 'manual' && admin);
-            if (lngManualEl) lngManualEl.required = (mode === 'manual' && admin);
+            if (latManualEl) latManualEl.required = (mode === 'manual' && isAdminNow);
+            if (lngManualEl) lngManualEl.required = (mode === 'manual' && isAdminNow);
             syncAddressRequirement();
             if (mode === 'manual') updateFromManualDebounced();
         };
         if (autoBtn) autoBtn.addEventListener('click', () => setMode('auto'));
-        if (manualBtn) manualBtn.addEventListener('click', () => setMode('manual'));
+        if (manualBtn && isAdminNow) manualBtn.addEventListener('click', () => setMode('manual'));
         if (tabs) {
             tabs.addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-mode]');
@@ -777,11 +777,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 setMode(mode === 'manual' ? 'manual' : 'auto');
             });
         }
-        if (manualBtn && !(isAdmin && isAdmin())) {
-            manualBtn.disabled = true;
-            manualBtn.title = 'للمدراء فقط';
+        if (manualBtn && !isAdminNow) {
+            manualBtn.style.display = 'none';
         }
         setMode('auto');
+        if (!isAdminNow && manualGroup) {
+            manualGroup.classList.add('hidden');
+        }
         window.setReportLocationMode = setMode;
     }
 });

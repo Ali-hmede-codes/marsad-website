@@ -1,7 +1,10 @@
---manuall location admin only not working
-login verification when open not working
-put location in reports auto remove this -- high 
-put the categories icons -- low
+==//manuall location admin only not working//fixed
+//login verification when open not working//fixed
+put location in reports location box auto remove this 
+can't make a report in the water==high 
+==put the categories icons==low
+
+
 report can't be sended in same location only after one hour for whatsapp -- high
 features : 
 reset password
