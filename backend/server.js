@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 require('dotenv').config();
+const whatsapp = require('./services/whatsapp');
 
 const app = express();
 app.set('trust proxy', true);
@@ -69,6 +70,7 @@ app.use('/api/reports', require('./routes/reports'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/whatsapp', require('./routes/whatsapp'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -112,6 +114,8 @@ if (ENABLE_HTTPS && keyPath && certPath && fs.existsSync(keyPath) && fs.existsSy
         console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 }
+
+whatsapp.initWhatsApp();
 
 const rateMap = new Map();
 function createRateLimiter(limit, windowMs) {

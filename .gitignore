@@ -33,3 +33,6 @@ pids/
 
 # Build output
 #frontend/js/dist/
+
+backend/.wwebjs_auth/
+.wwebjs_auth/

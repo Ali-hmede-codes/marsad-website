@@ -1,6 +1,7 @@
 const db = require('../config/database');
 const { isInLebanon, sanitizeInput } = require('../utils/validation');
 const { getAddressFromCoordinates } = require('../utils/geocoding');
+const whatsapp = require('../services/whatsapp');
 
 // ... (existing code)
 
@@ -101,11 +102,13 @@ exports.createReport = async (req, res) => {
             [req.user.user_id]
         );
 
-        res.status(201).json({
-            message: 'تم إنشاء التقرير بنجاح',
-            report_id: result.insertId,
-            address: finalAddress
-        });
+        try {
+            const [rows] = await db.query('SELECT category_name FROM report_details WHERE rep_id = ?', [result.insertId]);
+            const categoryName = rows && rows[0] && rows[0].category_name ? rows[0].category_name : '';
+            await whatsapp.onNewReport(categoryName, finalAddress);
+        } catch (_) {}
+
+        res.status(201).json({ message: 'تم إنشاء التقرير بنجاح', report_id: result.insertId, address: finalAddress });
     } catch (error) {
         console.error('Create report error:', error);
         res.status(500).json({ error: 'خطأ في الخادم' });
