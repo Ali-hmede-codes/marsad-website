@@ -94,6 +94,7 @@
                         <button id="refreshWhatsappBtn" class="btn btn-secondary btn-sm">تحديث</button>
                         <button id="showQrBtn" class="btn btn-primary btn-sm">عرض QR</button>
                         <button id="restartWhatsappBtn" class="btn btn-secondary btn-sm">إعادة تشغيل واتساب</button>
+                        <button id="clearAuthBtn" class="btn btn-secondary btn-sm" style="color: var(--color-error);">حذف المصادقة</button>
                     </div>
                 </div>
                 <div style="padding: 0 24px 16px;">
@@ -563,20 +564,12 @@
                         if(st && st.hasQr && !st.authenticated){ showWhatsappQR(); }
                     })
                     .catch(function(){ var el = document.getElementById('whatsappStatus'); if(el) el.textContent = 'تعذر تحميل الحالة'; });
-                fetchWithAuth(API_URL + '/whatsapp/channels')
+                fetchWithAuth(API_URL + '/whatsapp/channels/all')
                     .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
                     .then(function(chs){
                         var body = document.querySelector('#whatsappChannelsTable tbody');
                         if(!body) return;
-                        if(!chs || !chs.length){
-                            return fetchWithAuth(API_URL + '/whatsapp/channels/all')
-                                .then(function(rr){ return rr.ok ? rr.json() : Promise.reject(); })
-                                .then(function(all){
-                                    if(!all || !all.length){ body.innerHTML = '<tr><td class="text-center text-muted">لا توجد قنوات</td></tr>'; return; }
-                                    body.innerHTML = all.map(function(c){ return '<tr><td>' + (c.name||c.id||'') + '</td></tr>'; }).join('');
-                                })
-                                .catch(function(){ body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });
-                        }
+                        if(!chs || !chs.length){ body.innerHTML = '<tr><td class="text-center text-muted">لا توجد قنوات</td></tr>'; return; }
                         body.innerHTML = chs.map(function(c){ return '<tr><td>' + (c.name||c.id||'') + '</td></tr>'; }).join('');
                     })
                     .catch(function(){ var body = document.querySelector('#whatsappChannelsTable tbody'); if(body) body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });
@@ -649,6 +642,7 @@
                 var btnR = document.getElementById('refreshWhatsappBtn');
                 var btnQ = document.getElementById('showQrBtn');
                 var btnRestart = document.getElementById('restartWhatsappBtn');
+                var btnClear = document.getElementById('clearAuthBtn');
                 if(btnR) btnR.addEventListener('click', loadWhatsapp);
                 if(btnQ) btnQ.addEventListener('click', showWhatsappQR);
                 if(btnRestart) btnRestart.addEventListener('click', function(){
@@ -656,6 +650,12 @@
                         .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
                         .then(function(){ loadWhatsapp(); showWhatsappQR(); })
                         .catch(function(){ showNotification('تعذر إعادة تشغيل واتساب', 'error'); });
+                });
+                if(btnClear) btnClear.addEventListener('click', function(){
+                    fetchWithAuth(API_URL + '/whatsapp/auth/clear', { method: 'POST' })
+                        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                        .then(function(){ loadWhatsapp(); showWhatsappQR(); })
+                        .catch(function(){ showNotification('تعذر حذف المصادقة', 'error'); });
                 });
             }
             document.addEventListener('DOMContentLoaded', function(){ wireWhatsapp(); loadWhatsapp(); });

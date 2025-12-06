@@ -157,4 +157,14 @@ async function restartClient() {
   return getStatus();
 }
 
-module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient };
+async function clearAuth() {
+  try {
+    const authDir = path.join(__dirname, '../.wwebjs_auth');
+    if (fs.existsSync(authDir)) {
+      await fs.promises.rm(authDir, { recursive: true, force: true });
+    }
+  } catch (_) {}
+  return true;
+}
+
+module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth };

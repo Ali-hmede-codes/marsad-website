@@ -53,4 +53,10 @@ router.post('/restart', async (req, res) => {
   res.json(st);
 });
 
+router.post('/auth/clear', async (req, res) => {
+  await whatsapp.clearAuth();
+  const st = await whatsapp.restartClient();
+  res.json(st);
+});
+
 module.exports = router;
