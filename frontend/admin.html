@@ -546,7 +546,7 @@
                     .then(function(st){
                         var el = document.getElementById('whatsappStatus');
                         if(el){
-                            var t = 'مفعّل: ' + (st.enabled ? 'نعم' : 'لا') + ' | مصادق: ' + (st.authenticated ? 'نعم' : 'لا') + ' | جاهز: ' + (st.ready ? 'نعم' : 'لا');
+                            var t = 'مفعّل: ' + (st.enabled ? 'نعم' : 'لا') + ' | مصادق: ' + (st.authenticated ? 'نعم' : 'لا') + ' | جاهز: ' + (st.ready ? 'نعم' : 'لا') + (st.error ? (' | خطأ: ' + st.error) : '');
                             el.textContent = t;
                         }
                         if(st && st.hasQr && !st.authenticated){ showWhatsappQR(); }

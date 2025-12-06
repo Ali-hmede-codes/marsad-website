@@ -6,6 +6,7 @@ let client;
 let lastQr = null;
 let isReady = false;
 let isAuthenticated = false;
+let initError = null;
 
 const ENABLED = (process.env.WHATSAPP_ENABLED || 'true').toLowerCase() === 'true';
 
@@ -14,12 +15,22 @@ function initWhatsApp() {
   if (client) return;
   client = new Client({
     authStrategy: new LocalAuth({ dataPath: path.join(__dirname, '../.wwebjs_auth') }),
-    puppeteer: { headless: true }
+    puppeteer: {
+      headless: true,
+      args: ['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu','--no-zygote','--single-process'],
+      executablePath: process.env.CHROME_PATH || undefined
+    }
   });
   client.on('qr', (qr) => { lastQr = qr; });
-  client.on('authenticated', () => { isAuthenticated = true; });
-  client.on('ready', () => { isReady = true; });
-  client.initialize();
+  client.on('authenticated', () => { isAuthenticated = true; initError = null; });
+  client.on('auth_failure', (msg) => { isAuthenticated = false; initError = String(msg || 'auth_failure'); });
+  client.on('ready', () => { isReady = true; initError = null; });
+  client.on('disconnected', (reason) => { isReady = false; initError = String(reason || 'disconnected'); });
+  try {
+    client.initialize();
+  } catch (e) {
+    initError = e && e.message ? e.message : 'initialize_failed';
+  }
 }
 
 async function getAdminChannels() {
@@ -64,7 +75,7 @@ async function onNewReport(categoryName, location) {
 }
 
 function getStatus() {
-  return { enabled: ENABLED, ready: isReady, authenticated: isAuthenticated, hasQr: !!lastQr };
+  return { enabled: ENABLED, ready: isReady, authenticated: isAuthenticated, hasQr: !!lastQr, error: initError };
 }
 
 async function getQrPng() {
