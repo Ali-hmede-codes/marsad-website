@@ -563,14 +563,40 @@
                     .catch(function(){ var body = document.querySelector('#whatsappChannelsTable tbody'); if(body) body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });
             }
             function showWhatsappQR(){
-                fetchWithAuth(API_URL + '/whatsapp/qr.png')
-                    .then(function(r){ if(!r.ok) throw new Error(''); return r.blob(); })
+                fetchWithAuth(API_URL + '/whatsapp/status')
+                    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                    .then(function(st){
+                        if(st && st.hasQr){
+                            return fetchWithAuth(API_URL + '/whatsapp/qr.png');
+                        }
+                        var box = document.getElementById('whatsappQrBox');
+                        if(box){ box.style.display = 'flex'; box.innerHTML = '<div class="text-muted">جاري توليد رمز QR...</div>'; }
+                        return new Promise(function(resolve, reject){
+                            var attempts = 0;
+                            function poll(){
+                                fetchWithAuth(API_URL + '/whatsapp/status')
+                                    .then(function(rr){ return rr.ok ? rr.json() : Promise.reject(); })
+                                    .then(function(s2){
+                                        if(s2 && s2.hasQr){
+                                            resolve(fetchWithAuth(API_URL + '/whatsapp/qr.png'));
+                                        } else if(++attempts < 10){
+                                            setTimeout(poll, 1500);
+                                        } else {
+                                            reject(new Error('no-qr'));
+                                        }
+                                    })
+                                    .catch(function(){ if(++attempts < 10) setTimeout(poll, 1500); else reject(new Error('no-qr')); });
+                            }
+                            poll();
+                        });
+                    })
+                    .then(function(r){ if(!r || !r.ok) throw new Error('fetch-qr'); return r.blob(); })
                     .then(function(b){
                         var url = URL.createObjectURL(b);
                         var img = document.getElementById('whatsappQrImg');
                         var box = document.getElementById('whatsappQrBox');
                         if(img) img.src = url;
-                        if(box) box.style.display = 'flex';
+                        if(box){ box.style.display = 'flex'; box.innerHTML = ''; }
                     })
                     .catch(function(){ showNotification('QR غير متاح حالياً', 'error'); });
             }
