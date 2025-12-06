@@ -3,8 +3,7 @@ const router = express.Router();
 const reportController = require('../controllers/reportController');
 const { verifyToken, isPublisher } = require('../middleware/auth');
 
-// Protected routes
-router.get('/today', verifyToken, reportController.getTodayReports);
+router.get('/today', reportController.getTodayReports);
 router.get('/today/types', verifyToken, reportController.getTodayReportsByType);
 router.get('/today/cities', verifyToken, reportController.getTodayReportsByCity);
 router.get('/today/full', verifyToken, reportController.getTodayReportsFull);

@@ -4,8 +4,7 @@ const categoryController = require('../controllers/categoryController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const upload = require('../middleware/uploadMiddleware');
 
-// Protected routes
-router.get('/', verifyToken, categoryController.getAllCategories);
+router.get('/', categoryController.getAllCategories);
 router.get('/children', verifyToken, categoryController.getChildCategories);
 router.get('/parents', verifyToken, categoryController.getParentCategories);
 
