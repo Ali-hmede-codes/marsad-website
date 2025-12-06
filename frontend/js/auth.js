@@ -111,10 +111,11 @@ function toggleAdminButton(){
 // Make authenticated API request
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
+    const isForm = options && options.body && typeof FormData !== 'undefined' && (options.body instanceof FormData);
     const headers = {
-        'Content-Type': 'application/json',
         ...options.headers
     };
+    if (!isForm && !('Content-Type' in headers)) headers['Content-Type'] = 'application/json';
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const response = await fetch(url, { ...options, headers, credentials: 'include' });
     return response;
