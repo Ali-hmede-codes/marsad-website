@@ -39,6 +39,17 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Block non-dist JS files from being served directly
+app.use((req, res, next) => {
+    if (req.method === 'GET' && req.path.startsWith('/js/')) {
+        const allowed = req.path.startsWith('/js/dist/') && req.path.endsWith('.min.js');
+        if (!allowed) {
+            return res.status(403).send('Forbidden');
+        }
+    }
+    next();
+});
+
 app.get('/index.html', (req, res) => res.redirect(301, '/'));
 app.get('/index', (req, res) => res.redirect(301, '/'));
 app.get('/login.html', (req, res) => res.redirect(301, '/login'));

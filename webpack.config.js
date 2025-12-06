@@ -3,6 +3,7 @@ const JavaScriptObfuscator = require('webpack-obfuscator');
 
 module.exports = {
     mode: 'production',
+    devtool: false,
     entry: {
         auth: './frontend/js/auth.js',
         categories: './frontend/js/categories.js',
@@ -39,6 +40,6 @@ module.exports = {
             splitStrings: true,
             splitStringsChunkLength: 5,
             unicodeEscapeSequence: false
-        }, ['config.min.js', 'reports.min.js'])
+        }, ['config.min.js'])
     ]
 };
