@@ -367,6 +367,12 @@
                 if(categoryModalCancel) categoryModalCancel.addEventListener('click', closeCategoryModalAdmin);
                 var categoryForm = document.getElementById('categoryForm');
                 if(categoryForm) categoryForm.addEventListener('submit', handleCategorySubmitAdmin);
+                var colorPicker = document.getElementById('catg_color');
+                var colorText = document.getElementById('catg_color_text');
+                if(colorPicker && colorText){
+                    colorPicker.addEventListener('input', function(){ colorText.value = colorPicker.value; });
+                    colorText.addEventListener('input', function(){ var v = String(colorText.value||'').trim(); var m=/^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/; if(m.test(v)){ colorPicker.value = v.substring(0,7); }});
+                }
             }
 
             var categoriesTree = [];
@@ -456,7 +462,11 @@
                 var reqData = new FormData();
                 reqData.append('catg_name', fdR.get('catg_name'));
                 reqData.append('categorie_desc', fdR.get('categorie_desc'));
-                reqData.append('catg_color', fdR.get('catg_color_text'));
+                var colorTxt = String(fdR.get('catg_color_text')||'').trim();
+                var colorPick = String(fdR.get('catg_color')||'').trim();
+                var rx = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
+                var colorFinal = rx.test(colorTxt) ? colorTxt : (rx.test(colorPick) ? colorPick : '#000000');
+                reqData.append('catg_color', colorFinal);
                 reqData.append('required_role', fdR.get('required_role'));
                 if(parentId) reqData.append('parent_id', parentId);
                 var pictureFile = fdR.get('catg_picture'); if(pictureFile && pictureFile.size>0) reqData.append('catg_picture', pictureFile);
