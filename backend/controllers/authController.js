@@ -140,6 +140,14 @@ exports.login = async (req, res) => {
             }
         );
 
+        const cookieSecure = ((process.env.ENABLE_HTTPS || 'false').toLowerCase() === 'true');
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: cookieSecure,
+            sameSite: 'Strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/'
+        });
         res.json({
             message: 'تم تسجيل الدخول بنجاح',
             token,
@@ -174,6 +182,22 @@ exports.getCurrentUser = async (req, res) => {
     } catch (error) {
         console.error('Get user error:', error);
         res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
+// Logout
+exports.logout = async (req, res) => {
+    try {
+        const cookieSecure = ((process.env.ENABLE_HTTPS || 'false').toLowerCase() === 'true');
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: cookieSecure,
+            sameSite: 'Strict',
+            path: '/'
+        });
+        res.json({ message: 'تم تسجيل الخروج' });
+    } catch (error) {
+        res.json({ message: 'تم تسجيل الخروج' });
     }
 };
 

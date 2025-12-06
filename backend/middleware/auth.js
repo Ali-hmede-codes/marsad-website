@@ -1,10 +1,25 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
-// Verify JWT token
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader ? authHeader.split(' ')[1] : null;
+    let token = authHeader ? authHeader.split(' ')[1] : null;
+
+    if (!token && req.headers['cookie']) {
+        try {
+            const cookies = Object.fromEntries(String(req.headers['cookie'] || '')
+                .split(';')
+                .map(part => part.trim())
+                .filter(Boolean)
+                .map(pair => {
+                    const idx = pair.indexOf('=');
+                    const k = idx >= 0 ? pair.slice(0, idx) : pair;
+                    const v = idx >= 0 ? pair.slice(idx + 1) : '';
+                    return [k, decodeURIComponent(v)];
+                }));
+            token = cookies.token || null;
+        } catch (_) {}
+    }
 
     if (!token) {
         return res.status(401).json({ error: 'لا يوجد رمز مصادقة' });

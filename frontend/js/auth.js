@@ -31,7 +31,8 @@ function isAdmin() {
 }
 
 // Logout function
-function logout() {
+async function logout() {
+    try { await fetch(API_URL + '/auth/logout', { method: 'POST', credentials: 'include' }); } catch (_) {}
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/';
@@ -98,24 +99,16 @@ function toggleAdminButton(){
 // Make authenticated API request
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
-
-    if (!token) {
-        throw new Error('لم تسجل الدخول');
-    }
-
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
         ...options.headers
     };
-
-    const response = await fetch(url, { ...options, headers });
-
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const response = await fetch(url, { ...options, headers, credentials: 'include' });
     if (response.status === 401 || response.status === 403) {
-        logout();
+        await logout();
         throw new Error('انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى');
     }
-
     return response;
 }
 

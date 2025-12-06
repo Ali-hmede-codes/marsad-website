@@ -114,7 +114,6 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    localStorage.setItem('token', data.token);
                     var minimalUser = { is_admin: !!(data && data.user && data.user.is_admin), is_publisher: !!(data && data.user && data.user.is_publisher) };
                     localStorage.setItem('user', JSON.stringify(minimalUser));
                     showNotification('تم تسجيل الدخول بنجاح', 'success');

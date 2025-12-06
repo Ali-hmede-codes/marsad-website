@@ -202,11 +202,9 @@
     <script src="js/dist/auth.min.js"></script>
     <script>
         (function(){
-            var token = typeof getToken==='function' ? getToken() : null;
-            if(!token){
-                window.location.href = '/login';
-                return;
-            }
+            fetch(API_URL + '/auth/me', { credentials: 'include' })
+                .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
+                .catch(function(){ window.location.href = '/login'; return; });
             document.getElementById('logoutBtn').addEventListener('click', logout);
             function showSection(id){
                 var s1 = document.getElementById('homeSection');
