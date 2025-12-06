@@ -44,6 +44,7 @@
 
             <div class="button-group" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
                 <button id="tabHome" class="btn btn-secondary">الرئيسية</button>
+                <button id="tabWhatsapp" class="btn btn-secondary">واتساب</button>
                 <button id="tabReports" class="btn btn-secondary">التقارير</button>
                 <button id="tabAccounts" class="btn btn-secondary">الحسابات</button>
                 <button id="tabCategories" class="btn btn-secondary">الفئات</button>
@@ -84,30 +85,31 @@
                         <tbody></tbody>
                     </table>
                 </div>
-                <div class="table-wrapper" id="whatsappCard" style="margin-top:12px;">
-                    <div style="padding: 16px 24px; display:flex; align-items:center; justify-content:space-between;">
-                        <h2 class="section-title" style="margin:0;">واتساب</h2>
-                        <div style="display:flex; gap:8px; align-items:center;">
-                            <button id="refreshWhatsappBtn" class="btn btn-secondary btn-sm">تحديث</button>
-                            <button id="showQrBtn" class="btn btn-primary btn-sm">عرض QR</button>
-                        </div>
+            </section>
+
+            <section id="whatsappSection" class="card" style="padding: 0; display:none;">
+                <div class="daily-header" style="padding: 16px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <h2 class="section-title" style="margin:0;">واتساب</h2>
+                    <div class="daily-controls" style="display:flex;align-items:center;gap:12px;">
+                        <button id="refreshWhatsappBtn" class="btn btn-secondary btn-sm">تحديث</button>
+                        <button id="showQrBtn" class="btn btn-primary btn-sm">عرض QR</button>
                     </div>
-                    <div style="padding: 0 24px 16px;">
-                        <div id="whatsappStatus" class="text-muted" style="margin-bottom:12px;"></div>
-                        <div id="whatsappQrBox" style="display:none; align-items:center; justify-content:center;">
-                            <img id="whatsappQrImg" alt="WhatsApp QR" style="max-width:320px; border:1px solid var(--color-border); border-radius:8px;" />
-                        </div>
+                </div>
+                <div style="padding: 0 24px 16px;">
+                    <div id="whatsappStatus" class="text-muted" style="margin-bottom:12px;"></div>
+                    <div id="whatsappQrBox" style="display:none; align-items:center; justify-content:center;">
+                        <img id="whatsappQrImg" alt="WhatsApp QR" style="max-width:320px; border:1px solid var(--color-border); border-radius:8px;" />
                     </div>
-                    <div class="table-wrapper" style="margin-top:12px;">
-                        <table class="table table-modern" id="whatsappChannelsTable">
-                            <thead>
-                                <tr>
-                                    <th>القناة</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                </div>
+                <div class="table-wrapper" style="margin-top:12px;">
+                    <table class="table table-modern" id="whatsappChannelsTable">
+                        <thead>
+                            <tr>
+                                <th>القناة</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </section>
 
@@ -234,10 +236,12 @@
                 var s2 = document.getElementById('reportsSection');
                 var s3 = document.getElementById('accountsSection');
                 var s4 = document.getElementById('categoriesSection');
+                var s5 = document.getElementById('whatsappSection');
                 if(s1) s1.style.display = id==='home' ? '' : 'none';
                 if(s2) s2.style.display = id==='reports' ? '' : 'none';
                 if(s3) s3.style.display = id==='accounts' ? '' : 'none';
                 if(s4) s4.style.display = id==='categories' ? '' : 'none';
+                if(s5) s5.style.display = id==='whatsapp' ? '' : 'none';
             }
                     function loadHome(){
                 Promise.all([
@@ -350,10 +354,12 @@
             }
             function wireEvents(){
                 var homeBtn = document.getElementById('tabHome');
+                var whatsappBtn = document.getElementById('tabWhatsapp');
                 var reportsBtn = document.getElementById('tabReports');
                 var accountsBtn = document.getElementById('tabAccounts');
                 var categoriesBtn = document.getElementById('tabCategories');
                 if(homeBtn) homeBtn.addEventListener('click', function(){ showSection('home'); });
+                if(whatsappBtn) whatsappBtn.addEventListener('click', function(){ showSection('whatsapp'); loadWhatsapp(); });
                 if(reportsBtn) reportsBtn.addEventListener('click', function(){ showSection('reports'); });
                 if(accountsBtn) accountsBtn.addEventListener('click', function(){ showSection('accounts'); });
                 if(categoriesBtn) categoriesBtn.addEventListener('click', function(){ showSection('categories'); });
@@ -551,7 +557,7 @@
                     .then(function(chs){
                         var body = document.querySelector('#whatsappChannelsTable tbody');
                         if(!body) return;
-                        if(!chs || !chs.length){ body.innerHTML = '<tr><td class="text-center text-muted">لا توجد مجموعات أدمن</td></tr>'; return; }
+                        if(!chs || !chs.length){ body.innerHTML = '<tr><td class="text-center text-muted">لا توجد قنوات</td></tr>'; return; }
                         body.innerHTML = chs.map(function(c){ return '<tr><td>' + (c.name||c.id||'') + '</td></tr>'; }).join('');
                     })
                     .catch(function(){ var body = document.querySelector('#whatsappChannelsTable tbody'); if(body) body.innerHTML = '<tr><td class="text-center text-muted">تعذر تحميل القنوات</td></tr>'; });
@@ -568,6 +574,8 @@
                     })
                     .catch(function(){ showNotification('QR غير متاح حالياً', 'error'); });
             }
+            window.loadWhatsapp = loadWhatsapp;
+            window.showWhatsappQR = showWhatsappQR;
             function wireWhatsapp(){
                 var btnR = document.getElementById('refreshWhatsappBtn');
                 var btnQ = document.getElementById('showQrBtn');
