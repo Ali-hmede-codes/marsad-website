@@ -105,7 +105,7 @@ exports.createReport = async (req, res) => {
         try {
             const [rows] = await db.query('SELECT category_name FROM report_details WHERE rep_id = ?', [result.insertId]);
             const categoryName = rows && rows[0] && rows[0].category_name ? rows[0].category_name : '';
-            await whatsapp.onNewReport(categoryName, finalAddress);
+            await whatsapp.onNewReport(categoryName, finalAddress, category);
         } catch (_) {}
 
         res.status(201).json({ message: 'تم إنشاء التقرير بنجاح', report_id: result.insertId, address: finalAddress });

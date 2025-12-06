@@ -127,6 +127,34 @@
                         <div id="manualChannelsList" class="text-muted"></div>
                     </div>
                 </div>
+                <div class="card" style="padding: 16px 24px; margin:12px 24px;">
+                    <h3 class="section-title" style="margin:0 0 8px 0;">قوالب الرسائل</h3>
+                    <div class="form-group">
+                        <label for="waDefaultTemplate">القالب الافتراضي</label>
+                        <textarea id="waDefaultTemplate" class="form-control" rows="2" placeholder="مثال: 🔴{name} في منطقة : {location}"></textarea>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button id="waSaveDefaultTemplateBtn" class="btn btn-primary btn-sm">حفظ القالب الافتراضي</button>
+                        <span id="waDefaultTemplateStatus" class="text-muted"></span>
+                    </div>
+                    <hr style="margin:12px 0;">
+                    <div class="form-group">
+                        <label for="waTemplateCategorySelect">اختر الفئة الفرعية</label>
+                        <select id="waTemplateCategorySelect" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="waCategoryTemplateInput">قالب الفئة المختارة</label>
+                        <textarea id="waCategoryTemplateInput" class="form-control" rows="2" placeholder="استخدم {id} و {name} و {location}"></textarea>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <button id="waSaveCategoryTemplateBtn" class="btn btn-primary btn-sm">حفظ قالب الفئة</button>
+                        <button id="waRemoveCategoryTemplateBtn" class="btn btn-secondary btn-sm" style="color: var(--color-error);">حذف قالب الفئة</button>
+                        <span id="waCategoryTemplateStatus" class="text-muted"></span>
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div id="waTemplatesSummary" class="text-muted"></div>
+                    </div>
+                </div>
             </section>
 
             <section id="reportsSection" class="card" style="padding: 0; display:none;">
@@ -600,6 +628,32 @@
                         }
                     })
                     .catch(function(){ var listEl = document.getElementById('manualChannelsList'); if(listEl) listEl.textContent = 'تعذر تحميل القنوات اليدوية'; });
+                Promise.all([
+                    fetchWithAuth(API_URL + '/whatsapp/templates'),
+                    fetchWithAuth(API_URL + '/categories/children')
+                ])
+                    .then(function(arr){ return Promise.all(arr.map(function(r){ return r.ok ? r.json() : Promise.reject(); })); })
+                    .then(function(res){
+                        var templates = res[0] || {};
+                        var children = Array.isArray(res[1]) ? res[1] : [];
+                        var defaultEl = document.getElementById('waDefaultTemplate');
+                        var selectEl = document.getElementById('waTemplateCategorySelect');
+                        var inputEl = document.getElementById('waCategoryTemplateInput');
+                        var summaryEl = document.getElementById('waTemplatesSummary');
+                        if(defaultEl){ defaultEl.value = typeof templates.default === 'string' ? templates.default : '🔴{name} في منطقة : {location}'; }
+                        if(selectEl){
+                            selectEl.innerHTML = children.map(function(c){ return '<option value="'+ c.catg_id +'">'+ (c.catg_name||c.catg_id) +'</option>'; }).join('');
+                            var firstId = children[0] ? String(children[0].catg_id) : null;
+                            var byId = templates.byId || {};
+                            if(firstId && inputEl){ inputEl.value = byId[firstId] || ''; }
+                        }
+                        if(summaryEl){
+                            var byIdCount = templates.byId ? Object.keys(templates.byId).length : 0;
+                            var byNameCount = templates.byName ? Object.keys(templates.byName).length : 0;
+                            summaryEl.textContent = 'القوالب المحددة: بالمعرّف ' + byIdCount + ' | بالاسم ' + byNameCount;
+                        }
+                    })
+                    .catch(function(){ var summaryEl = document.getElementById('waTemplatesSummary'); if(summaryEl) summaryEl.textContent = 'تعذر تحميل القوالب'; });
             }
             function showWhatsappQR(){
                 fetchWithAuth(API_URL + '/whatsapp/status')
@@ -704,6 +758,51 @@
                         .then(function(){ if(statusEl) statusEl.textContent = 'تم الحفظ'; loadWhatsapp(); })
                         .catch(function(){ if(statusEl) statusEl.textContent = 'تعذر الحفظ'; });
                 });
+                var selectEl = document.getElementById('waTemplateCategorySelect');
+                var catInputEl = document.getElementById('waCategoryTemplateInput');
+                var defaultEl = document.getElementById('waDefaultTemplate');
+                var saveDefaultBtn = document.getElementById('waSaveDefaultTemplateBtn');
+                var saveCatBtn = document.getElementById('waSaveCategoryTemplateBtn');
+                var removeCatBtn = document.getElementById('waRemoveCategoryTemplateBtn');
+                var defaultStatusEl = document.getElementById('waDefaultTemplateStatus');
+                var catStatusEl = document.getElementById('waCategoryTemplateStatus');
+                if(selectEl){
+                    selectEl.addEventListener('change', function(){
+                        fetchWithAuth(API_URL + '/whatsapp/templates')
+                            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                            .then(function(t){ var byId = t.byId || {}; var id = String(selectEl.value||''); if(catInputEl) catInputEl.value = byId[id] || ''; })
+                            .catch(function(){ if(catInputEl) catInputEl.value = ''; });
+                    });
+                }
+                if(saveDefaultBtn){
+                    saveDefaultBtn.addEventListener('click', function(){
+                        var val = defaultEl ? String(defaultEl.value||'') : '';
+                        fetchWithAuth(API_URL + '/whatsapp/templates', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ default: val }) })
+                            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                            .then(function(){ if(defaultStatusEl) defaultStatusEl.textContent = 'تم الحفظ'; loadWhatsapp(); })
+                            .catch(function(){ if(defaultStatusEl) defaultStatusEl.textContent = 'تعذر الحفظ'; });
+                    });
+                }
+                if(saveCatBtn){
+                    saveCatBtn.addEventListener('click', function(){
+                        var id = String(selectEl ? selectEl.value : '');
+                        var val = catInputEl ? String(catInputEl.value||'') : '';
+                        var payload = { byId: {} }; payload.byId[id] = val;
+                        fetchWithAuth(API_URL + '/whatsapp/templates', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                            .then(function(){ if(catStatusEl) catStatusEl.textContent = 'تم الحفظ'; loadWhatsapp(); })
+                            .catch(function(){ if(catStatusEl) catStatusEl.textContent = 'تعذر الحفظ'; });
+                    });
+                }
+                if(removeCatBtn){
+                    removeCatBtn.addEventListener('click', function(){
+                        var id = String(selectEl ? selectEl.value : '');
+                        fetchWithAuth(API_URL + '/whatsapp/templates', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ removeById: [id] }) })
+                            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                            .then(function(){ if(catStatusEl) catStatusEl.textContent = 'تم الحذف'; loadWhatsapp(); })
+                            .catch(function(){ if(catStatusEl) catStatusEl.textContent = 'تعذر الحذف'; });
+                    });
+                }
             }
             document.addEventListener('DOMContentLoaded', function(){ wireWhatsapp(); loadWhatsapp(); });
         })();

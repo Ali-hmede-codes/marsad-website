@@ -10,6 +10,7 @@ let isAuthenticated = false;
 let initError = null;
 let executablePathUsed = null;
 let manualChannelsCache = null;
+let templatesCache = null;
 
 const ENABLED = (process.env.WHATSAPP_ENABLED || 'true').toLowerCase() === 'true';
 
@@ -155,9 +156,9 @@ async function sendToManualChannels(message) {
   }
 }
 
-async function onNewReport(categoryName, location) {
+async function onNewReport(categoryName, location, categoryId) {
   if (!ENABLED) return;
-  const msg = `🔴${String(categoryName)} في منطقة : ${String(location)}`;
+  const msg = formatWhatsAppMessage(categoryId != null ? String(categoryId) : null, String(categoryName), String(location));
   const manual = getManualChannels();
   if (manual && manual.length) {
     await sendToManualChannels(msg);
@@ -188,6 +189,40 @@ async function getQrSvg() {
   return svg;
 }
 
+function getTemplates() {
+  const p = path.join(__dirname, '../data/whatsapp_templates.json');
+  try {
+    const raw = fs.readFileSync(p, 'utf-8');
+    const parsed = JSON.parse(raw);
+    templatesCache = parsed && typeof parsed === 'object' ? parsed : {};
+    return templatesCache;
+  } catch (_) {
+    return templatesCache || {};
+  }
+}
+
+async function saveTemplates(obj) {
+  const p = path.join(__dirname, '../data/whatsapp_templates.json');
+  await fs.promises.mkdir(path.dirname(p), { recursive: true });
+  const toWrite = obj && typeof obj === 'object' ? obj : {};
+  await fs.promises.writeFile(p, JSON.stringify(toWrite, null, 2), 'utf-8');
+  templatesCache = toWrite;
+  return templatesCache;
+}
+
+function formatWhatsAppMessage(categoryId, categoryName, location) {
+  const t = getTemplates();
+  const byId = t.byId && typeof t.byId === 'object' ? t.byId : {};
+  const byName = t.byName && typeof t.byName === 'object' ? t.byName : {};
+  const d = typeof t.default === 'string' ? t.default : '🔴{name} في منطقة : {location}';
+  const keyId = categoryId != null ? String(categoryId) : null;
+  const chosen = (keyId && byId[keyId]) || byName[categoryName] || d;
+  return String(chosen)
+    .replaceAll('{id}', keyId || '')
+    .replaceAll('{name}', categoryName || '')
+    .replaceAll('{location}', location || '');
+}
+
 async function restartClient() {
   try {
     if (client && typeof client.destroy === 'function') {
@@ -214,4 +249,4 @@ async function clearAuth() {
   return true;
 }
 
-module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, getManualChannels, saveManualChannels, sendToManualChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth };
+module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, getManualChannels, saveManualChannels, sendToManualChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth, getTemplates, saveTemplates };

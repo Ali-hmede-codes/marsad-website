@@ -74,4 +74,43 @@ router.post('/auth/clear', async (req, res) => {
   res.json(st);
 });
 
+router.get('/templates', async (req, res) => {
+  const t = whatsapp.getTemplates();
+  res.json(t);
+});
+
+router.put('/templates', async (req, res) => {
+  try {
+    const current = whatsapp.getTemplates();
+    const next = {
+      default: typeof current.default === 'string' ? current.default : '🔴{name} في منطقة : {location}',
+      byId: current.byId && typeof current.byId === 'object' ? { ...current.byId } : {},
+      byName: current.byName && typeof current.byName === 'object' ? { ...current.byName } : {}
+    };
+    if (typeof req.body.default === 'string') {
+      next.default = req.body.default;
+    }
+    if (req.body.byId && typeof req.body.byId === 'object') {
+      for (const k of Object.keys(req.body.byId)) {
+        const v = req.body.byId[k];
+        if (typeof v === 'string') next.byId[String(k)] = v;
+      }
+    }
+    if (req.body.byName && typeof req.body.byName === 'object') {
+      for (const k of Object.keys(req.body.byName)) {
+        const v = req.body.byName[k];
+        if (typeof v === 'string') next.byName[String(k)] = v;
+      }
+    }
+    const remId = Array.isArray(req.body.removeById) ? req.body.removeById.map((s) => String(s)) : [];
+    for (const id of remId) { delete next.byId[id]; }
+    const remName = Array.isArray(req.body.removeByName) ? req.body.removeByName.map((s) => String(s)) : [];
+    for (const nm of remName) { delete next.byName[nm]; }
+    const saved = await whatsapp.saveTemplates(next);
+    res.json(saved);
+  } catch (e) {
+    res.status(400).json({ error: 'تعذر تحديث القوالب' });
+  }
+});
+
 module.exports = router;
