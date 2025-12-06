@@ -25,7 +25,6 @@
                 </a>
                 <nav class="nav">
                     <a href="index.html" class="btn btn-secondary btn-sm">الخريطة</a>
-                    <a href="dashboard.html" class="btn btn-secondary btn-sm">لوحة التحكم</a>
                     <button id="logoutBtn" class="btn btn-secondary btn-icon" title="تسجيل الخروج" aria-label="تسجيل الخروج">
                         <img src="https://img.icons8.com/ios/50/exit--v1.png" alt="Logout" />
                     </button>
@@ -49,7 +48,7 @@
                 <button id="tabHome" class="btn btn-secondary">الرئيسية</button>
                 <button id="tabReports" class="btn btn-secondary">التقارير</button>
                 <button id="tabAccounts" class="btn btn-secondary">الحسابات</button>
-                <a href="categories.html" class="btn btn-secondary">الفئات</a>
+                <button id="tabCategories" class="btn btn-secondary">الفئات</button>
             </div>
 
             <section id="homeSection" class="card" style="padding: 0;">
@@ -137,6 +136,64 @@
                     </table>
                 </div>
             </section>
+
+            <section id="categoriesSection" class="card" style="padding: 0; display:none;">
+                <div class="daily-header" style="padding: 16px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <h2 class="section-title" style="margin:0;">إدارة الفئات</h2>
+                    <div class="daily-controls" style="display:flex;align-items:center;gap:12px;">
+                        <button id="addMainCategoryBtn" class="btn btn-primary btn-sm">إضافة فئة رئيسية</button>
+                        <button id="refreshCategoriesBtn" class="btn btn-secondary btn-sm">تحديث</button>
+                    </div>
+                </div>
+                <div id="categoriesContainer" class="categories-container">
+                    <div class="text-center text-muted" style="padding: 2rem;">جاري التحميل...</div>
+                </div>
+            </section>
+
+            <div id="categoryModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modalTitle">إضافة فئة</h2>
+                        <button class="modal-close" id="categoryModalClose">&times;</button>
+                    </div>
+                    <form id="categoryForm" enctype="multipart/form-data">
+                        <input type="hidden" id="categoryId" name="categoryId">
+                        <input type="hidden" id="parentId" name="parentId">
+                        <div class="form-group">
+                            <label for="catg_name">اسم الفئة *</label>
+                            <input type="text" id="catg_name" name="catg_name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="categorie_desc">الوصف</label>
+                            <textarea id="categorie_desc" name="categorie_desc" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="catg_color">اللون *</label>
+                            <div style="display:flex;gap:1rem;align-items:center;">
+                                <input type="color" id="catg_color" name="catg_color" value="#000000" style="width:60px;height:40px;border:1px solid var(--color-border);border-radius:8px;cursor:pointer;">
+                                <input type="text" id="catg_color_text" class="form-control" value="#000000" pattern="^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" style="flex:1;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="catg_picture">صورة الفئة</label>
+                            <input type="file" id="catg_picture" name="catg_picture" class="form-control" accept="image/*">
+                            <div id="currentPicture" style="margin-top:0.5rem;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="required_role">الصلاحية المطلوبة *</label>
+                            <select id="required_role" name="required_role" class="form-control" required>
+                                <option value="user">مستخدم عادي</option>
+                                <option value="publisher">ناشر</option>
+                                <option value="admin">مدير</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="categoryModalCancel">إلغاء</button>
+                            <button type="submit" class="btn btn-primary">حفظ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -155,9 +212,11 @@
                 var s1 = document.getElementById('homeSection');
                 var s2 = document.getElementById('reportsSection');
                 var s3 = document.getElementById('accountsSection');
+                var s4 = document.getElementById('categoriesSection');
                 if(s1) s1.style.display = id==='home' ? '' : 'none';
                 if(s2) s2.style.display = id==='reports' ? '' : 'none';
                 if(s3) s3.style.display = id==='accounts' ? '' : 'none';
+                if(s4) s4.style.display = id==='categories' ? '' : 'none';
             }
             function loadHome(){
                 Promise.all([
@@ -272,15 +331,21 @@
                 var homeBtn = document.getElementById('tabHome');
                 var reportsBtn = document.getElementById('tabReports');
                 var accountsBtn = document.getElementById('tabAccounts');
+                var categoriesBtn = document.getElementById('tabCategories');
                 if(homeBtn) homeBtn.addEventListener('click', function(){ showSection('home'); });
                 if(reportsBtn) reportsBtn.addEventListener('click', function(){ showSection('reports'); });
                 if(accountsBtn) accountsBtn.addEventListener('click', function(){ showSection('accounts'); });
+                if(categoriesBtn) categoriesBtn.addEventListener('click', function(){ showSection('categories'); });
                 var refreshHomeBtn = document.getElementById('refreshHomeBtn');
                 if(refreshHomeBtn) refreshHomeBtn.addEventListener('click', loadHome);
                 var refreshReportsBtn = document.getElementById('refreshReportsBtn');
                 if(refreshReportsBtn) refreshReportsBtn.addEventListener('click', loadReports);
                 var refreshAccountsBtn = document.getElementById('refreshAccountsBtn');
                 if(refreshAccountsBtn) refreshAccountsBtn.addEventListener('click', loadUsers);
+                var refreshCategoriesBtn = document.getElementById('refreshCategoriesBtn');
+                if(refreshCategoriesBtn) refreshCategoriesBtn.addEventListener('click', loadCategoriesAdmin);
+                var addMainCategoryBtn = document.getElementById('addMainCategoryBtn');
+                if(addMainCategoryBtn) addMainCategoryBtn.addEventListener('click', function(){ openCategoryModalAdmin(); });
                 var reportsTable = document.getElementById('adminReportsTable');
                 if(reportsTable){
                     reportsTable.addEventListener('click', function(e){
@@ -299,7 +364,126 @@
                         if(t && t.getAttribute('data-delete-user')){ var id4 = t.getAttribute('data-delete-user'); deleteUser(id4); }
                     });
                 }
+                var categoryModal = document.getElementById('categoryModal');
+                var categoryModalClose = document.getElementById('categoryModalClose');
+                var categoryModalCancel = document.getElementById('categoryModalCancel');
+                if(categoryModalClose) categoryModalClose.addEventListener('click', closeCategoryModalAdmin);
+                if(categoryModalCancel) categoryModalCancel.addEventListener('click', closeCategoryModalAdmin);
+                var categoryForm = document.getElementById('categoryForm');
+                if(categoryForm) categoryForm.addEventListener('submit', handleCategorySubmitAdmin);
             }
+
+            var categoriesTree = [];
+            var editingCategoryId = null;
+            function loadCategoriesAdmin(){
+                fetch(API_URL + '/categories')
+                    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                    .then(function(data){ categoriesTree = data || []; displayCategoriesAdmin(); })
+                    .catch(function(){ var c = document.getElementById('categoriesContainer'); if(c) c.innerHTML = '<div class="text-center" style="color: var(--color-error); padding: 2rem;">حدث خطأ في تحميل الفئات</div>'; });
+            }
+            function displayCategoriesAdmin(){
+                var container = document.getElementById('categoriesContainer');
+                if(!container) return;
+                if(!categoriesTree.length){ container.innerHTML = '<div class="text-center text-muted" style="padding: 2rem;">لا توجد فئات. ابدأ بإضافة فئة رئيسية.</div>'; return; }
+                container.innerHTML = categoriesTree.map(function(cat){ return renderCategoryAdmin(cat, 0); }).join('');
+            }
+            function renderCategoryAdmin(category, level){
+                var indent = level * 2;
+                var hasChildren = category.children && category.children.length>0;
+                var roleText = { 'user':'مستخدم', 'publisher':'ناشر', 'admin':'مدير' };
+                var html = '<div class="category-card" style="margin-right: '+indent+'rem;">'+
+                    '<div class="category-header">'+
+                    '<div class="category-info">'+
+                    '<div class="category-color-badge" style="background-color: '+ (category.catg_color || '#000000') +'"></div>'+
+                    '<div>'+
+                    '<h3 class="category-name">'+ category.catg_name +'</h3>'+
+                    (category.categorie_desc ? ('<p class="category-desc">'+ category.categorie_desc +'</p>') : '')+
+                    '<div class="category-meta">'+
+                    '<span class="category-role-badge">'+ (roleText[category.required_role] || category.required_role) +'</span>'+ (level===0 ? '<span class="category-type-badge">فئة رئيسية</span>' : '<span class="category-type-badge subcategory">فئة فرعية</span>')+
+                    '</div>'+
+                    '</div>'+
+                    '</div>'+
+                    (category.catg_picture ? ('<img src="'+ category.catg_picture +'" alt="'+ category.catg_name +'" class="category-picture">') : '')+
+                    '</div>'+
+                    '<div class="category-actions">'+ (level===0 ? ('<button class="btn btn-sm btn-secondary" data-add-sub="'+ category.catg_id +'">➕ إضافة فئة فرعية</button>') : '')+
+                    '<button class="btn btn-sm btn-secondary" data-edit="'+ category.catg_id +'">✏️ تعديل</button>'+ ' '+
+                    '<button class="btn btn-sm btn-secondary" data-delete="'+ category.catg_id +'" style="color: var(--color-error);">🗑️ حذف</button>'+ '</div>'+
+                    '</div>';
+                if(hasChildren){ html += category.children.map(function(ch){ return renderCategoryAdmin(ch, level+1); }).join(''); }
+                return html;
+            }
+            function findCategoryByIdAdmin(id, list){
+                var arr = list || categoriesTree;
+                for(var i=0;i<arr.length;i++){ var c=arr[i]; if(String(c.catg_id)===String(id)) return c; if(c.children && c.children.length){ var f = findCategoryByIdAdmin(id, c.children); if(f) return f; } }
+                return null;
+            }
+            function openCategoryModalAdmin(categoryId, parentId){
+                editingCategoryId = categoryId || null;
+                var modal = document.getElementById('categoryModal');
+                var form = document.getElementById('categoryForm');
+                var modalTitle = document.getElementById('modalTitle');
+                if(!modal || !form || !modalTitle) return;
+                form.reset();
+                document.getElementById('categoryId').value = '';
+                document.getElementById('parentId').value = '';
+                var cp = document.getElementById('currentPicture'); if(cp) cp.innerHTML='';
+                if(categoryId){
+                    modalTitle.textContent = 'تعديل الفئة';
+                    var category = findCategoryByIdAdmin(categoryId);
+                    if(!category) return;
+                    document.getElementById('categoryId').value = category.catg_id;
+                    document.getElementById('catg_name').value = category.catg_name;
+                    document.getElementById('categorie_desc').value = category.categorie_desc || '';
+                    document.getElementById('catg_color').value = (category.catg_color||'#000000').substring(0,7);
+                    document.getElementById('catg_color_text').value = category.catg_color || '#000000';
+                    document.getElementById('required_role').value = category.required_role;
+                    if(category.catg_picture){ document.getElementById('currentPicture').innerHTML = '<img src="'+category.catg_picture+'" alt="Current" style="max-width:200px;border-radius:8px;">'; }
+                } else if(parentId){
+                    modalTitle.textContent = 'إضافة فئة فرعية';
+                    document.getElementById('parentId').value = parentId;
+                    var parent = findCategoryByIdAdmin(parentId);
+                    if(parent){ document.getElementById('catg_color').value = (parent.catg_color||'#000000').substring(0,7); document.getElementById('catg_color_text').value = parent.catg_color||'#000000'; }
+                } else {
+                    modalTitle.textContent = 'إضافة فئة رئيسية';
+                    document.getElementById('catg_color').value = '#000000';
+                    document.getElementById('catg_color_text').value = '#000000';
+                }
+                modal.classList.add('active');
+            }
+            function closeCategoryModalAdmin(){ var modal = document.getElementById('categoryModal'); if(modal) modal.classList.remove('active'); editingCategoryId=null; }
+            function handleCategorySubmitAdmin(e){
+                e.preventDefault();
+                var formEl = e.target;
+                var fdR = new FormData(formEl);
+                var categoryId = fdR.get('categoryId');
+                var parentId = fdR.get('parentId');
+                var reqData = new FormData();
+                reqData.append('catg_name', fdR.get('catg_name'));
+                reqData.append('categorie_desc', fdR.get('categorie_desc'));
+                reqData.append('catg_color', fdR.get('catg_color_text'));
+                reqData.append('required_role', fdR.get('required_role'));
+                if(parentId) reqData.append('parent_id', parentId);
+                var pictureFile = fdR.get('catg_picture'); if(pictureFile && pictureFile.size>0) reqData.append('catg_picture', pictureFile);
+                var url, method;
+                if(categoryId){ url = API_URL + '/categories/' + categoryId; method = 'PUT'; }
+                else { url = API_URL + '/categories'; method = 'POST'; }
+                fetchWithAuth(url, { method: method, body: reqData })
+                    .then(function(r){ return r.ok ? r.json() : r.json().then(function(e){ throw new Error(e.error||''); }); })
+                    .then(function(){ showNotification('تم الحفظ بنجاح', 'success'); closeCategoryModalAdmin(); loadCategoriesAdmin(); })
+                    .catch(function(e){ showNotification(e.message||'حدث خطأ في حفظ الفئة', 'error'); });
+            }
+            function deleteCategoryAdmin(categoryId){
+                fetchWithAuth(API_URL + '/categories/' + categoryId, { method:'DELETE' })
+                    .then(function(r){ return r.ok ? r.json() : r.json().then(function(e){ throw new Error(e.error||''); }); })
+                    .then(function(){ showNotification('تم الحذف بنجاح', 'success'); loadCategoriesAdmin(); })
+                    .catch(function(e){ showNotification(e.message||'حدث خطأ في حذف الفئة', 'error'); });
+            }
+            document.addEventListener('click', function(e){
+                var t = e.target;
+                if(t && t.getAttribute('data-add-sub')){ openCategoryModalAdmin(t.getAttribute('data-add-sub')); }
+                if(t && t.getAttribute('data-edit')){ openCategoryModalAdmin(t.getAttribute('data-edit')); }
+                if(t && t.getAttribute('data-delete')){ deleteCategoryAdmin(t.getAttribute('data-delete')); }
+            });
             fetchWithAuth(API_URL + '/admin/status')
                 .then(function(resp){ if(resp.ok) return resp.json(); throw new Error('forbidden'); })
                 .then(function(){
@@ -313,6 +497,7 @@
                     loadHome();
                     loadReports();
                     loadUsers();
+                    loadCategoriesAdmin();
                 })
                 .catch(function(){ showNotification('غير مصرح لك', 'error'); window.location.href = 'login.html'; });
         })();
