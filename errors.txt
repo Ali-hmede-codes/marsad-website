@@ -1,0 +1,2 @@
+manuall location admin only not working
+login verification code not working
