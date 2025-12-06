@@ -39,8 +39,18 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve frontend static files with extensionless HTML support
-app.use(express.static(path.join(__dirname, '../frontend'), { extensions: ['html'] }));
+app.get('/index.html', (req, res) => res.redirect(301, '/'));
+app.get('/index', (req, res) => res.redirect(301, '/'));
+app.get('/login.html', (req, res) => res.redirect(301, '/login'));
+app.get('/register.html', (req, res) => res.redirect(301, '/register'));
+app.get('/admin.html', (req, res) => res.redirect(301, '/admin'));
+
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../frontend/index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../frontend/login.html')));
+app.get('/register', (req, res) => res.sendFile(path.join(__dirname, '../frontend/register.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../frontend/admin.html')));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -62,9 +72,8 @@ app.use((err, req, res, next) => {
 
 // Serve index.html for all non-API routes (SPA support)
 app.get('*', (req, res) => {
-    // Only serve index.html for non-API routes
     if (!req.path.startsWith('/api/')) {
-        res.sendFile(path.join(__dirname, '../frontend/index.html'));
+        res.status(404).send('Not Found');
     } else {
         res.status(404).json({ error: 'المسار غير موجود' });
     }
