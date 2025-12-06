@@ -68,7 +68,8 @@ async function updateAuthUI() {
                 logoutBtn.addEventListener('click', logout);
             }
             if (userName) {
-                userName.textContent = user && user.name ? String(user.name) : '';
+                var roleStr = user ? (user.is_admin ? 'مدير' : (user.is_publisher ? 'ناشر' : 'مستخدم')) : '';
+                userName.textContent = user && user.name ? (String(user.name) + (roleStr ? ' - ' + roleStr : '')) : '';
             }
             const compact = { is_admin: !!(user && user.is_admin), is_publisher: !!(user && user.is_publisher) };
             localStorage.setItem('user', JSON.stringify(compact));

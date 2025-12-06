@@ -24,15 +24,39 @@ async function loadCategories() {
     try {
         const response = await fetchWithAuth(`${window.API_URL}/categories`);
         const data = await response.json();
-        categories = data;
+        let isAdminNow = false, isPublisherNow = false;
+        try {
+            const meResp = await fetchWithAuth(`${window.API_URL}/auth/me`);
+            if (meResp && meResp.ok) {
+                const me = await meResp.json();
+                isAdminNow = !!(me && me.is_admin);
+                isPublisherNow = !!(me && me.is_publisher);
+            }
+        } catch (_) {}
+        const allowRole = (r) => {
+            const role = String(r || '').toLowerCase();
+            if (isAdminNow) return true;
+            return role === 'user' || role === 'publisher';
+        };
+        const filterTree = (arr) => {
+            return (Array.isArray(arr) ? arr : []).map(p => {
+                const children = Array.isArray(p.children) ? p.children.filter(ch => allowRole(ch.required_role)) : [];
+                const includeParent = isAdminNow || allowRole(p.required_role) || children.length > 0;
+                if (!includeParent) return null;
+                const copy = { ...p };
+                copy.children = children;
+                return copy;
+            }).filter(Boolean);
+        };
+        categories = filterTree(data);
 
         // Populate filter dropdown
         const filterSelect = document.getElementById('categoryFilter');
         const reportCategorySelect = document.getElementById('reportCategory');
 
         if (filterSelect) {
-            filterSelect.innerHTML = '<option value="">جميع الفئات</option>';
-            data.forEach(parent => {
+            filterSelect.innerHTML = '<option value="">جميع الفئات</option>'; 
+            categories.forEach(parent => {
                 const hasChildren = parent.children && parent.children.length > 0;
                 if (hasChildren) {
                     const optgroup = document.createElement('optgroup');
@@ -54,7 +78,7 @@ async function loadCategories() {
         const mainFilterSelect = document.getElementById('mainCategoryFilter');
         if (mainFilterSelect) {
             mainFilterSelect.innerHTML = '<option value="">جميع الفئات الرئيسية</option>';
-            data.forEach(parent => {
+            categories.forEach(parent => {
                 const option = document.createElement('option');
                 option.value = parent.catg_id;
                 option.textContent = parent.catg_name;
@@ -65,7 +89,7 @@ async function loadCategories() {
                 if (!filterSelect) return;
                 if (!parentId) {
                     filterSelect.innerHTML = '<option value="">جميع الفئات</option>';
-                    data.forEach(parent => {
+                    categories.forEach(parent => {
                         const hasChildren = parent.children && parent.children.length > 0;
                         if (hasChildren) {
                             const optgroup = document.createElement('optgroup');
@@ -86,7 +110,7 @@ async function loadCategories() {
                 }
 
                 filterSelect.innerHTML = '<option value="">جميع الفئات</option>';
-                const parent = data.find(p => String(p.catg_id) === String(parentId));
+                const parent = categories.find(p => String(p.catg_id) === String(parentId));
                 const children = parent && parent.children ? parent.children : [];
                 children.forEach(cat => {
                     const option = document.createElement('option');
@@ -109,7 +133,7 @@ async function loadCategories() {
         const reportMainCategorySelect = document.getElementById('reportMainCategory');
         if (reportMainCategorySelect && reportCategorySelect) {
             reportMainCategorySelect.innerHTML = '<option value="">اختر الفئة الرئيسية</option>';
-            data.forEach(parent => {
+            categories.forEach(parent => {
                 const option = document.createElement('option');
                 option.value = parent.catg_id;
                 option.textContent = parent.catg_name;
@@ -118,7 +142,7 @@ async function loadCategories() {
 
             const populateChildren = (parentId) => {
                 reportCategorySelect.innerHTML = '<option value="">اختر الفئة</option>';
-                const parent = data.find(p => String(p.catg_id) === String(parentId));
+                const parent = categories.find(p => String(p.catg_id) === String(parentId));
                 const children = parent && parent.children ? parent.children : [];
                 children.forEach(cat => {
                     const option = document.createElement('option');
@@ -207,8 +231,13 @@ async function createReport(reportData) {
 
 // Get category name by ID
 function getCategoryName(categoryId) {
-    const category = categories.find(cat => cat.catg_id == categoryId);
-    return category ? category.catg_name : 'غير معروف';
+    let name = 'غير معروف';
+    const idStr = String(categoryId);
+    (categories || []).forEach(p => {
+        if (String(p.catg_id) === idStr) { name = p.catg_name; return; }
+        (p.children || []).forEach(ch => { if (String(ch.catg_id) === idStr) name = ch.catg_name; });
+    });
+    return name;
 }
 
 // Show report details
