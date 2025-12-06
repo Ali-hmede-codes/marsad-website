@@ -54,3 +54,25 @@ exports.updateUserRole = async (req, res) => {
         res.status(500).json({ error: 'خطأ في الخادم' });
     }
 };
+
+// Delete user (admin only)
+exports.deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [rows] = await db.query('SELECT is_admin FROM users WHERE user_id = ?', [id]);
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ error: 'المستخدم غير موجود' });
+        }
+        if (rows[0].is_admin) {
+            return res.status(400).json({ error: 'لا يمكن حذف حساب مدير' });
+        }
+
+        await db.query('DELETE FROM users WHERE user_id = ?', [id]);
+
+        res.json({ message: 'تم حذف المستخدم بنجاح' });
+    } catch (error) {
+        console.error('Delete user error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};

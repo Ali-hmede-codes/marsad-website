@@ -263,6 +263,32 @@ exports.getTodayReports = async (req, res) => {
     }
 };
 
+exports.getTodayReportsFull = async (req, res) => {
+    try {
+        const { tzOffset } = req.query;
+        const offset = tzOffset || '+02:00';
+        const sign = offset.startsWith('-') ? -1 : 1;
+        const parts = offset.replace('+', '').replace('-', '').split(':');
+        const offsetMinutes = sign * ((parseInt(parts[0] || '0', 10) * 60) + parseInt(parts[1] || '0', 10));
+        const [rows] = await db.query(
+            `SELECT r.rep_id, r.report_address, r.date_and_time, r.latitude, r.longitude, r.is_active,
+                    r.categorie, r.confirmation_count, r.last_confirmed_at,
+                    c.catg_name AS category_name,
+                    u.user_id AS reporter_id, u.name AS reporter_name
+             FROM reports r
+             JOIN categories c ON r.categorie = c.catg_id
+             JOIN users u ON r.user_reported = u.user_id
+             WHERE r.is_active = TRUE AND DATE(TIMESTAMPADD(MINUTE, ?, r.date_and_time)) = DATE(TIMESTAMPADD(MINUTE, ?, UTC_TIMESTAMP()))
+             ORDER BY r.date_and_time DESC`,
+            [offsetMinutes, offsetMinutes]
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('Get today reports full error:', error);
+        res.status(500).json({ error: 'خطأ في الخادم' });
+    }
+};
+
 exports.getTodayReportsByType = async (req, res) => {
     try {
         const { tzOffset } = req.query;

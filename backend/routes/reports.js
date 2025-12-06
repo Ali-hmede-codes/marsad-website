@@ -7,6 +7,7 @@ const { verifyToken, isPublisher } = require('../middleware/auth');
 router.get('/today', reportController.getTodayReports);
 router.get('/today/types', reportController.getTodayReportsByType);
 router.get('/today/cities', reportController.getTodayReportsByCity);
+router.get('/today/full', reportController.getTodayReportsFull);
 router.get('/', reportController.getAllReports);
 router.get('/:id', reportController.getReport);
 

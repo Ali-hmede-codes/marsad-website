@@ -41,9 +41,102 @@
                 <p class="dashboard-subtitle" id="adminSubtitle"></p>
             </div>
 
-            <div class="card">
+            <div class="card" style="margin-bottom: 16px;">
                 <div id="adminStatus" class="text-center">جاري التحقق من الصلاحيات...</div>
             </div>
+
+            <div class="button-group" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                <button id="tabHome" class="btn btn-secondary">الرئيسية</button>
+                <button id="tabReports" class="btn btn-secondary">التقارير</button>
+                <button id="tabAccounts" class="btn btn-secondary">الحسابات</button>
+                <a href="categories.html" class="btn btn-secondary">الفئات</a>
+            </div>
+
+            <section id="homeSection" class="card" style="padding: 0;">
+                <div class="daily-header" style="padding: 16px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <h2 class="section-title" style="margin:0;">ملخص اليوم</h2>
+                    <div class="daily-controls" style="display:flex;align-items:center;gap:12px;">
+                        <button id="refreshHomeBtn" class="btn btn-secondary btn-sm">تحديث</button>
+                    </div>
+                </div>
+                <div class="stats-grid" style="padding: 16px 24px;">
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي تقارير اليوم</div>
+                        <div class="stat-value" id="homeTotalReports">0</div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-modern" id="homeTypesTable">
+                        <thead>
+                            <tr>
+                                <th>الفئة</th>
+                                <th>العدد</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-modern" id="homeCitiesTable" style="margin-top:12px;">
+                        <thead>
+                            <tr>
+                                <th>المدينة</th>
+                                <th>العدد</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="reportsSection" class="card" style="padding: 0; display:none;">
+                <div class="daily-header" style="padding: 16px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <h2 class="section-title" style="margin:0;">تقارير اليوم</h2>
+                    <div class="daily-controls" style="display:flex;align-items:center;gap:12px;">
+                        <button id="refreshReportsBtn" class="btn btn-secondary btn-sm">تحديث</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-modern" id="adminReportsTable">
+                        <thead>
+                            <tr>
+                                <th>الوقت</th>
+                                <th>النوع</th>
+                                <th>المدينة</th>
+                                <th>عدد البلاغات</th>
+                                <th>المبلغ</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminReportsBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="accountsSection" class="card" style="padding: 0; display:none;">
+                <div class="daily-header" style="padding: 16px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <h2 class="section-title" style="margin:0;">الحسابات</h2>
+                    <div class="daily-controls" style="display:flex;align-items:center;gap:12px;">
+                        <button id="refreshAccountsBtn" class="btn btn-secondary btn-sm">تحديث</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-modern" id="adminUsersTable">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>البريد</th>
+                                <th>الحالة</th>
+                                <th>الصلاحيات</th>
+                                <th>التقارير</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersBody"></tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -58,24 +151,170 @@
                 return;
             }
             document.getElementById('logoutBtn').addEventListener('click', logout);
+            function showSection(id){
+                var s1 = document.getElementById('homeSection');
+                var s2 = document.getElementById('reportsSection');
+                var s3 = document.getElementById('accountsSection');
+                if(s1) s1.style.display = id==='home' ? '' : 'none';
+                if(s2) s2.style.display = id==='reports' ? '' : 'none';
+                if(s3) s3.style.display = id==='accounts' ? '' : 'none';
+            }
+            function loadHome(){
+                Promise.all([
+                    fetch(API_URL + '/reports/today'),
+                    fetch(API_URL + '/reports/today/types'),
+                    fetch(API_URL + '/reports/today/cities')
+                ]).then(function(arr){
+                    return Promise.all(arr.map(function(r){ return r.ok ? r.json() : Promise.resolve([]); }));
+                }).then(function(results){
+                    var today = Array.isArray(results[0]) ? results[0] : [];
+                    var types = Array.isArray(results[1]) ? results[1] : [];
+                    var cities = Array.isArray(results[2]) ? results[2] : [];
+                    var totalEl = document.getElementById('homeTotalReports');
+                    if(totalEl) totalEl.textContent = today.length;
+                    var tBody = document.querySelector('#homeTypesTable tbody');
+                    if(tBody){
+                        tBody.innerHTML = types.map(function(row){ return '<tr><td>'+ (row.category_name || row.category_id) +'</td><td>'+ row.count +'</td></tr>'; }).join('');
+                        if(!types.length) tBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">لا توجد بيانات</td></tr>';
+                    }
+                    var cBody = document.querySelector('#homeCitiesTable tbody');
+                    if(cBody){
+                        cBody.innerHTML = cities.map(function(row){ return '<tr><td>'+ (row.city || '') +'</td><td>'+ row.count +'</td></tr>'; }).join('');
+                        if(!cities.length) cBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">لا توجد بيانات</td></tr>';
+                    }
+                }).catch(function(){
+                    showNotification('حدث خطأ في تحميل الملخص', 'error');
+                });
+            }
+            function extractCity(address){
+                var s = String(address||'');
+                var parts = s.split(',').map(function(p){return p.trim();}).filter(function(p){return !!p});
+                var badA = /(مستشفى|مشفى|طريق|شارع|أوتوستراد|جسر|نفق|مطار|جامعة|محطة|قصر|مرفأ|ميناء|دوار|مستديرة|مدرسة|سوق|مول|صيدلية|مطعم|فندق|معمل|مصنع|لبنان|محافظة|قضاء)/i;
+                var badE = /(pharmacy|pharmacie|hospital|hopital|clinic|clinique|shop|store|market|supermarket|mall|restaurant|hotel|bank|atm|station|bridge|tunnel|airport|university|school|college|center|centre|lebanon|liban)/i;
+                var pool = parts.filter(function(p){ return !badA.test(p) && !badE.test(p) && !/\d/.test(p); });
+                if(!pool.length) return s.trim();
+                var arabicPool = pool.filter(function(p){ return /[\u0600-\u06FF]/.test(p); });
+                return arabicPool.length ? arabicPool[arabicPool.length-1] : pool[pool.length-1];
+            }
+            function loadReports(){
+                fetch(API_URL + '/reports/today/full')
+                    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                    .then(function(rows){
+                        var body = document.getElementById('adminReportsBody');
+                        if(!body) return;
+                        if(!rows.length){ body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">لا توجد تقارير اليوم</td></tr>'; return; }
+                        body.innerHTML = rows.map(function(r){
+                            var time = new Date(r.date_and_time).toLocaleTimeString('ar-LB', { hour: '2-digit', minute: '2-digit' });
+                            var city = extractCity(r.report_address||'');
+                            var name = r.reporter_name || 'غير معروف';
+                            return '<tr>'+
+                                '<td>'+ time +'</td>'+
+                                '<td>'+ (r.category_name||'') +'</td>'+
+                                '<td>'+ city +'</td>'+
+                                '<td>'+ (Number(r.confirmation_count||1)) +'</td>'+
+                                '<td><button class="btn btn-secondary btn-sm" data-user="'+ r.reporter_id +'">'+ name +'</button></td>'+
+                                '<td><button class="btn btn-secondary btn-sm" data-del="'+ r.rep_id +'" style="color: var(--color-error);">حذف</button></td>'+
+                            '</tr>';
+                        }).join('');
+                    }).catch(function(){
+                        showNotification('فشل تحميل التقارير', 'error');
+                    });
+            }
+            function deleteReport(id){
+                fetchWithAuth(API_URL + '/reports/' + id, { method: 'DELETE' })
+                    .then(function(r){ if(!r.ok) return r.json().then(function(e){throw new Error(e.error||'');}); return r.json(); })
+                    .then(function(){ showNotification('تم حذف التقرير بنجاح', 'success'); loadReports(); loadHome(); })
+                    .catch(function(e){ showNotification(e.message||'حدث خطأ في حذف التقرير', 'error'); });
+            }
+            function loadUsers(){
+                fetchWithAuth(API_URL + '/users')
+                    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                    .then(function(users){
+                        var body = document.getElementById('adminUsersBody');
+                        if(!body) return;
+                        if(!users.length){ body.innerHTML = '<tr><td colspan="7" class="text-center text-muted">لا توجد حسابات</td></tr>'; return; }
+                        body.innerHTML = users.map(function(u){
+                            var status = u.is_active ? 'نشط' : 'غير نشط';
+                            var roles = (u.is_admin ? 'مدير' : '') + (u.is_publisher ? (u.is_admin ? '، ' : '') + 'ناشر' : (!u.is_admin ? 'مستخدم' : ''));
+                            var created = new Date(u.created_at).toLocaleDateString('ar-LB');
+                            return '<tr>'+
+                                '<td>'+ (u.name||'') +'</td>'+
+                                '<td>'+ (u.email||'') +'</td>'+
+                                '<td>'+ status +'</td>'+
+                                '<td>'+ roles +'</td>'+
+                                '<td>'+ (u.reports_count||0) +'</td>'+
+                                '<td>'+ created +'</td>'+
+                                '<td>'+
+                                    '<button class="btn btn-secondary btn-sm" data-toggle-active="'+ u.user_id +'">'+ (u.is_active ? 'تعطيل' : 'تفعيل') +'</button> '+
+                                    '<button class="btn btn-secondary btn-sm" data-toggle-pub="'+ u.user_id +'">'+ (u.is_publisher ? 'إزالة ناشر' : 'جعله ناشر') +'</button> '+
+                                    '<button class="btn btn-secondary btn-sm" data-toggle-admin="'+ u.user_id +'">'+ (u.is_admin ? 'إزالة مدير' : 'جعله مدير') +'</button> '+
+                                    '<button class="btn btn-secondary btn-sm" data-delete-user="'+ u.user_id +'" style="color: var(--color-error);">حذف</button>'+
+                                '</td>'+
+                            '</tr>';
+                        }).join('');
+                    }).catch(function(){
+                        showNotification('فشل تحميل الحسابات', 'error');
+                    });
+            }
+            function updateUser(userId, payload){
+                fetchWithAuth(API_URL + '/users/' + userId + '/role', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                    .then(function(r){ if(!r.ok) return r.json().then(function(e){throw new Error(e.error||'');}); return r.json(); })
+                    .then(function(){ showNotification('تم تحديث الحساب', 'success'); loadUsers(); })
+                    .catch(function(e){ showNotification(e.message||'حدث خطأ في تحديث الحساب', 'error'); });
+            }
+            function deleteUser(userId){
+                fetchWithAuth(API_URL + '/users/' + userId, { method: 'DELETE' })
+                    .then(function(r){ if(!r.ok) return r.json().then(function(e){throw new Error(e.error||'');}); return r.json(); })
+                    .then(function(){ showNotification('تم حذف المستخدم', 'success'); loadUsers(); })
+                    .catch(function(e){ showNotification(e.message||'فشل حذف المستخدم', 'error'); });
+            }
+            function wireEvents(){
+                var homeBtn = document.getElementById('tabHome');
+                var reportsBtn = document.getElementById('tabReports');
+                var accountsBtn = document.getElementById('tabAccounts');
+                if(homeBtn) homeBtn.addEventListener('click', function(){ showSection('home'); });
+                if(reportsBtn) reportsBtn.addEventListener('click', function(){ showSection('reports'); });
+                if(accountsBtn) accountsBtn.addEventListener('click', function(){ showSection('accounts'); });
+                var refreshHomeBtn = document.getElementById('refreshHomeBtn');
+                if(refreshHomeBtn) refreshHomeBtn.addEventListener('click', loadHome);
+                var refreshReportsBtn = document.getElementById('refreshReportsBtn');
+                if(refreshReportsBtn) refreshReportsBtn.addEventListener('click', loadReports);
+                var refreshAccountsBtn = document.getElementById('refreshAccountsBtn');
+                if(refreshAccountsBtn) refreshAccountsBtn.addEventListener('click', loadUsers);
+                var reportsTable = document.getElementById('adminReportsTable');
+                if(reportsTable){
+                    reportsTable.addEventListener('click', function(e){
+                        var t = e.target;
+                        if(t && t.getAttribute('data-del')){ deleteReport(t.getAttribute('data-del')); }
+                        if(t && t.getAttribute('data-user')){ showSection('accounts'); loadUsers(); }
+                    });
+                }
+                var usersTable = document.getElementById('adminUsersTable');
+                if(usersTable){
+                    usersTable.addEventListener('click', function(e){
+                        var t = e.target;
+                        if(t && t.getAttribute('data-toggle-active')){ var id = t.getAttribute('data-toggle-active'); updateUser(id, { is_active: t.textContent==='تعطيل' ? false : true }); }
+                        if(t && t.getAttribute('data-toggle-pub')){ var id2 = t.getAttribute('data-toggle-pub'); updateUser(id2, { is_publisher: t.textContent.indexOf('جعله')>-1 ? true : false }); }
+                        if(t && t.getAttribute('data-toggle-admin')){ var id3 = t.getAttribute('data-toggle-admin'); updateUser(id3, { is_admin: t.textContent.indexOf('جعله')>-1 ? true : false }); }
+                        if(t && t.getAttribute('data-delete-user')){ var id4 = t.getAttribute('data-delete-user'); deleteUser(id4); }
+                    });
+                }
+            }
             fetchWithAuth(API_URL + '/admin/status')
-                .then(function(resp){
-                    if(resp.ok) return resp.json();
-                    throw new Error('forbidden');
-                })
-                .then(function(data){
+                .then(function(resp){ if(resp.ok) return resp.json(); throw new Error('forbidden'); })
+                .then(function(){
                     document.getElementById('adminStatus').textContent = 'تم التحقق: لديك صلاحيات المدير';
                     fetchWithAuth(API_URL + '/auth/me')
                         .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
-                        .then(function(user){
-                            document.getElementById('adminSubtitle').textContent = user && user.name ? ('مرحباً، ' + user.name) : '';
-                        })
+                        .then(function(user){ document.getElementById('adminSubtitle').textContent = user && user.name ? ('مرحباً، ' + user.name) : ''; })
                         .catch(function(){});
+                    wireEvents();
+                    showSection('home');
+                    loadHome();
+                    loadReports();
+                    loadUsers();
                 })
-                .catch(function(){
-                    showNotification('غير مصرح لك', 'error');
-                    window.location.href = 'login.html';
-                });
+                .catch(function(){ showNotification('غير مصرح لك', 'error'); window.location.href = 'login.html'; });
         })();
     </script>
 </body>
