@@ -108,7 +108,8 @@
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'
                 });
 
                 const data = await response.json();
@@ -116,6 +117,7 @@
                 if (response.ok) {
                     var minimalUser = { is_admin: !!(data && data.user && data.user.is_admin), is_publisher: !!(data && data.user && data.user.is_publisher) };
                     localStorage.setItem('user', JSON.stringify(minimalUser));
+                    localStorage.setItem('logged_in', '1');
                     showNotification('تم تسجيل الدخول بنجاح', 'success');
                     setTimeout(() => {
                         window.location.href = '/';
