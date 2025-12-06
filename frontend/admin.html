@@ -486,7 +486,7 @@
             }
             document.addEventListener('click', function(e){
                 var t = e.target;
-                if(t && t.getAttribute('data-add-sub')){ openCategoryModalAdmin(t.getAttribute('data-add-sub')); }
+                if(t && t.getAttribute('data-add-sub')){ openCategoryModalAdmin(null, t.getAttribute('data-add-sub')); }
                 if(t && t.getAttribute('data-edit')){ openCategoryModalAdmin(t.getAttribute('data-edit')); }
                 if(t && t.getAttribute('data-delete')){ deleteCategoryAdmin(t.getAttribute('data-delete')); }
             });
