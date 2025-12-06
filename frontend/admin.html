@@ -40,9 +40,7 @@
                 <p class="dashboard-subtitle" id="adminSubtitle"></p>
             </div>
 
-            <div class="card" style="margin-bottom: 16px;">
-                <div id="adminStatus" class="text-center">جاري التحقق من الصلاحيات...</div>
-            </div>
+            
 
             <div class="button-group" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
                 <button id="tabHome" class="btn btn-secondary">الرئيسية</button>
@@ -485,7 +483,7 @@
             fetchWithAuth(API_URL + '/admin/status')
                 .then(function(resp){ if(resp.ok) return resp.json(); throw new Error('forbidden'); })
                 .then(function(){
-                    document.getElementById('adminStatus').textContent = 'تم التحقق: لديك صلاحيات المدير';
+                    
                     fetchWithAuth(API_URL + '/auth/me')
                         .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
                         .then(function(user){ document.getElementById('adminSubtitle').textContent = user && user.name ? ('مرحباً، ' + user.name) : ''; })
