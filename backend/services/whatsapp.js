@@ -157,7 +157,7 @@ async function sendToManualChannels(message) {
 
 async function onNewReport(categoryName, location) {
   if (!ENABLED) return;
-  const msg = `${String(categoryName)} في منطقة : ${String(location)}`;
+  const msg = `🔴${String(categoryName)} في منطقة : ${String(location)}`;
   const manual = getManualChannels();
   if (manual && manual.length) {
     await sendToManualChannels(msg);
