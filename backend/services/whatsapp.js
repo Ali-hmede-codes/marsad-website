@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const QRCode = require('qrcode');
 
@@ -7,18 +8,47 @@ let lastQr = null;
 let isReady = false;
 let isAuthenticated = false;
 let initError = null;
+let executablePathUsed = null;
 
 const ENABLED = (process.env.WHATSAPP_ENABLED || 'true').toLowerCase() === 'true';
+
+function resolveChromePath() {
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+  const candidates = [];
+  if (process.platform === 'win32') {
+    candidates.push(
+      'C:/Program Files/Google/Chrome/Application/chrome.exe',
+      'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+      process.env.LOCALAPPDATA ? `${process.env.LOCALAPPDATA}/Google/Chrome/Application/chrome.exe` : ''
+    );
+  } else if (process.platform === 'darwin') {
+    candidates.push('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome');
+  } else {
+    candidates.push(
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/snap/bin/chromium'
+    );
+  }
+  for (const p of candidates) {
+    if (p && fs.existsSync(p)) return p;
+  }
+  return undefined;
+}
 
 function initWhatsApp() {
   if (!ENABLED) return;
   if (client) return;
+  executablePathUsed = resolveChromePath();
   client = new Client({
     authStrategy: new LocalAuth({ dataPath: path.join(__dirname, '../.wwebjs_auth') }),
     puppeteer: {
-      headless: true,
+      headless: 'new',
       args: ['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu','--no-zygote','--single-process'],
-      executablePath: process.env.CHROME_PATH || undefined
+      executablePath: executablePathUsed
     }
   });
   client.on('qr', (qr) => { lastQr = qr; });
@@ -75,7 +105,7 @@ async function onNewReport(categoryName, location) {
 }
 
 function getStatus() {
-  return { enabled: ENABLED, ready: isReady, authenticated: isAuthenticated, hasQr: !!lastQr, error: initError };
+  return { enabled: ENABLED, ready: isReady, authenticated: isAuthenticated, hasQr: !!lastQr, error: initError, chromePath: executablePathUsed || null };
 }
 
 async function getQrPng() {
