@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const name = data && data.display_name ? data.display_name : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
                         city = extractCity(name);
                     }
-                    if (addressInput) addressInput.value = city || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    if (addressInput) addressInput.value = city || '';
                 } catch (_) {}
             }
             if (window.showNotification) window.showNotification('تم تحديد الموقع بنجاح', 'success');

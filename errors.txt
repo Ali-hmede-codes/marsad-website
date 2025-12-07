@@ -4,6 +4,8 @@ put location in reports location box auto remove this
 can't make a report in the water==high 
 ==put the categories icons==low
 
+==get location in the automatic put number ==
+
 
 report can't be sended in same location only after one hour for whatsapp -- high
 features : 
