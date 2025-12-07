@@ -226,6 +226,8 @@ function setupAddressSearch() {
     const addressInput = document.getElementById('reportAddress');
     const citySearchInput = document.getElementById('reportCitySearch');
     const suggestions = document.getElementById('reportCitySuggestions');
+    const latHiddenEl = document.getElementById('reportLat');
+    const lngHiddenEl = document.getElementById('reportLng');
 
     if (!addressInput) return;
 
@@ -233,13 +235,36 @@ function setupAddressSearch() {
         const query = (citySearchInput ? citySearchInput.value.trim() : '').trim();
         if (!query) return;
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=1&accept-language=ar&q=${encodeURIComponent(query)}`);
-            const data = await response.json();
-            if (Array.isArray(data) && data.length > 0) {
-                const name = data[0].display_name || '';
-                const city = (window.extractCity ? window.extractCity(name) : name);
+            const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=10&accept-language=ar&q=${encodeURIComponent(query)}`);
+            const data = await resp.json();
+            const items = Array.isArray(data) ? data : [];
+            const allowed = new Set(['city','town','village','hamlet','municipality','county']);
+            const extractCitySafe = (name) => { try { return (window.extractCity ? window.extractCity(name) : name); } catch (_) { return name; } };
+            const normalizedQuery = query.toLowerCase();
+            let picked = null;
+            for (const it of items) {
+                const t = String(it.type || '').toLowerCase();
+                if (!allowed.has(t)) continue;
+                const a = it.address || {};
+                let cityName = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || '';
+                if (!cityName) cityName = extractCitySafe(it.display_name || '');
+                cityName = String(cityName || '').trim();
+                if (!cityName) continue;
+                if (cityName.toLowerCase() === normalizedQuery) { picked = it; break; }
+                if (!picked) picked = it; // fallback to first allowed if no exact match
+            }
+            if (picked) {
+                const name = picked.display_name || '';
+                const city = extractCitySafe(name);
+                const lat = parseFloat(picked.lat);
+                const lng = parseFloat(picked.lon);
+                if (latHiddenEl) latHiddenEl.value = lat;
+                if (lngHiddenEl) lngHiddenEl.value = lng;
                 addressInput.value = city;
                 addressInput.readOnly = true;
+                selectedLocation = { lat, lng };
+                if (typeof addSearchMarker === 'function') addSearchMarker({ lat, lng }, city);
+                if (map) map.setView([lat, lng], 14);
                 if (window.showNotification) window.showNotification(`تم اختيار المدينة: ${city}`, 'success');
             }
         } catch (_) {}
@@ -278,11 +303,11 @@ function setupAddressSearch() {
                     }
                     city = String(city || '').trim();
                     if (!city) continue;
-                    if (!unique[city]) unique[city] = { name: city };
+                    if (!unique[city]) unique[city] = { name: city, lat: it.lat, lng: it.lon };
                 }
                 const list = Object.values(unique).slice(0, 10);
                 if (!list.length) { hideSuggestions(); return; }
-                suggestions.innerHTML = list.map(it => `<button class="suggestion-item" data-name="${it.name}">${it.name}</button>`).join('');
+                suggestions.innerHTML = list.map(it => `<button class="suggestion-item" data-name="${it.name}" data-lat="${it.lat}" data-lng="${it.lng}">${it.name}</button>`).join('');
                 suggestions.style.display = 'block';
             } catch (_) { hideSuggestions(); }
         });
@@ -290,6 +315,15 @@ function setupAddressSearch() {
             const btn = e.target.closest('.suggestion-item');
             if (!btn) return;
             const name = btn.getAttribute('data-name') || '';
+            const lat = parseFloat(btn.getAttribute('data-lat'));
+            const lng = parseFloat(btn.getAttribute('data-lng'));
+            if (isFinite(lat) && isFinite(lng)) {
+                if (latHiddenEl) latHiddenEl.value = lat;
+                if (lngHiddenEl) lngHiddenEl.value = lng;
+                selectedLocation = { lat, lng };
+                if (typeof addSearchMarker === 'function') addSearchMarker({ lat, lng }, name);
+                if (map) map.setView([lat, lng], 14);
+            }
             addressInput.value = name;
             addressInput.readOnly = true;
             hideSuggestions();
