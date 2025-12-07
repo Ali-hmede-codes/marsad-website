@@ -751,17 +751,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const latManualEl = document.getElementById('reportLatManual');
             const lngManualEl = document.getElementById('reportLngManual');
             if (addressInput) {
-                const readonlyNow = (mode !== 'manual') || !isAdminNow;
-                addressInput.readOnly = readonlyNow;
-                addressInput.placeholder = 'اسم المدينة (يُحدد تلقائياً)';
+                addressInput.readOnly = (mode === 'manual');
+                addressInput.placeholder = mode === 'auto' ? 'ابحث عن مدينة في لبنان' : 'اسم المدينة (يُحدد تلقائياً)';
                 addressInput.required = mode === 'auto';
-                if (!readonlyNow && addressInput.value) {
+                if (mode === 'manual' && addressInput.value) {
                     addressInput.value = extractCity(addressInput.value);
                 }
             }
             if (searchBtn) {
-                searchBtn.style.display = 'none';
-                searchBtn.disabled = true;
+                searchBtn.style.display = (mode === 'manual') ? 'none' : '';
+                searchBtn.disabled = (mode === 'manual');
             }
             if (latManualEl) latManualEl.required = (mode === 'manual' && isAdminNow);
             if (lngManualEl) lngManualEl.required = (mode === 'manual' && isAdminNow);

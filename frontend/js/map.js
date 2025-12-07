@@ -227,6 +227,7 @@ function setupAddressSearch() {
     const searchBtn = document.getElementById('searchAddressBtn');
     const latInput = document.getElementById('reportLat');
     const lngInput = document.getElementById('reportLng');
+    const suggestions = document.getElementById('reportAddressSuggestions');
 
     if (!addressInput || !searchBtn) return;
 
@@ -294,6 +295,55 @@ function setupAddressSearch() {
             performSearch();
         }
     });
+
+    if (suggestions) {
+        let abortController = null;
+        const extractCitySafe = (name) => {
+            try { return (window.extractCity ? window.extractCity(name) : name); } catch (_) { return name; }
+        };
+        const showSuggestions = (items) => {
+            if (!Array.isArray(items) || !items.length) { suggestions.style.display = 'none'; suggestions.innerHTML = ''; return; }
+            suggestions.innerHTML = items.map(it => {
+                const city = extractCitySafe(it.display_name || '');
+                return `<button class="suggestion-item" data-lat="${it.lat}" data-lng="${it.lon}" data-name="${city}">${city}</button>`;
+            }).join('');
+            suggestions.style.display = 'block';
+        };
+        const hideSuggestions = () => { suggestions.style.display = 'none'; suggestions.innerHTML = ''; };
+
+        addressInput.addEventListener('input', async () => {
+            const q = addressInput.value.trim();
+            if (q.length < 2) { hideSuggestions(); return; }
+            try {
+                if (abortController) abortController.abort();
+                abortController = new AbortController();
+                const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&accept-language=ar&limit=5&countrycodes=lb`, { signal: abortController.signal });
+                const data = await resp.json();
+                showSuggestions(Array.isArray(data) ? data : []);
+            } catch (_) { hideSuggestions(); }
+        });
+        suggestions.addEventListener('click', (e) => {
+            const btn = e.target.closest('.suggestion-item');
+            if (!btn) return;
+            const lat = parseFloat(btn.getAttribute('data-lat'));
+            const lng = parseFloat(btn.getAttribute('data-lng'));
+            const name = btn.getAttribute('data-name') || '';
+            if (!isFinite(lat) || !isFinite(lng)) return;
+            if (latInput) latInput.value = lat;
+            if (lngInput) lngInput.value = lng;
+            addressInput.value = name;
+            addressInput.readOnly = true;
+            hideSuggestions();
+            selectedLocation = { lat, lng };
+            if (typeof addSearchMarker === 'function') {
+                addSearchMarker({ lat, lng }, name);
+            }
+            if (map) map.setView([lat, lng], 14);
+        });
+        document.addEventListener('click', (e) => {
+            if (!suggestions.contains(e.target) && e.target !== addressInput) hideSuggestions();
+        });
+    }
 }
 
 // Search for a location by name
