@@ -234,8 +234,6 @@ function setupAddressSearch() {
     const performSearch = async () => {
         const query = addressInput.value.trim();
         if (!query) return;
-
-        // Show loading state
         const originalBtnText = searchBtn.innerHTML;
         searchBtn.innerHTML = '<span class="loading" style="display:inline-flex;align-items:center;">\
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">\
@@ -244,42 +242,21 @@ function setupAddressSearch() {
             </svg>\
         </span>';
         searchBtn.disabled = true;
-
         try {
-            if (window.showNotification) window.showNotification('جاري البحث عن الموقع...', 'info');
-
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&accept-language=ar&limit=1&countrycodes=lb`
-            );
+            if (window.showNotification) window.showNotification('جاري البحث عن المدينة...', 'info');
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=1&accept-language=ar&q=${encodeURIComponent(query)}`);
             const data = await response.json();
-
             if (data && data.length > 0) {
                 const result = data[0];
-
-                const lat = parseFloat(result.lat);
-                const lng = parseFloat(result.lon);
-
-                // Update hidden inputs
-                if (latInput) latInput.value = lat;
-                if (lngInput) lngInput.value = lng;
-
-                // Update address input with the full found name
-                addressInput.value = result.display_name;
-
-                // Update global selectedLocation
-                selectedLocation = { lat, lng };
-
-                // Update map view
-                if (map) {
-                    map.setView([lat, lng], 16);
-                }
-
-                if (window.showNotification) window.showNotification(`تم تحديد الموقع: ${result.display_name}`, 'success');
+                const name = result.display_name || '';
+                const city = (window.extractCity ? window.extractCity(name) : name);
+                addressInput.value = city;
+                addressInput.readOnly = true;
+                if (window.showNotification) window.showNotification(`تم اختيار المدينة: ${city}`, 'success');
             } else {
-                if (window.showNotification) window.showNotification('لم يتم العثور على الموقع', 'error');
+                if (window.showNotification) window.showNotification('لم يتم العثور على مدينة', 'error');
             }
-        } catch (error) {
-            console.error('Search error:', error);
+        } catch (_) {
             if (window.showNotification) window.showNotification('حدث خطأ أثناء البحث', 'error');
         } finally {
             searchBtn.innerHTML = originalBtnText;
@@ -333,20 +310,10 @@ function setupAddressSearch() {
         suggestions.addEventListener('click', (e) => {
             const btn = e.target.closest('.suggestion-item');
             if (!btn) return;
-            const lat = parseFloat(btn.getAttribute('data-lat'));
-            const lng = parseFloat(btn.getAttribute('data-lng'));
             const name = btn.getAttribute('data-name') || '';
-            if (!isFinite(lat) || !isFinite(lng)) return;
-            if (latInput) latInput.value = lat;
-            if (lngInput) lngInput.value = lng;
             addressInput.value = name;
             addressInput.readOnly = true;
             hideSuggestions();
-            selectedLocation = { lat, lng };
-            if (typeof addSearchMarker === 'function') {
-                addSearchMarker({ lat, lng }, name);
-            }
-            if (map) map.setView([lat, lng], 14);
         });
         document.addEventListener('click', (e) => {
             if (!suggestions.contains(e.target) && e.target !== addressInput) hideSuggestions();
