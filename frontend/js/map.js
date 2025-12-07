@@ -298,28 +298,36 @@ function setupAddressSearch() {
 
     if (suggestions) {
         let abortController = null;
-        const extractCitySafe = (name) => {
-            try { return (window.extractCity ? window.extractCity(name) : name); } catch (_) { return name; }
-        };
-        const showSuggestions = (items) => {
-            if (!Array.isArray(items) || !items.length) { suggestions.style.display = 'none'; suggestions.innerHTML = ''; return; }
-            suggestions.innerHTML = items.map(it => {
-                const city = extractCitySafe(it.display_name || '');
-                return `<button class="suggestion-item" data-lat="${it.lat}" data-lng="${it.lon}" data-name="${city}">${city}</button>`;
-            }).join('');
-            suggestions.style.display = 'block';
-        };
+        const extractCitySafe = (name) => { try { return (window.extractCity ? window.extractCity(name) : name); } catch (_) { return name; } };
         const hideSuggestions = () => { suggestions.style.display = 'none'; suggestions.innerHTML = ''; };
-
         addressInput.addEventListener('input', async () => {
             const q = addressInput.value.trim();
             if (q.length < 2) { hideSuggestions(); return; }
             try {
                 if (abortController) abortController.abort();
                 abortController = new AbortController();
-                const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&accept-language=ar&limit=5&countrycodes=lb`, { signal: abortController.signal });
+                const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=10&accept-language=ar&q=${encodeURIComponent(q)}`, { signal: abortController.signal });
                 const data = await resp.json();
-                showSuggestions(Array.isArray(data) ? data : []);
+                const items = Array.isArray(data) ? data : [];
+                const allowed = new Set(['city','town','village','hamlet','municipality','county']);
+                const unique = {};
+                for (const it of items) {
+                    const t = String(it.type || '').toLowerCase();
+                    if (!allowed.has(t)) continue;
+                    const a = it.address || {};
+                    let city = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || '';
+                    if (!city) {
+                        const name = it.display_name || '';
+                        city = extractCitySafe(name);
+                    }
+                    city = String(city || '').trim();
+                    if (!city) continue;
+                    if (!unique[city]) unique[city] = { name: city, lat: it.lat, lng: it.lon };
+                }
+                const list = Object.values(unique).slice(0, 10);
+                if (!list.length) { hideSuggestions(); return; }
+                suggestions.innerHTML = list.map(it => `<button class="suggestion-item" data-lat="${it.lat}" data-lng="${it.lng}" data-name="${it.name}">${it.name}</button>`).join('');
+                suggestions.style.display = 'block';
             } catch (_) { hideSuggestions(); }
         });
         suggestions.addEventListener('click', (e) => {
