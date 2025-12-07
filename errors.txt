@@ -1,10 +1,10 @@
 ==//manuall location admin only not working//fixed
 //login verification when open not working//fixed
-put location in reports location box auto remove this 
-can't make a report in the water==high 
+put location in reports location box auto remove this //fixed
+can't make a report in the water==high//not fixed 
 ==put the categories icons==low
 
-==get location in the automatic put number ==
+==get location in the automatic put number ==//fixed
 
 
 report can't be sended in same location only after one hour for whatsapp -- high
