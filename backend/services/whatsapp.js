@@ -11,8 +11,42 @@ let initError = null;
 let executablePathUsed = null;
 let manualChannelsCache = null;
 let templatesCache = null;
+let sendToggleCache = null;
 
 const ENABLED = (process.env.WHATSAPP_ENABLED || 'true').toLowerCase() === 'true';
+
+function getToggleFilePath() {
+  return path.join(__dirname, '../data/whatsapp_toggle.json');
+}
+
+function getToggleEnabled() {
+  if (typeof sendToggleCache === 'boolean') return sendToggleCache;
+  try {
+    const p = getToggleFilePath();
+    const raw = fs.readFileSync(p, 'utf-8');
+    const obj = JSON.parse(raw);
+    const val = !!(obj && obj.enabled);
+    sendToggleCache = val;
+    return val;
+  } catch (_) {
+    sendToggleCache = true;
+    return true;
+  }
+}
+
+async function setToggleEnabled(enabled) {
+  const val = !!enabled;
+  const p = getToggleFilePath();
+  await fs.promises.mkdir(path.dirname(p), { recursive: true });
+  await fs.promises.writeFile(p, JSON.stringify({ enabled: val }, null, 2), 'utf-8');
+  sendToggleCache = val;
+  return sendToggleCache;
+}
+
+async function isSendEnabled() {
+  if (!ENABLED) return false;
+  return !!getToggleEnabled();
+}
 
 function resolveChromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
@@ -157,7 +191,7 @@ async function sendToManualChannels(message) {
 }
 
 async function onNewReport(categoryName, location, categoryId) {
-  if (!ENABLED) return;
+  if (!(await isSendEnabled())) return;
   const msg = formatWhatsAppMessage(categoryId != null ? String(categoryId) : null, String(categoryName), String(location));
   const manual = getManualChannels();
   if (manual && manual.length) {
@@ -168,7 +202,7 @@ async function onNewReport(categoryName, location, categoryId) {
 }
 
 function getStatus() {
-  return { enabled: ENABLED, ready: isReady, authenticated: isAuthenticated, hasQr: !!lastQr, error: initError, chromePath: executablePathUsed || null };
+  return { enabled: ENABLED, sendEnabled: ENABLED && !!getToggleEnabled(), ready: isReady, authenticated: isAuthenticated, hasQr: !!lastQr, error: initError, chromePath: executablePathUsed || null };
 }
 
 async function getQrPng() {
@@ -249,4 +283,4 @@ async function clearAuth() {
   return true;
 }
 
-module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, getManualChannels, saveManualChannels, sendToManualChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth, getTemplates, saveTemplates };
+module.exports = { initWhatsApp, getAdminChannels, getAllChannels, sendToAdminChannels, getManualChannels, saveManualChannels, sendToManualChannels, onNewReport, getStatus, getQrPng, getQrDataUrl, getQrSvg, restartClient, clearAuth, getTemplates, saveTemplates, getToggleEnabled, setToggleEnabled };

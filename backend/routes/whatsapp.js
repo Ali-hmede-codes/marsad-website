@@ -9,6 +9,20 @@ router.get('/status', (req, res) => {
   res.json(whatsapp.getStatus());
 });
 
+router.get('/toggle', (req, res) => {
+  res.json({ enabled: whatsapp.getToggleEnabled() });
+});
+
+router.put('/toggle', async (req, res) => {
+  try {
+    const flag = !!(req.body && (req.body.enabled !== undefined ? req.body.enabled : req.body.on));
+    const saved = await whatsapp.setToggleEnabled(flag);
+    res.json({ enabled: saved });
+  } catch (e) {
+    res.status(400).json({ error: 'تعذر حفظ الحالة' });
+  }
+});
+
 router.get('/channels', async (req, res) => {
   const channels = await whatsapp.getAdminChannels();
   res.json(channels);

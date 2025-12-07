@@ -102,6 +102,14 @@
                     <div id="whatsappQrBox" style="display:none; align-items:center; justify-content:center; min-height:340px;">
                         <img id="whatsappQrImg" alt="WhatsApp QR" style="max-width:360px; display:block; border:1px solid var(--color-border); border-radius:8px;" />
                     </div>
+                    <div class="form-group" style="margin-top: 12px; display:flex; align-items:center; gap:12px;">
+                        <label style="margin:0;">إرسال الرسائل إلى واتساب</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="waSendToggle" class="toggle-input">
+                            <label for="waSendToggle" class="toggle-label"></label>
+                        </div>
+                        <span id="waSendToggleStatus" class="text-muted"></span>
+                    </div>
                 </div>
                 <div class="table-wrapper" style="margin-top:12px;">
                     <table class="table table-modern" id="whatsappChannelsTable">
@@ -590,7 +598,7 @@
                     .then(function(st){
                         var el = document.getElementById('whatsappStatus');
                         if(el){
-                            var t = 'مفعّل: ' + (st.enabled ? 'نعم' : 'لا') + ' | مصادق: ' + (st.authenticated ? 'نعم' : 'لا') + ' | جاهز: ' + (st.ready ? 'نعم' : 'لا');
+                            var t = 'مفعّل: ' + (st.enabled ? 'نعم' : 'لا') + ' | إرسال: ' + (st.sendEnabled ? 'نعم' : 'لا') + ' | مصادق: ' + (st.authenticated ? 'نعم' : 'لا') + ' | جاهز: ' + (st.ready ? 'نعم' : 'لا');
                             var extra = '';
                             if(st && st.error){
                                 var err = String(st.error || '');
@@ -606,6 +614,16 @@
                         if(st && st.hasQr && !st.authenticated){ showWhatsappQR(); }
                     })
                     .catch(function(){ var el = document.getElementById('whatsappStatus'); if(el) el.textContent = 'تعذر تحميل الحالة'; });
+                fetchWithAuth(API_URL + '/whatsapp/toggle')
+                    .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                    .then(function(d){
+                        var tgl = document.getElementById('waSendToggle');
+                        var sEl = document.getElementById('waSendToggleStatus');
+                        var enabled = !!(d && d.enabled);
+                        if(tgl) tgl.checked = enabled;
+                        if(sEl) sEl.textContent = enabled ? 'مفعل' : 'معطل';
+                    })
+                    .catch(function(){ var sEl = document.getElementById('waSendToggleStatus'); if(sEl) sEl.textContent = 'تعذر تحميل الحالة'; });
                 fetchWithAuth(API_URL + '/whatsapp/channels/all')
                     .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
                     .then(function(chs){
@@ -742,6 +760,17 @@
                         .then(function(){ loadWhatsapp(); showWhatsappQR(); })
                         .catch(function(){ showNotification('تعذر حذف المصادقة', 'error'); });
                 });
+                var toggleEl = document.getElementById('waSendToggle');
+                var toggleStatusEl = document.getElementById('waSendToggleStatus');
+                if(toggleEl){
+                    toggleEl.addEventListener('change', function(){
+                        var val = !!toggleEl.checked;
+                        fetchWithAuth(API_URL + '/whatsapp/toggle', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: val }) })
+                            .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+                            .then(function(d){ if(toggleStatusEl) toggleStatusEl.textContent = (d && d.enabled) ? 'مفعل' : 'معطل'; loadWhatsapp(); })
+                            .catch(function(){ showNotification('تعذر تحديث الحالة', 'error'); });
+                    });
+                }
                 var btnSaveManual = document.getElementById('saveManualChannelsBtn');
                 if(btnSaveManual) btnSaveManual.addEventListener('click', function(){
                     var inputEl = document.getElementById('manualChannelsInput');
