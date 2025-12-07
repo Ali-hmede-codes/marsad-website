@@ -154,20 +154,25 @@ async function loadCategories() {
                 tile.type = 'button';
                 tile.className = 'category-tile';
                 tile.dataset.id = String(parent.catg_id);
+                tile.setAttribute('aria-pressed', 'false');
+                tile.setAttribute('aria-label', parent.catg_name);
+                tile.tabIndex = 0;
                 const bg = parent.catg_color || `rgb(${parent.catg_color_r || 100}, ${parent.catg_color_g || 100}, ${parent.catg_color_b || 100})`;
                 tile.style.backgroundColor = bg;
                 tile.title = parent.catg_name;
-                if (parent.catg_picture) {
-                    tile.innerHTML = `<img src="${parent.catg_picture}" alt="${parent.catg_name}">`;
-                } else {
-                    tile.innerHTML = `<span class="category-tile-label">${parent.catg_name}</span>`;
-                }
-                tile.addEventListener('click', () => {
-                    Array.from(reportMainCategoryGrid.querySelectorAll('.category-tile')).forEach(el => el.classList.remove('selected'));
+                const iconHtml = parent.catg_picture ? `<img src="${parent.catg_picture}" alt="${parent.catg_name}" class="tile-icon">` : '';
+                tile.innerHTML = `<div class="tile-content">${iconHtml}<span class="tile-label category-tile-label">${parent.catg_name}</span></div>`;
+                const selectThis = () => {
+                    Array.from(reportMainCategoryGrid.querySelectorAll('.category-tile')).forEach(el => { el.classList.remove('selected'); el.setAttribute('aria-pressed', 'false'); });
                     tile.classList.add('selected');
+                    tile.setAttribute('aria-pressed', 'true');
                     if (reportMainCategoryHidden) reportMainCategoryHidden.value = String(parent.catg_id);
                     populateChildren(parent.catg_id);
                     reportCategorySelect.value = '';
+                };
+                tile.addEventListener('click', selectThis);
+                tile.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectThis(); }
                 });
                 reportMainCategoryGrid.appendChild(tile);
             });
