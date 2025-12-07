@@ -158,6 +158,18 @@ async function loadCategories() {
             reportMainCategorySelect.addEventListener('change', (e) => {
                 populateChildren(e.target.value);
             });
+
+            const defaultMainId = '1';
+            const defaultSubId = '7';
+            const hasMain = categories.some(p => String(p.catg_id) === defaultMainId);
+            if (hasMain) {
+                reportMainCategorySelect.value = defaultMainId;
+                populateChildren(defaultMainId);
+                const hasSub = Array.from(reportCategorySelect.options).some(opt => String(opt.value) === defaultSubId);
+                if (hasSub) {
+                    reportCategorySelect.value = defaultSubId;
+                }
+            }
         }
     } catch (error) {
         console.error('Error loading categories:', error);
