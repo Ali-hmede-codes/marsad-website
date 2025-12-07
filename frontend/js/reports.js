@@ -395,7 +395,7 @@ function renderDailyReportsForDate(dateStr) {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">\
                 <path d="M12 2c4 0 7 3 7 7 0 6-7 13-7 13s-7-7-7-13c0-4 3-7 7-7z"></path>\
                 <circle cx="12" cy="9" r="2" fill="currentColor"></circle>\
-            </svg> ${city}</span></td><td><span class="badge" style="display:inline-block;padding:2px 8px;border-radius:12px;background:#eee;color:#333;font-weight:600;">${count}</span></td>`;
+            </svg> ${city}</span></td><td><span class="badge" style="display:inline-block;padding:2px 8px;border-radius:12px;background:transparent;color:#fff;font-weight:700;">${count}</span></td>`;
         tbody.appendChild(tr);
     });
 }
