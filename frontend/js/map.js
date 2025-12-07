@@ -209,7 +209,7 @@ async function openReportModal(latlng) {
         if (data && data.display_name) {
             addressInput.value = data.display_name;
         } else {
-            addressInput.value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+            addressInput.value = '';
         }
         addressInput.readOnly = true;
     } catch (error) {
@@ -224,10 +224,9 @@ async function openReportModal(latlng) {
 // Setup address search in report modal
 function setupAddressSearch() {
     const addressInput = document.getElementById('reportAddress');
-    const searchBtn = document.getElementById('searchAddressBtn');
-    const latInput = document.getElementById('reportLat');
-    const lngInput = document.getElementById('reportLng');
-    const suggestions = document.getElementById('reportAddressSuggestions');
+    const searchBtn = document.getElementById('searchCityInModalBtn');
+    const citySearchInput = document.getElementById('reportCitySearch');
+    const suggestions = document.getElementById('reportCitySuggestions');
 
     if (!addressInput || !searchBtn) return;
 
@@ -266,19 +265,19 @@ function setupAddressSearch() {
 
     searchBtn.addEventListener('click', performSearch);
 
-    addressInput.addEventListener('keypress', (e) => {
+    if (citySearchInput) citySearchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault(); // Prevent form submission
             performSearch();
         }
     });
 
-    if (suggestions) {
+    if (suggestions && citySearchInput) {
         let abortController = null;
         const extractCitySafe = (name) => { try { return (window.extractCity ? window.extractCity(name) : name); } catch (_) { return name; } };
         const hideSuggestions = () => { suggestions.style.display = 'none'; suggestions.innerHTML = ''; };
-        addressInput.addEventListener('input', async () => {
-            const q = addressInput.value.trim();
+        citySearchInput.addEventListener('input', async () => {
+            const q = citySearchInput.value.trim();
             if (q.length < 2) { hideSuggestions(); return; }
             try {
                 if (abortController) abortController.abort();
@@ -299,11 +298,11 @@ function setupAddressSearch() {
                     }
                     city = String(city || '').trim();
                     if (!city) continue;
-                    if (!unique[city]) unique[city] = { name: city, lat: it.lat, lng: it.lon };
+                    if (!unique[city]) unique[city] = { name: city };
                 }
                 const list = Object.values(unique).slice(0, 10);
                 if (!list.length) { hideSuggestions(); return; }
-                suggestions.innerHTML = list.map(it => `<button class="suggestion-item" data-lat="${it.lat}" data-lng="${it.lng}" data-name="${it.name}">${it.name}</button>`).join('');
+                suggestions.innerHTML = list.map(it => `<button class="suggestion-item" data-name="${it.name}">${it.name}</button>`).join('');
                 suggestions.style.display = 'block';
             } catch (_) { hideSuggestions(); }
         });
@@ -316,7 +315,8 @@ function setupAddressSearch() {
             hideSuggestions();
         });
         document.addEventListener('click', (e) => {
-            if (!suggestions.contains(e.target) && e.target !== addressInput) hideSuggestions();
+            const inside = suggestions.contains(e.target) || (citySearchInput && citySearchInput.contains && citySearchInput.contains(e.target));
+            if (!inside) hideSuggestions();
         });
     }
 }
