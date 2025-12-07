@@ -130,16 +130,9 @@ async function loadCategories() {
             });
         }
 
-        const reportMainCategorySelect = document.getElementById('reportMainCategory');
-        if (reportMainCategorySelect && reportCategorySelect) {
-            reportMainCategorySelect.innerHTML = '<option value="">اختر الفئة الرئيسية</option>';
-            categories.forEach(parent => {
-                const option = document.createElement('option');
-                option.value = parent.catg_id;
-                option.textContent = parent.catg_name;
-                reportMainCategorySelect.appendChild(option);
-            });
-
+        const reportMainCategoryGrid = document.getElementById('reportMainCategoryGrid');
+        const reportMainCategoryHidden = document.getElementById('reportMainCategory');
+        if (reportMainCategoryGrid && reportCategorySelect) {
             const populateChildren = (parentId) => {
                 reportCategorySelect.innerHTML = '<option value="">اختر الفئة</option>';
                 const parent = categories.find(p => String(p.catg_id) === String(parentId));
@@ -155,20 +148,37 @@ async function loadCategories() {
                 });
             };
 
-            reportMainCategorySelect.addEventListener('change', (e) => {
-                populateChildren(e.target.value);
+            reportMainCategoryGrid.innerHTML = '';
+            categories.forEach(parent => {
+                const tile = document.createElement('button');
+                tile.type = 'button';
+                tile.className = 'category-tile';
+                tile.dataset.id = String(parent.catg_id);
+                const bg = parent.catg_color || `rgb(${parent.catg_color_r || 100}, ${parent.catg_color_g || 100}, ${parent.catg_color_b || 100})`;
+                tile.style.backgroundColor = bg;
+                tile.title = parent.catg_name;
+                if (parent.catg_picture) {
+                    tile.innerHTML = `<img src="${parent.catg_picture}" alt="${parent.catg_name}">`;
+                } else {
+                    tile.innerHTML = `<span class="category-tile-label">${parent.catg_name}</span>`;
+                }
+                tile.addEventListener('click', () => {
+                    Array.from(reportMainCategoryGrid.querySelectorAll('.category-tile')).forEach(el => el.classList.remove('selected'));
+                    tile.classList.add('selected');
+                    if (reportMainCategoryHidden) reportMainCategoryHidden.value = String(parent.catg_id);
+                    populateChildren(parent.catg_id);
+                    reportCategorySelect.value = '';
+                });
+                reportMainCategoryGrid.appendChild(tile);
             });
 
             const defaultMainId = '1';
             const defaultSubId = '7';
-            const hasMain = categories.some(p => String(p.catg_id) === defaultMainId);
-            if (hasMain) {
-                reportMainCategorySelect.value = defaultMainId;
-                populateChildren(defaultMainId);
-                const hasSub = Array.from(reportCategorySelect.options).some(opt => String(opt.value) === defaultSubId);
-                if (hasSub) {
-                    reportCategorySelect.value = defaultSubId;
-                }
+            const defaultTile = reportMainCategoryGrid.querySelector(`.category-tile[data-id="${defaultMainId}"]`);
+            if (defaultTile) {
+                defaultTile.click();
+                const opt = Array.from(reportCategorySelect.options).find(opt => String(opt.value) === defaultSubId);
+                if (opt) reportCategorySelect.value = defaultSubId;
             }
         }
     } catch (error) {
