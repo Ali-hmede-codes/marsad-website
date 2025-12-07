@@ -1591,6 +1591,7 @@ body {
     border: none;
     cursor: pointer;
     font-size: var(--font-size-base);
+    color: #fff;
 }
 .suggestion-item:hover {
     background-color: var(--color-surface-hover);

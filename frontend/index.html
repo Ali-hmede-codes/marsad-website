@@ -127,6 +127,14 @@
                 <input type="hidden" id="reportLat">
                 <input type="hidden" id="reportLng">
 
+                <div class="form-group" style="margin-top: 0;">
+                    <label for="reportCitySearch">بحث عن مدينة</label>
+                    <div class="input-group">
+                        <input id="reportCitySearch" type="text" class="form-control" placeholder="اكتب جزء من اسم المدينة">
+                    </div>
+                    <div id="reportCitySuggestions" class="suggestions" aria-label="اقتراحات المدن" style="display:none;"></div>
+                </div>
+
                 <div id="locationModeTabs" class="button-group" style="display:flex;gap:8px;margin-bottom:12px;">
                     <button type="button" data-mode="auto" class="btn btn-secondary btn-sm active">تلقائي</button>
                     <button type="button" data-mode="manual" class="btn btn-secondary btn-sm">يدوي</button>
@@ -178,27 +186,8 @@
                                 <line x1="21" y1="12" x2="19" y2="12"></line>
                             </svg>
                         </button>
-                        <button type="button" id="searchAddressBtn" class="btn btn-secondary btn-icon" title="بحث" aria-label="بحث">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="7"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                        </button>
                     </div>
-                    <div id="reportAddressSuggestions" class="suggestions" aria-label="اقتراحات المدن" style="display:none;"></div>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label for="reportCitySearch">بحث عن مدينة</label>
-                        <div class="input-group">
-                            <input id="reportCitySearch" type="text" class="form-control" placeholder="اكتب جزء من اسم المدينة">
-                            <button type="button" id="searchCityInModalBtn" class="btn btn-secondary btn-icon" title="بحث" aria-label="بحث">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="11" cy="11" r="7"></circle>
-                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </button>
-                        </div>
-                        <div id="reportCitySuggestions" class="suggestions" aria-label="اقتراحات المدن" style="display:none;"></div>
-                    </div>
+                    
                 </div>
 
                 <div class="form-actions">

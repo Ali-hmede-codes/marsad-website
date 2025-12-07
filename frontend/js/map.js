@@ -224,46 +224,26 @@ async function openReportModal(latlng) {
 // Setup address search in report modal
 function setupAddressSearch() {
     const addressInput = document.getElementById('reportAddress');
-    const searchBtn = document.getElementById('searchCityInModalBtn');
     const citySearchInput = document.getElementById('reportCitySearch');
     const suggestions = document.getElementById('reportCitySuggestions');
 
-    if (!addressInput || !searchBtn) return;
+    if (!addressInput) return;
 
     const performSearch = async () => {
-        const query = addressInput.value.trim();
+        const query = (citySearchInput ? citySearchInput.value.trim() : '').trim();
         if (!query) return;
-        const originalBtnText = searchBtn.innerHTML;
-        searchBtn.innerHTML = '<span class="loading" style="display:inline-flex;align-items:center;">\
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">\
-                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="4" opacity="0.2"></circle>\
-                <path d="M12 2a10 10 0 0 1 10 10" fill="none" stroke="currentColor" stroke-width="4"></path>\
-            </svg>\
-        </span>';
-        searchBtn.disabled = true;
         try {
-            if (window.showNotification) window.showNotification('جاري البحث عن المدينة...', 'info');
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=1&accept-language=ar&q=${encodeURIComponent(query)}`);
             const data = await response.json();
-            if (data && data.length > 0) {
-                const result = data[0];
-                const name = result.display_name || '';
+            if (Array.isArray(data) && data.length > 0) {
+                const name = data[0].display_name || '';
                 const city = (window.extractCity ? window.extractCity(name) : name);
                 addressInput.value = city;
                 addressInput.readOnly = true;
                 if (window.showNotification) window.showNotification(`تم اختيار المدينة: ${city}`, 'success');
-            } else {
-                if (window.showNotification) window.showNotification('لم يتم العثور على مدينة', 'error');
             }
-        } catch (_) {
-            if (window.showNotification) window.showNotification('حدث خطأ أثناء البحث', 'error');
-        } finally {
-            searchBtn.innerHTML = originalBtnText;
-            searchBtn.disabled = false;
-        }
+        } catch (_) {}
     };
-
-    searchBtn.addEventListener('click', performSearch);
 
     if (citySearchInput) citySearchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
