@@ -64,6 +64,7 @@ app.get('/register.html', (req, res) => {
     res.redirect(301, '/register' + qs);
 });
 app.get('/admin.html', (req, res) => res.redirect(301, '/admin'));
+app.get('/categories.html', (req, res) => res.status(403).send('Forbidden'));
 
 app.use(express.static(path.join(__dirname, '../frontend')));
 

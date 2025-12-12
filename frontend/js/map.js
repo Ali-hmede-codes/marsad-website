@@ -228,6 +228,7 @@ function setupAddressSearch() {
     const suggestions = document.getElementById('reportCitySuggestions');
     const latHiddenEl = document.getElementById('reportLat');
     const lngHiddenEl = document.getElementById('reportLng');
+    const searchCache = new Map();
 
     if (!addressInput) return;
 
@@ -235,12 +236,25 @@ function setupAddressSearch() {
         const query = (citySearchInput ? citySearchInput.value.trim() : '').trim();
         if (!query) return;
         try {
-            const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=10&accept-language=ar&q=${encodeURIComponent(query)}`);
-            const data = await resp.json();
-            const items = Array.isArray(data) ? data : [];
+            const norm = normalizeArabic(query);
+            const variants = Array.from(new Set([query, stripAl(query), norm, stripAl(norm)]));
+            let items = [];
+            for (const v of variants) {
+                const key = v.toLowerCase();
+                let data;
+                if (searchCache.has(key)) {
+                    data = searchCache.get(key);
+                } else {
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=10&accept-language=ar&q=${encodeURIComponent(v)}`);
+                    data = await resp.json();
+                    searchCache.set(key, data);
+                }
+                const arr = Array.isArray(data) ? data : [];
+                if (arr && arr.length) { items = arr; break; }
+            }
             const allowed = new Set(['city','town','village','hamlet','municipality','county']);
             const extractCitySafe = (name) => { try { return (window.extractCity ? window.extractCity(name) : name); } catch (_) { return name; } };
-            const normalizedQuery = query.toLowerCase();
+            const normalizedQuery = normalizeArabic(query);
             let picked = null;
             for (const it of items) {
                 const t = String(it.type || '').toLowerCase();
@@ -250,7 +264,8 @@ function setupAddressSearch() {
                 if (!cityName) cityName = extractCitySafe(it.display_name || '');
                 cityName = String(cityName || '').trim();
                 if (!cityName) continue;
-                if (cityName.toLowerCase() === normalizedQuery) { picked = it; break; }
+                const normCity = normalizeArabic(cityName);
+                if (normCity === normalizedQuery || normCity.includes(normalizedQuery)) { picked = it; break; }
                 if (!picked) picked = it; // fallback to first allowed if no exact match
             }
             if (picked) {
@@ -287,9 +302,22 @@ function setupAddressSearch() {
             try {
                 if (abortController) abortController.abort();
                 abortController = new AbortController();
-                const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=10&accept-language=ar&q=${encodeURIComponent(q)}`, { signal: abortController.signal });
-                const data = await resp.json();
-                const items = Array.isArray(data) ? data : [];
+                const norm = normalizeArabic(q);
+                const variants = Array.from(new Set([q, stripAl(q), norm, stripAl(norm)]));
+                let items = [];
+                for (const v of variants) {
+                    const key = v.toLowerCase();
+                    let data;
+                    if (searchCache.has(key)) {
+                        data = searchCache.get(key);
+                    } else {
+                        const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=lb&limit=15&accept-language=ar&q=${encodeURIComponent(v)}`, { signal: abortController.signal });
+                        data = await resp.json();
+                        searchCache.set(key, data);
+                    }
+                    const arr = Array.isArray(data) ? data : [];
+                    if (arr && arr.length) { items = arr; break; }
+                }
                 const allowed = new Set(['city','town','village','hamlet','municipality','county']);
                 const unique = {};
                 for (const it of items) {
@@ -303,7 +331,9 @@ function setupAddressSearch() {
                     }
                     city = String(city || '').trim();
                     if (!city) continue;
-                    if (!unique[city]) unique[city] = { name: city, lat: it.lat, lng: it.lon };
+                    const nq = normalizeArabic(q);
+                    const nc = normalizeArabic(city);
+                    if (!unique[city] && (nc.includes(nq) || nq.includes(nc) || nc === nq)) unique[city] = { name: city, lat: it.lat, lng: it.lon };
                 }
                 const list = Object.values(unique).slice(0, 10);
                 if (!list.length) { hideSuggestions(); return; }
@@ -333,6 +363,16 @@ function setupAddressSearch() {
             if (!inside) hideSuggestions();
         });
     }
+}
+
+function normalizeArabic(s) {
+    const x = String(s || '').toLowerCase();
+    const diacritics = /[\u064B-\u0652]/g;
+    const tatweel = /\u0640/g;
+    return x.replace(diacritics, '').replace(tatweel, '').replace(/^ال\s*/i, '').replace(/[^\u0600-\u06FFa-z0-9\s]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ئ/g, 'ي').replace(/ؤ/g, 'و');
+}
+function stripAl(s) {
+    return String(s || '').replace(/^ال\s*/i, '');
 }
 
 // Search for a location by name
